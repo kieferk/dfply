@@ -1,0 +1,4 @@
+{
+  "test/test_base.py::test_drop_between": true, 
+  "test/test_base.py::test_select_between": true
+}
