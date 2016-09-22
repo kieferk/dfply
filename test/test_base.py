@@ -133,6 +133,8 @@ def test_select_between():
 
     df = diamonds[['x','y','z']]
     assert df.equals(diamonds >> select_between('x', 20))
+    assert df.equals(diamonds >> select_between('x'))
+
 
 
 def test_drop_between():
@@ -142,45 +144,50 @@ def test_drop_between():
 
     df = diamonds[['carat','cut']]
     assert df.equals(diamonds >> drop_between(X.color, 20))
+    assert df.equals(diamonds >> drop_between(X.color))
 
 
-# @selectionpipe
-# def select_from(df, *args):
-#     ind = df.columns.tolist().index(args[0])
-#     column_matches = df.columns[ind:]
-#     return df[column_matches]
-#
-#
-# @selectionpipe
-# def drop_from(df, *args):
-#     ind = df.columns.tolist().index(args[0])
-#     column_matches = df.columns[ind:]
-#     return df.drop(column_matches, axis=1)
-#
-#
-# @selectionpipe
-# def select_to(df, *args):
-#     ind = df.columns.tolist().index(args[0])
-#     column_matches = df.columns[:ind]
-#     return df[column_matches]
-#
-#
-# @selectionpipe
-# def drop_to(df, *args):
-#     ind = df.columns.tolist().index(args[0])
-#     column_matches = df.columns[:ind]
-#     return df.drop(column_matches, axis=1)
-#
-#
-# @selectionpipe
-# def select_through(df, *args):
-#     ind = df.columns.tolist().index(args[0])
-#     column_matches = df.columns.values[:ind+1]
-#     return df[column_matches]
-#
-#
-# @selectionpipe
-# def drop_through(df, *args):
-#     ind = df.columns.tolist().index(args[0])
-#     column_matches = df.columns.values[:ind+1]
-#     return df.drop(column_matches, axis=1)
+def test_select_from():
+    df = diamonds[['x','y','z']]
+    assert df.equals(diamonds >> select_from('x'))
+    assert df.equals(diamonds >> select_from(X.x))
+    assert df.equals(diamonds >> select_from(7))
+
+    assert diamonds[[]].equals(diamonds >> select_from(100))
+
+
+def test_drop_from():
+    df = diamonds[['carat','cut']]
+    assert df.equals(diamonds >> drop_from('color'))
+    assert df.equals(diamonds >> drop_from(X.color))
+    assert df.equals(diamonds >> drop_from(2))
+
+    assert diamonds[[]].equals(diamonds >> drop_from(0))
+
+
+def test_select_to():
+    df = diamonds[['carat','cut']]
+    assert df.equals(diamonds >> select_to('color'))
+    assert df.equals(diamonds >> select_to(X.color))
+    assert df.equals(diamonds >> select_to(2))
+
+
+def test_drop_to():
+    df = diamonds[['x','y','z']]
+    assert df.equals(diamonds >> drop_to('x'))
+    assert df.equals(diamonds >> drop_to(X.x))
+    assert df.equals(diamonds >> drop_to(7))
+
+
+def select_through():
+    df = diamonds[['carat','cut','color']]
+    assert df.equals(diamonds >> select_through('color'))
+    assert df.equals(diamonds >> select_through(X.color))
+    assert df.equals(diamonds >> select_through(2))
+
+
+def drop_through():
+    df = diamonds[['y','z']]
+    assert df.equals(diamonds >> drop_through('x'))
+    assert df.equals(diamonds >> drop_through(X.x))
+    assert df.equals(diamonds >> drop_through(7))

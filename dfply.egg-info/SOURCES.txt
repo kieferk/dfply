@@ -1,6 +1,16 @@
+setup.py
 dfply/__init__.py
 dfply/base.py
+dfply/group.py
+dfply/select.py
+dfply/subset.py
 dfply.egg-info/PKG-INFO
 dfply.egg-info/SOURCES.txt
 dfply.egg-info/dependency_links.txt
 dfply.egg-info/top_level.txt
+dfply/data/__init__.py
+dfply/vendor/__init__.py
+dfply/vendor/six.py
+dfply/vendor/pandas_ply/__init__.py
+dfply/vendor/pandas_ply/symbolic.py
+test/test_base.py

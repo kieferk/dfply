@@ -119,21 +119,15 @@ class SymbolicEvaluation(object):
 
 
 
-def agnostic_column_indexer(df, indices):
-    assert isinstance(df, pd.DataFrame)
-
-    columns = df.columns.values
+def _ambiguous_index_parser(df, indices):
     selected = []
     for index in indices:
         index = symbolic.to_callable(index)(df)
         assert type(index) in (str, int, list, tuple,
                                pd.Series, pd.DataFrame)
         if type(index) in (list, tuple):
-            selected.extend(agnostic_column_indexer(df, index))
-        elif type(index) == int:
-            if index < len(columns):
-                selected.append(columns[index])
-        elif type(index) == str:
+            selected.extend(ambiguous_index_parser(df, index))
+        elif type(index) in [int, str]:
             selected.append(index)
         elif type(index) == pd.Series:
             selected.append(index._name)
@@ -148,9 +142,9 @@ def agnostic_column_indexer(df, indices):
 def indexer_arguments(f, *args, **kwargs):
     assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
     if len(args) > 1:
-        args = list(args[0:1]) + agnostic_column_indexer(args[0], args[1:])
+        args = list(args[0:1]) + _ambiguous_index_parser(args[0], args[1:])
     if len(kwargs) > 0:
-        kwargs = {k:agnostic_column_indexer(args[0], v) for k,v in kwargs.items()}
+        kwargs = {k:_ambiguous_index_parser(args[0], v) for k,v in kwargs.items()}
     return f(*args, **kwargs)
 
 
@@ -158,18 +152,5 @@ def dfpipe(f):
     return Pipe(
         SymbolicEvaluation(
             GroupDelegation(f)
-        )
-    )
-
-
-# NOTE: selection currently removes groupings
-# before performing the select, as if the grouping
-# was not there. Is this consistent with best
-# practices for table operations? Basically an
-# ungroup() call is implicit.
-def selectionpipe(f):
-    return Pipe(
-        SymbolicEvaluation(
-            indexer_arguments(f)
         )
     )
