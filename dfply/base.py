@@ -3,6 +3,9 @@ from .vendor.pandas_ply.symbolic import X
 
 import pandas as pd
 from decorator import decorator
+import numpy as np
+import warnings
+
 
 
 # Initialize the global X symbol
@@ -113,39 +116,10 @@ class SymbolicEvaluation(object):
             args = self._args_eval(args[0], args[1:])
 
         if len(kwargs) > 0:
-            kwargs = self._kwargs_eval(args[0], args[1:])
+            kwargs = self._kwargs_eval(args[0], kwargs)
 
         return self.function(*args, **kwargs)
 
-
-
-def _ambiguous_index_parser(df, indices):
-    selected = []
-    for index in indices:
-        index = symbolic.to_callable(index)(df)
-        assert type(index) in (str, int, list, tuple,
-                               pd.Series, pd.DataFrame)
-        if type(index) in (list, tuple):
-            selected.extend(ambiguous_index_parser(df, index))
-        elif type(index) in [int, str]:
-            selected.append(index)
-        elif type(index) == pd.Series:
-            selected.append(index._name)
-        elif type(index) == pd.DataFrame:
-            indices = index.columns.values.tolist()
-            selected.extend(indices)
-
-    return selected
-
-
-@decorator
-def indexer_arguments(f, *args, **kwargs):
-    assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
-    if len(args) > 1:
-        args = list(args[0:1]) + _ambiguous_index_parser(args[0], args[1:])
-    if len(kwargs) > 0:
-        kwargs = {k:_ambiguous_index_parser(args[0], v) for k,v in kwargs.items()}
-    return f(*args, **kwargs)
 
 
 def dfpipe(f):
@@ -154,3 +128,113 @@ def dfpipe(f):
             GroupDelegation(f)
         )
     )
+
+
+
+# ------------------------------------------------------------------------------
+# Positional argument helpers and decorators
+# ------------------------------------------------------------------------------
+
+
+def _ambiguous_reference(df, ref):
+    ref = symbolic.to_callable(ref)(df)
+    if type(ref) == pd.Series:
+        return ref._name
+    else:
+        return ref
+
+
+def _ambiguous_reference_arg_parser(df, args):
+    parsed = []
+    for arg in args:
+        arg = symbolic.to_callable(arg)(df)
+        assert type(arg) in (str, int, list, tuple,
+                               pd.Series, pd.DataFrame)
+        if type(arg) in (list, tuple):
+            parsed.extend(_ambiguous_reference_arg_parser(df, arg))
+        elif type(arg) in [int, str]:
+            parsed.append(arg)
+        elif type(arg) == pd.Series:
+            parsed.append(arg._name)
+        elif type(arg) == pd.DataFrame:
+            column_names = arg.columns.values.tolist()
+            parsed.extend(column_names)
+    return parsed
+
+
+@decorator
+def reference_args(f, *args, **kwargs):
+    assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+    if len(args) > 1:
+        args = list(args[0:1]) + _ambiguous_reference_arg_parser(args[0], args[1:])
+    return f(*args, **kwargs)
+
+
+@decorator
+def reference_kwargs(f, *args, **kwargs):
+    assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+    if len(kwargs) > 0:
+        kwargs = {k:_ambiguous_reference(args[0], v) for k,v in kwargs.items()}
+    return f(*args, **kwargs)
+
+
+@decorator
+def mixed_labels_to_integer(f, *args, **kwargs):
+    assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+    columns = args[0].columns.tolist()
+    positions = []
+    for ind in args[1:]:
+        if type(ind) == str:
+            if ind not in columns:
+                raise IndexError(str(ind)+' is not in columns.')
+            else:
+                positions.append(columns.index(ind))
+        else:
+            if ind < 0:
+                raise IndexError(str(index)+' is negative. Not currently allowed.')
+            positions.append(ind)
+    args = list(args[0:1]) + positions
+    return f(*args, **kwargs)
+
+
+@decorator
+def mixed_labels_to_string(f, *args, **kwargs):
+    assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+    columns = args[0].columns.tolist()
+    indices = []
+    for ind in args[1:]:
+        if type(ind) == str:
+            indices.append(ind)
+        else:
+            raise warnings.warn('Integer indices will be inferred as column label positions.')
+            if ind < 0:
+                raise IndexError(str(index)+' is negative. Not currently allowed.')
+            elif ind >= len(columns):
+                raise IndexError(str(index)+' is greater than length of columns. Not allowed when inferred as column label positions.')
+            else:
+                indices.append(columns[ind])
+    args = list(args[0:1]) + indices
+    return f(*args, **kwargs)
+
+
+
+def args_are_labels(f):
+    return Pipe(
+        SymbolicEvaluation(
+            GroupDelegation(
+                reference_args(
+                    mixed_labels_to_string(f)
+                    )
+                )
+            )
+        )
+
+
+def kwargs_are_labels(f):
+    return Pipe(
+        SymbolicEvaluation(
+            GroupDelegation(
+                reference_kwargs(f)
+                )
+            )
+        )

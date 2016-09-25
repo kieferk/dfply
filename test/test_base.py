@@ -6,6 +6,7 @@ from dfply.base import *
 from dfply.group import *
 from dfply.subset import *
 from dfply.select import *
+from dfply.reshape import *
 
 
 ##==============================================================================
@@ -133,7 +134,6 @@ def test_select_between():
 
     df = diamonds[['x','y','z']]
     assert df.equals(diamonds >> select_between('x', 20))
-    assert df.equals(diamonds >> select_between('x'))
 
 
 
@@ -144,7 +144,6 @@ def test_drop_between():
 
     df = diamonds[['carat','cut']]
     assert df.equals(diamonds >> drop_between(X.color, 20))
-    assert df.equals(diamonds >> drop_between(X.color))
 
 
 def test_select_from():
@@ -191,3 +190,39 @@ def drop_through():
     assert df.equals(diamonds >> drop_through('x'))
     assert df.equals(diamonds >> drop_through(X.x))
     assert df.equals(diamonds >> drop_through(7))
+
+
+##==============================================================================
+## subsetting
+##==============================================================================
+
+def test_row_slice():
+    df = diamonds.iloc[[0,1],:]
+    assert df.equals(diamonds >> row_slice([0,1]))
+    df = diamonds.groupby('cut').apply(lambda df: df.iloc[0,:]).reset_index(drop=True)
+    d = diamonds >> groupby(X.cut) >> row_slice(0)
+    assert df.equals(d.reset_index(drop=True))
+    df = diamonds.loc[diamonds.table > 61, :]
+    assert df.equals(diamonds >> row_slice(X.table > 61))
+
+
+##==============================================================================
+## reshaping
+##==============================================================================
+
+def arrange_apply_helperfunc(df):
+    df = df.sort_values('depth', ascending=False)
+    df = df.head(2)
+    return df
+
+def test_arrange():
+    df = diamonds.groupby('cut').apply(arrange_apply_helperfunc).reset_index(drop=True)
+    d = (diamonds >> groupby('cut') >> arrange('depth', ascending=False) >>
+         head(2) >> ungroup()).reset_index(drop=True)
+    assert df.equals(d)
+
+
+def test_rename():
+    df = diamonds.rename(columns={'cut':'Cut','table':'Table','carat':'Carat'})
+    d = diamonds >> rename(Cut=X.cut, Table=X.table, Carat='carat')
+    assert df.equals(d)

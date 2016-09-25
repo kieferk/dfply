@@ -1,16 +1,1 @@
-{
-  "test/test_base.py::test_drop": true, 
-  "test/test_base.py::test_drop_between": true, 
-  "test/test_base.py::test_drop_containing": true, 
-  "test/test_base.py::test_drop_endswith": true, 
-  "test/test_base.py::test_drop_from": true, 
-  "test/test_base.py::test_drop_startswith": true, 
-  "test/test_base.py::test_drop_to": true, 
-  "test/test_base.py::test_select": true, 
-  "test/test_base.py::test_select_between": true, 
-  "test/test_base.py::test_select_containing": true, 
-  "test/test_base.py::test_select_endswith": true, 
-  "test/test_base.py::test_select_from": true, 
-  "test/test_base.py::test_select_startswith": true, 
-  "test/test_base.py::test_select_to": true
-}
+{}

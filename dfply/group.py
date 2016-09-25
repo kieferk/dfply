@@ -2,7 +2,7 @@ from .base import *
 
 @Pipe
 @SymbolicEvaluation
-@indexer_arguments
+@reference_args
 def groupby(df, *args):
     group_by = args
     existing_groups = getattr(df, "_grouped_by", None)
