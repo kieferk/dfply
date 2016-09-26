@@ -1,9 +1,8 @@
 from .base import *
 
 @Pipe
-@SymbolicEvaluation
-@reference_args
-@arg_labels_to_string
+@SymbolicEvaluation(arg_labels=True, positional_to_labels=True,
+                    flatten_args=True)
 def groupby(df, *args):
     group_by = args
     existing_groups = getattr(df, "_grouped_by", None)

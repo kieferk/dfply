@@ -17,24 +17,37 @@ import warnings
 # ==============================================================================
 
 
+# def label_selection(f):
+#     return Pipe(
+#         SymbolicEvaluation(
+#             reference_args(
+#                 arg_labels_to_string(f)
+#                 )
+#             )
+#         )
+#
+#
+# def positional_selection(f):
+#     return Pipe(
+#         SymbolicEvaluation(
+#             reference_args(
+#                 arg_labels_to_integer(f)
+#                 )
+#             )
+#         )
+
+
 def label_selection(f):
     return Pipe(
-        SymbolicEvaluation(
-            reference_args(
-                arg_labels_to_string(f)
-                )
-            )
-        )
-
+        SymbolicEvaluation(arg_labels=True, positional_to_labels=True,
+                           flatten_args=True)(f)
+    )
 
 def positional_selection(f):
     return Pipe(
-        SymbolicEvaluation(
-            reference_args(
-                arg_labels_to_integer(f)
-                )
-            )
-        )
+        SymbolicEvaluation(arg_labels=True, labels_to_positional=True,
+                           flatten_args=True)(f)
+    )
 
 
 # ------------------------------------------------------------------------------

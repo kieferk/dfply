@@ -6,5 +6,6 @@ from dfply.group import *
 from dfply.select import *
 from dfply.subset import *
 from dfply.reshape import *
-from dfply.create import *
+from dfply.transform import *
 from dfply.summarize import *
+from dfply.join import *

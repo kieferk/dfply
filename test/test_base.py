@@ -216,18 +216,20 @@ def arrange_apply_helperfunc(df):
     df = df.head(2)
     return df
 
+
 def test_arrange():
     df = diamonds.groupby('cut').apply(arrange_apply_helperfunc).reset_index(drop=True)
     d = (diamonds >> groupby('cut') >> arrange('depth', ascending=False) >>
          head(2) >> ungroup()).reset_index(drop=True)
+
+    print df.head(5)
+    print d.head(5)
     assert df.equals(d)
 
 
 def test_rename():
     df = diamonds.rename(columns={'cut':'Cut','table':'Table','carat':'Carat'})
     d = diamonds >> rename(Cut=X.cut, Table=X.table, Carat='carat')
-    assert df.equals(d)
-    d = diamonds >> rename(Cut=X.cut, Table=X.table, Carat=0)
     assert df.equals(d)
 
 
@@ -272,3 +274,9 @@ def test_group_transmute():
     df = df[['testcol']]
     d = diamonds >> groupby('cut') >> transmute(testcol=X.x*X.shape[0])
     assert df.equals(d.reset_index(drop=True))
+
+
+##==============================================================================
+## summarization
+##==============================================================================
+# TODO
