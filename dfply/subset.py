@@ -13,7 +13,7 @@ import numpy as np
 
 
 @decorator
-def mixed_indices_to_integer(f, *args, **kwargs):
+def arg_indices_to_integer(f, *args, **kwargs):
     assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
     rows = np.arange(args[0].shape[0])
     positions = []
@@ -67,6 +67,20 @@ def distict(df, *args, **kwargs):
 
 
 @dfpipe
-@mixed_indices_to_integer
+@arg_indices_to_integer
 def row_slice(df, *args):
     return df.iloc[args[0], :]
+
+
+# ------------------------------------------------------------------------------
+# Filtering/masking
+# ------------------------------------------------------------------------------
+
+@dfpipe
+def mask(df, *args):
+    mask = pd.Series(np.ones(df.shape[0], dtype=bool))
+    for arg in args:
+        if arg.dtype != bool:
+            raise Exception("Arguments must be boolean.")
+        mask = mask & arg
+    return df[mask]

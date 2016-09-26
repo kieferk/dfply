@@ -17,19 +17,11 @@ import warnings
 # ==============================================================================
 
 
-# def selectionpipe(f):
-#     return Pipe(
-#         SymbolicEvaluation(
-#             positional_arguments(f)
-#         )
-#     )
-
-
 def label_selection(f):
     return Pipe(
         SymbolicEvaluation(
             reference_args(
-                mixed_labels_to_string(f)
+                arg_labels_to_string(f)
                 )
             )
         )
@@ -39,7 +31,7 @@ def positional_selection(f):
     return Pipe(
         SymbolicEvaluation(
             reference_args(
-                mixed_labels_to_integer(f)
+                arg_labels_to_integer(f)
                 )
             )
         )

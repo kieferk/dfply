@@ -7,6 +7,7 @@ from dfply.group import *
 from dfply.subset import *
 from dfply.select import *
 from dfply.reshape import *
+from dfply.create import *
 
 
 ##==============================================================================
@@ -226,3 +227,48 @@ def test_rename():
     df = diamonds.rename(columns={'cut':'Cut','table':'Table','carat':'Carat'})
     d = diamonds >> rename(Cut=X.cut, Table=X.table, Carat='carat')
     assert df.equals(d)
+    d = diamonds >> rename(Cut=X.cut, Table=X.table, Carat=0)
+    assert df.equals(d)
+
+
+##==============================================================================
+## variable creation
+##==============================================================================
+
+def test_mutate():
+    df = diamonds.copy()
+    df['testcol'] = 1
+    assert df.equals(diamonds >> mutate(testcol=1))
+    df['testcol'] = df['x']
+    assert df.equals(diamonds >> mutate(testcol=X.x))
+    df['testcol'] = df['x'] * df['y']
+    assert df.equals(diamonds >> mutate(testcol=X.x * X.y))
+    df['testcol'] = df['x'].mean()
+    assert df.equals(diamonds >> mutate(testcol=np.mean(X.x)))
+
+
+def group_mutate_helper(df):
+    df['testcol'] = df['x']*df.shape[0]
+    return df
+
+
+def test_group_mutate():
+    df = diamonds.copy()
+    df = df.groupby('cut').apply(group_mutate_helper).reset_index(drop=True)
+    d = diamonds >> groupby('cut') >> mutate(testcol=X.x*X.shape[0]) >> ungroup()
+    assert df.equals(d.reset_index(drop=True))
+
+
+def test_transmute():
+    df = diamonds.copy()
+    df['testcol'] = df['x'] * df['y']
+    df = df[['testcol']]
+    assert df.equals(diamonds >> transmute(testcol=X.x * X.y))
+
+
+def test_group_transmute():
+    df = diamonds.copy()
+    df = df.groupby('cut').apply(group_mutate_helper).reset_index(drop=True)
+    df = df[['testcol']]
+    d = diamonds >> groupby('cut') >> transmute(testcol=X.x*X.shape[0])
+    assert df.equals(d.reset_index(drop=True))

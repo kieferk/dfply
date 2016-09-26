@@ -7,7 +7,6 @@ import numpy as np
 import warnings
 
 
-
 # Initialize the global X symbol
 X(0)
 
@@ -122,10 +121,16 @@ class SymbolicEvaluation(object):
 
 
 
+# def dfpipe(f):
+#     return Pipe(
+#         SymbolicEvaluation(
+#             GroupDelegation(f)
+#         )
+#     )
 def dfpipe(f):
     return Pipe(
-        SymbolicEvaluation(
-            GroupDelegation(f)
+        GroupDelegation(
+            SymbolicEvaluation(f)
         )
     )
 
@@ -178,63 +183,98 @@ def reference_kwargs(f, *args, **kwargs):
     return f(*args, **kwargs)
 
 
+def _label_to_integer(columns, label):
+    if type(label) == str:
+        if label not in columns:
+            raise Exception("String label "+str(label)+' is not in columns.')
+        else:
+            return columns.index(label)
+    elif type(label) == int:
+        if label < 0:
+            raise Exception("Int label "+str(label)+' is negative. Not currently allowed.')
+        else:
+            return label
+    else:
+        raise Exception("Label not of type str or int.")
+
+
+def _label_to_string(columns, label):
+    if type(label) == str:
+        return label
+    elif type(label) == int:
+        warnings.warn('Int labels will be inferred as column positions.')
+        if label < 0:
+            raise Exception(str(label)+' is negative. Not currently allowed.')
+        elif label >= len(columns):
+            raise Exception(str(label)+' is greater than length of columns.')
+        else:
+            return columns[label]
+    else:
+        raise Exception("Label not of type str or int.")
+
+
 @decorator
-def mixed_labels_to_integer(f, *args, **kwargs):
+def arg_labels_to_integer(f, *args, **kwargs):
     assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
     columns = args[0].columns.tolist()
     positions = []
     for ind in args[1:]:
-        if type(ind) == str:
-            if ind not in columns:
-                raise IndexError(str(ind)+' is not in columns.')
-            else:
-                positions.append(columns.index(ind))
-        else:
-            if ind < 0:
-                raise IndexError(str(index)+' is negative. Not currently allowed.')
-            positions.append(ind)
+        positions.append(_label_to_integer(columns, ind))
     args = list(args[0:1]) + positions
     return f(*args, **kwargs)
 
 
 @decorator
-def mixed_labels_to_string(f, *args, **kwargs):
+def arg_labels_to_string(f, *args, **kwargs):
     assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
     columns = args[0].columns.tolist()
     indices = []
     for ind in args[1:]:
-        if type(ind) == str:
-            indices.append(ind)
-        else:
-            raise warnings.warn('Integer indices will be inferred as column label positions.')
-            if ind < 0:
-                raise IndexError(str(index)+' is negative. Not currently allowed.')
-            elif ind >= len(columns):
-                raise IndexError(str(index)+' is greater than length of columns. Not allowed when inferred as column label positions.')
-            else:
-                indices.append(columns[ind])
+        indices.append(_label_to_string(columns, ind))
     args = list(args[0:1]) + indices
     return f(*args, **kwargs)
 
 
+@decorator
+def kwarg_labels_to_integer(f, *args, **kwargs):
+    assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+    columns = args[0].columns.tolist()
+    positions = {}
+    for key, ind in kwargs.items():
+        positions[key] = _label_to_integer(columns, ind)
+    return f(*args, **positions)
 
-def args_are_labels(f):
+
+@decorator
+def kwarg_labels_to_string(f, *args, **kwargs):
+    assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+    columns = args[0].columns.tolist()
+    indices = {}
+    for key, ind in kwargs.items():
+        indices[key] = _label_to_string(columns, ind)
+    return f(*args, **indices)
+
+
+
+def args_reference_columns(f):
     return Pipe(
-        SymbolicEvaluation(
-            GroupDelegation(
+        GroupDelegation(
+            SymbolicEvaluation(
                 reference_args(
-                    mixed_labels_to_string(f)
+                    arg_labels_to_string(f)
                     )
                 )
             )
         )
 
 
-def kwargs_are_labels(f):
+def kwargs_reference_columns(f):
     return Pipe(
-        SymbolicEvaluation(
-            GroupDelegation(
-                reference_kwargs(f)
+        GroupDelegation(
+            SymbolicEvaluation(
+                reference_kwargs(
+                    kwarg_labels_to_string(f)
+                    )
                 )
             )
         )
