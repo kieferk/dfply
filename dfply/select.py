@@ -17,22 +17,6 @@ import warnings
 # ==============================================================================
 
 
-# def label_selection(f):
-#     """Decorator chain for selection functions requiring string labels
-#     for columns."""
-#     return Pipe(
-#         SymbolicEvaluation(arg_labels=True, positional_to_labels=True,
-#                            flatten_args=True)(f)
-#     )
-#
-# def positional_selection(f):
-#     """Decorator chain for selection functions requiring column positions as
-#     integers."""
-#     return Pipe(
-#         SymbolicEvaluation(arg_labels=True, labels_to_positional=True,
-#                            flatten_args=True)(f)
-#     )
-
 def label_selection(f):
     return Pipe(
         SymbolicReference(
