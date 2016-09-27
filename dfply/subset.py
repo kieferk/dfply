@@ -64,7 +64,7 @@ def sample(df, *args, **kwargs):
 
 @dfpipe
 def distict(df, *args, **kwargs):
-    drop_indices = drop_df.drop_duplicates(**kwargs).index
+    drop_indices = df.drop_duplicates(**kwargs).index
     return df.loc[drop_indices]
 
 

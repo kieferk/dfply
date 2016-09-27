@@ -7,7 +7,8 @@ from .base import *
 
 @Pipe
 @GroupDelegation
-@SymbolicEvaluation(arg_labels=True, positional_to_labels=True)
+@SymbolicReference
+@label_args
 def arrange(df, *args, **kwargs):
     return df.sort_values(list(args), **kwargs)
 
@@ -17,7 +18,7 @@ def arrange(df, *args, **kwargs):
 # ------------------------------------------------------------------------------
 
 @Pipe
-@SymbolicEvaluation(kwarg_labels=True)
+@SymbolicReference
 def rename(df, **kwargs):
     return df.rename(columns={v:k for k,v in kwargs.items()})
 
@@ -26,8 +27,7 @@ def rename(df, **kwargs):
 # Elongate
 # ------------------------------------------------------------------------------
 
-@Pipe
-@SymbolicEvaluation(arg_labels=True, positional_to_labels=True)
+@label_selection
 def gather(df, key, values, *args, **kwargs):
     if len(args) == 0:
         args = df.columns.tolist()
@@ -71,8 +71,7 @@ def convert_type(df, columns):
 
 
 
-@Pipe
-@SymbolicEvaluation(arg_labels=True, positional_to_labels=True)
+@label_selection
 def spread(df, key, values, convert=False):
     # Taken mostly from dplython package
 

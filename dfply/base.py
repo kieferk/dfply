@@ -13,9 +13,7 @@ X(0)
 class Pipe(object):
     """
     Generic pipe decorator class that allows DataFrames to be passed
-    through the __rrshift__ binary operator: >>
-
-    data >> head(5)
+    through the __rrshift__ binary operator, >>
     """
 
     __name__ = "Pipe"
@@ -27,13 +25,11 @@ class Pipe(object):
         return self.function(other)
 
     def __call__(self, *args, **kwargs):
-        #print 'Pipe', args, kwargs
         return Pipe(lambda x: self.function(x, *args, **kwargs))
 
 
 class GroupDelegation(object):
-    """
-    Decorator that manages operation on groupings for data.
+    """Decorator class that managing grouped operations on DataFrames.
 
     Checks for an attached `df._grouped_by` attribute added to a
     pandas DataFrame by the `groupby` function.
@@ -81,121 +77,170 @@ class GroupDelegation(object):
             return self.function(*args, **kwargs)
 
 
+
 class SymbolicEvaluation(object):
 
     __name__ = "SymbolicEvaluation"
 
-    def __init__(self, arg_labels=False, kwarg_labels=False,
-                 labels_to_positional=False, positional_to_labels=False,
-                 flatten_args=False):
-        if labels_to_positional and positional_to_labels:
-            raise Exception('Can only specify one conversion direction between labels and positional.')
-        self.arg_labels = arg_labels
-        self.kwarg_labels = kwarg_labels
-        self.labels_to_positional = labels_to_positional
-        self.positional_to_labels = positional_to_labels
-        self.flatten_args = flatten_args
+    def __init__(self, function):
+        self.function = function
 
+    def _args_eval(self, df, args):
+        return [df]+[symbolic.to_callable(arg)(df) for arg in args]
+
+    def _kwargs_eval(self, df, kwargs):
+        return {k:symbolic.to_callable(v)(df) for k,v in kwargs.items()}
+
+    def __call__(self, *args, **kwargs):
+        assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+        if len(args) > 1:
+            args = self._args_eval(args[0], args[1:])
+        if len(kwargs) > 0:
+            kwargs = self._kwargs_eval(args[0], kwargs)
+        return self.function(*args, **kwargs)
+
+
+
+class SymbolicReference(object):
+
+    __name__ = "SymbolicReference"
+
+    def __init__(self, function):
+        self.function = function
 
     def _label_or_arg(self, df, arg):
+        """Recursively extracts pandas series arguments or retains original
+        argument."""
         arg = symbolic.to_callable(arg)(df)
         if isinstance(arg, pd.Series):
             return arg._name
+        elif isinstance(arg, pd.DataFrame):
+            return arg.columns.tolist()
+        elif isinstance(arg, (list, tuple)):
+            return [self._label_or_arg(df, subarg) for subarg in arg]
         else:
             return arg
 
-
-    def _label_to_integer(self, columns, label):
-        if isinstance(label, str):
-            if label not in columns:
-                raise Exception("String label "+str(label)+' is not in columns.')
-            return columns.index(label)
-        elif isinstance(label, int):
-            if label < 0:
-                raise Exception("Int label "+str(label)+' is negative. Not currently allowed.')
-            return label
-        else:
-            raise Exception("Label not of type str or int.")
-
-
-    def _label_to_string(self, columns, label):
-        if isinstance(label, str):
-            return label
-        elif isinstance(label, int):
-            warnings.warn('Int labels will be inferred as column positions.')
-            if label < 0:
-                raise Exception(str(label)+' is negative. Not currently allowed.')
-            elif label >= len(columns):
-                raise Exception(str(label)+' is greater than length of columns.')
-            else:
-                return columns[label]
-        else:
-            raise Exception("Label not of type str or int.")
-
-
-    def _ambiguous_selection_arg_flattener(self, df, args):
-        parsed = []
-        for arg in args:
-            arg = symbolic.to_callable(arg)(df)
-            assert type(arg) in (str, int, list, tuple,
-                                 pd.Series, pd.DataFrame)
-            if type(arg) in (list, tuple):
-                parsed.extend(self._ambiguous_selection_arg_flattener(df, arg))
-            elif type(arg) in [int, str]:
-                parsed.append(arg)
-            elif type(arg) == pd.Series:
-                parsed.append(arg._name)
-            elif type(arg) == pd.DataFrame:
-                column_names = arg.columns.values.tolist()
-                parsed.extend(column_names)
-        return parsed
-
-
     def _args_eval(self, df, args):
-        if self.arg_labels and self.flatten_args:
-            args = self._ambiguous_selection_arg_flattener(df, args)
-        elif self.arg_labels:
-            args = [self._label_or_arg(df, arg) for arg in args]
-        else:
-            args = [symbolic.to_callable(arg)(df) for arg in args]
-
-        if self.labels_to_positional:
-            return [df]+[self._label_to_integer(df.columns.tolist(), arg) for arg in args]
-        elif self.positional_to_labels:
-            return [df]+[self._label_to_string(df.columns.tolist(), arg) for arg in args]
-        else:
-            return [df]+args
-
+        return [df]+[self._label_or_arg(df, arg) for arg in args]
 
     def _kwargs_eval(self, df, kwargs):
-        if self.kwarg_labels:
-            kwargs = {k:self._label_or_arg(df, v) for k,v in kwargs.items()}
+        return {k:self._label_or_arg(df, v) for k,v in kwargs.items()}
+
+    def __call__(self, *args, **kwargs):
+        assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+        if len(args) > 1:
+            args = self._args_eval(args[0], args[1:])
+        if len(kwargs) > 0:
+            kwargs = self._kwargs_eval(args[0], kwargs)
+        return self.function(*args, **kwargs)
+
+
+
+def _arg_extractor(args):
+    flat = []
+    for arg in args:
+        if isinstance(arg, (list, tuple)):
+            flat.extend(_arg_extractor(arg))
         else:
-            kwargs = {k:symbolic.to_callable(v)(df) for k,v in kwargs.items()}
-        return kwargs
+            flat.append(arg)
+    return flat
 
 
 
-    def __call__(self, f, *args, **kwargs):
+def flatten_arguments(f):
+    @wraps(f)
+    def flat_wrapped(*args, **kwargs):
+        flat_args = _arg_extractor(args)
+        return f(*flat_args, **kwargs)
+    return flat_wrapped
 
-        def fwrapped(*args, **kwargs):
-            assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
 
-            if len(args) > 1:
-                args = self._args_eval(args[0], args[1:])
 
-            if len(kwargs) > 0:
-                kwargs = self._kwargs_eval(args[0], kwargs)
+def _label_to_positional(columns, label):
+    """Converts string column labels to their integer position."""
+    if isinstance(label, str):
+        if label not in columns:
+            raise Exception("String label "+str(label)+' is not in columns.')
+        return columns.index(label)
+    elif isinstance(label, int):
+        if label < 0:
+            raise Exception("Int label "+str(label)+' is negative. Not currently allowed.')
+        return label
+    else:
+        raise Exception("Label not of type str or int.")
 
-            return f(*args, **kwargs)
 
-        return fwrapped
+
+def _positional_to_label(columns, label):
+    """Converts column integer positions to their string label."""
+    if isinstance(label, str):
+        return label
+    elif isinstance(label, int):
+        warnings.warn('Int labels will be inferred as column positions.')
+        if label < 0:
+            raise Exception(str(label)+' is negative. Not currently allowed.')
+        elif label >= len(columns):
+            raise Exception(str(label)+' is greater than length of columns.')
+        else:
+            return columns[label]
+    else:
+        raise Exception("Label not of type str or int.")
+
+
+
+def label_args(f):
+    @wraps(f)
+    def flat_wrapped(*args, **kwargs):
+        assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+        if len(args) > 1:
+            flat_args = _arg_extractor(args[1:])
+            string_args = [_positional_to_label(args[0].columns.tolist(), arg)
+                           for arg in flat_args]
+            args = [args[0]]+string_args
+        return f(*args, **kwargs)
+    return flat_wrapped
+
+
+
+def positional_args(f):
+    @wraps(f)
+    def flat_wrapped(*args, **kwargs):
+        assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+        if len(args) > 1:
+            flat_args = _arg_extractor(args[1:])
+            string_args = [_label_to_positional(args[0].columns.tolist(), arg)
+                           for arg in flat_args]
+            args = [args[0]]+string_args
+        return f(*args, **kwargs)
+    return flat_wrapped
+
+
+
+def label_selection(f):
+    return Pipe(
+        SymbolicReference(
+            label_args(f)
+        )
+    )
+
+
+def positional_selection(f):
+    return Pipe(
+        SymbolicReference(
+            positional_args(f)
+        )
+    )
 
 
 
 def dfpipe(f):
+    """Standard chain of decorators for a function to be used with dfply.
+    The function can be chained with >> by `Pipe`, application of the function
+    to grouped DataFrames is enabled by `GroupDelegation`, and symbolic
+    arguments are evaluated as-is using a default `SymbolicEvaluation`."""
     return Pipe(
         GroupDelegation(
-            SymbolicEvaluation()(f)
+            SymbolicEvaluation(f)
         )
     )
