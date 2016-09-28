@@ -17,21 +17,6 @@ import warnings
 # ==============================================================================
 
 
-def label_selection(f):
-    return Pipe(
-        SymbolicReference(
-            label_args(f)
-        )
-    )
-
-def positional_selection(f):
-    return Pipe(
-        SymbolicReference(
-            positional_args(f)
-        )
-    )
-
-
 # ------------------------------------------------------------------------------
 # Select and drop operators
 # ------------------------------------------------------------------------------

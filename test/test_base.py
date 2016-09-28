@@ -8,6 +8,7 @@ from dfply.subset import *
 from dfply.select import *
 from dfply.reshape import *
 from dfply.create import *
+from dfply.join import *
 
 
 ##==============================================================================
@@ -280,3 +281,21 @@ def test_group_transmute():
 ## summarization
 ##==============================================================================
 # TODO
+
+
+
+##==============================================================================
+## joins
+##==============================================================================
+
+def test_inner_join():
+    a = pd.DataFrame({
+        'x1':['A','B','C'],
+        'x2':[1,2,3]
+    })
+    b = pd.DataFrame({
+        'x1':['A','B','D'],
+        'x3':[True,False,True]
+    })
+    c = a >> inner_join(b, by='x1')
+    print c

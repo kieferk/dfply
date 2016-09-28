@@ -8,7 +8,8 @@ from .base import *
 @Pipe
 @GroupDelegation
 @SymbolicReference
-@label_args
+@flatten_arguments
+@column_indices_as_labels
 def arrange(df, *args, **kwargs):
     return df.sort_values(list(args), **kwargs)
 

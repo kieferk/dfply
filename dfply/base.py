@@ -147,33 +147,44 @@ def _arg_extractor(args):
     return flat
 
 
-
 def flatten_arguments(f):
     @wraps(f)
-    def flat_wrapped(*args, **kwargs):
+    def wrapped(*args, **kwargs):
         flat_args = _arg_extractor(args)
         return f(*flat_args, **kwargs)
-    return flat_wrapped
+    return wrapped
+
+
+def join_index_arguments(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+        if len(args) > 1:
+            args_ = reduce(lambda x, y: np.concatenate([np.atleast_1d(x), np.atleast_1d(y)]),
+                           args[1:])
+            args = [args[0]] + [np.atleast_1d(args_)]
+        return f(*args, **kwargs)
+    return wrapped
 
 
 
-def _label_to_positional(columns, label):
-    """Converts string column labels to their integer position."""
-    if isinstance(label, str):
-        if label not in columns:
-            raise Exception("String label "+str(label)+' is not in columns.')
-        return columns.index(label)
-    elif isinstance(label, int):
-        if label < 0:
-            raise Exception("Int label "+str(label)+' is negative. Not currently allowed.')
-        return label
+def _col_ind_to_position(columns, ind):
+    """Converts column indexers to their integer position."""
+    if isinstance(ind, str):
+        if ind not in columns:
+            raise Exception("String label "+str(ind)+' is not in columns.')
+        return columns.index(ind)
+    elif isinstance(ind, int):
+        if ind < 0:
+            raise Exception("Int label "+str(ind)+' is negative. Not currently allowed.')
+        return ind
     else:
-        raise Exception("Label not of type str or int.")
+        raise Exception("Column indexer not of type str or int.")
 
 
 
-def _positional_to_label(columns, label):
-    """Converts column integer positions to their string label."""
+def _col_ind_to_label(columns, label):
+    """Converts column indexers positions to their string label."""
     if isinstance(label, str):
         return label
     elif isinstance(label, int):
@@ -188,39 +199,37 @@ def _positional_to_label(columns, label):
         raise Exception("Label not of type str or int.")
 
 
-
-def label_args(f):
+def column_indices_as_labels(f):
     @wraps(f)
-    def flat_wrapped(*args, **kwargs):
+    def wrapped(*args, **kwargs):
         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
         if len(args) > 1:
-            flat_args = _arg_extractor(args[1:])
-            string_args = [_positional_to_label(args[0].columns.tolist(), arg)
-                           for arg in flat_args]
-            args = [args[0]]+string_args
+            label_args = [_col_ind_to_label(args[0].columns.tolist(), arg)
+                          for arg in args[1:]]
+            args = [args[0]]+label_args
         return f(*args, **kwargs)
-    return flat_wrapped
+    return wrapped
 
 
-
-def positional_args(f):
+def column_indices_as_positions(f):
     @wraps(f)
-    def flat_wrapped(*args, **kwargs):
+    def wrapped(*args, **kwargs):
         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
         if len(args) > 1:
-            flat_args = _arg_extractor(args[1:])
-            string_args = [_label_to_positional(args[0].columns.tolist(), arg)
-                           for arg in flat_args]
-            args = [args[0]]+string_args
+            label_args = [_col_ind_to_position(args[0].columns.tolist(), arg)
+                          for arg in args[1:]]
+            args = [args[0]]+label_args
         return f(*args, **kwargs)
-    return flat_wrapped
+    return wrapped
 
 
 
 def label_selection(f):
     return Pipe(
         SymbolicReference(
-            label_args(f)
+            flatten_arguments(
+                column_indices_as_labels(f)
+            )
         )
     )
 
@@ -228,7 +237,9 @@ def label_selection(f):
 def positional_selection(f):
     return Pipe(
         SymbolicReference(
-            positional_args(f)
+            flatten_arguments(
+                column_indices_as_positions(f)
+            )
         )
     )
 
