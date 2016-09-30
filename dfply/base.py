@@ -82,6 +82,9 @@ class GroupDelegation(object):
 
 
 class SymbolicEvaluation(object):
+    """Decorator class that evaluates symbolic arguments and keyword arguments
+    passed through to the decorated function.
+    """
 
     __name__ = "SymbolicEvaluation"
 
@@ -105,6 +108,8 @@ class SymbolicEvaluation(object):
 
 
 class SymbolicReference(object):
+    """Decorator class that converts symbolic arguments and keyword arguments
+    into their names (specifically `pandas.Series` objects)."""
 
     __name__ = "SymbolicReference"
 
@@ -141,6 +146,9 @@ class SymbolicReference(object):
 
 
 def _arg_extractor(args):
+    """Extracts arguments from lists or tuples and returns them
+    "flattened".
+    """
     flat = []
     for arg in args:
         if isinstance(arg, (list, tuple)):
@@ -151,6 +159,14 @@ def _arg_extractor(args):
 
 
 def flatten_arguments(f):
+    """Decorator that "flattens" any arguments contained inside of lists or
+    tuples. Designed primarily for selection and dropping functions.
+
+    Example:
+        args = (a, b, (c, d, [e, f, g]))
+        becomes
+        args = (a, b, c, d, e, f, g)
+    """
     @wraps(f)
     def wrapped(*args, **kwargs):
         flat_args = _arg_extractor(args)
@@ -159,6 +175,16 @@ def flatten_arguments(f):
 
 
 def join_index_arguments(f):
+    """Decorator for joining indexing arguments together. Designed primarily for
+    `row_slice` to combine arbitrary single indices and lists of indices
+    together.
+
+    Example:
+        args = (1, 2, 3, [4, 5], [6, 7])
+        becomes
+        args = ([1, 2, 3, 4, 5, 6, 7])
+    """
+
     @wraps(f)
     def wrapped(*args, **kwargs):
         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
@@ -203,6 +229,9 @@ def _col_ind_to_label(columns, label):
 
 
 def column_indices_as_labels(f):
+    """Decorator that convertes column indicies to label. Typically decoration
+    occurs after decoration by SymbolicReference.
+    """
     @wraps(f)
     def wrapped(*args, **kwargs):
         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
@@ -215,6 +244,9 @@ def column_indices_as_labels(f):
 
 
 def column_indices_as_positions(f):
+    """Decorator that converts column indices to integer position. Typically
+    decoration occurs after decoration by SymbolicReference.
+    """
     @wraps(f)
     def wrapped(*args, **kwargs):
         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
@@ -228,6 +260,10 @@ def column_indices_as_positions(f):
 
 
 def label_selection(f):
+    """Convenience chain of decorators for functions that operate with the
+    expectation of having column labels as arguments (despite user potentially
+    providing symbolic `pandas.Series` objects or integer column positions).
+    """
     return Pipe(
         SymbolicReference(
             flatten_arguments(
@@ -238,6 +274,10 @@ def label_selection(f):
 
 
 def positional_selection(f):
+    """Convenience chain of decorators for functions that operate with the
+    expectation of having column integer positions as arguments (despite
+    user potentially providing symbolic `pandas.Series` objects or column labels).
+    """
     return Pipe(
         SymbolicReference(
             flatten_arguments(
