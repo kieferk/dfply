@@ -28,9 +28,25 @@ the `>>` operator.
 
 ```python
 from dfply import *
+
 diamonds >> head(3)
+
 carat      cut color clarity  depth  table  price     x     y     z
 0   0.23    Ideal     E     SI2   61.5   55.0    326  3.95  3.98  2.43
 1   0.21  Premium     E     SI1   59.8   61.0    326  3.89  3.84  2.31
 2   0.23     Good     E     VS1   56.9   65.0    327  4.05  4.07  2.31
+```
+
+You can chain piped operations, and of course assign the output to a new
+DataFrame.
+
+```python
+lowprice = diamonds >> head(10) >> tail(3)
+
+lowprice
+
+carat        cut color clarity  depth  table  price     x     y     z
+7   0.26  Very Good     H     SI1   61.9   55.0    337  4.07  4.11  2.53
+8   0.22       Fair     E     VS2   65.1   61.0    337  3.87  3.78  2.49
+9   0.23  Very Good     H     VS1   59.4   61.0    338  4.00  4.05  2.39
 ```
