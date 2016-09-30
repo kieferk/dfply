@@ -18,11 +18,11 @@ def summarize_each(df, functions, *args):
     return pd.DataFrame([values], columns=columns)
 
 
-@dfpipe
-def count(df):
-    return pd.DataFrame(dict(n=df.shape[0]))
-
-
-@Pipe
-def nrow(df):
-    return df.shape[0]
+# @dfpipe
+# def count(df):
+#     return pd.DataFrame(dict(n=[df.shape[0]]))
+#
+#
+# @Pipe
+# def nrow(df):
+#     return df.shape[0]

@@ -75,7 +75,6 @@ def convert_type(df, columns):
 @label_selection
 def spread(df, key, values, convert=False):
     # Taken mostly from dplython package
-
     columns = df.columns.tolist()
     id_cols = [col for col in columns if not col in [key, values]]
 

@@ -71,7 +71,6 @@ def distict(df, *args, **kwargs):
 @dfpipe
 @join_index_arguments
 def row_slice(df, indices):
-    print indices
     if indices.dtype == bool:
         return df.loc[indices, :]
     else:

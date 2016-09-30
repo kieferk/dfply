@@ -18,7 +18,6 @@ def get_join_parameters(join_kwargs):
 @Pipe
 def inner_join(df, other, **kwargs):
     left_on, right_on, suffixes = get_join_parameters(kwargs)
-    print left_on, right_on, suffixes
     joined = df.merge(other, how='inner', left_on=left_on,
                       right_on=right_on, suffixes=suffixes)
     return joined

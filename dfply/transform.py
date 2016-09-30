@@ -3,6 +3,7 @@ from .base import *
 
 @dfpipe
 def mutate(df, **kwargs):
+    df = df.copy()
     for key, value in kwargs.items():
         df[key] = value
     return df
@@ -10,9 +11,10 @@ def mutate(df, **kwargs):
 
 @dfpipe
 def transmute(df, **kwargs):
+    df = df.copy()
     for key, value in kwargs.items():
         df[key] = value
-    return df[sorted(kwargs.keys())]
+    return df.select(lambda x: x in kwargs.keys(), axis=1)
 
 
 # ------------------------------------------------------------------------------

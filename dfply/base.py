@@ -70,7 +70,10 @@ class GroupDelegation(object):
         if grouped_by is not None:
             df = df.groupby(grouped_by)
             df = self._apply_combine_reset(df, *args[1:], **kwargs)
-            df._grouped_by = grouped_by
+            if all([True if group in df.columns else False for group in grouped_by]):
+                df._grouped_by = grouped_by
+            else:
+                warnings.warn('Grouping lost due to transformation.')
             return df
 
         else:
