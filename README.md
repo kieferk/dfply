@@ -20,7 +20,7 @@ customized later in the readme.
 
 ## Overview
 
-> (An ipython notebook showcasing working features of dfply [can be
+> (A notebook showcasing most of the working functions in dfply [can be
 found here](https://github.com/kieferk/dfply/blob/master/examples/dfply-example-gallery.ipynb))
 
 dfply works directly on pandas DataFrames, chaining operations on the data with
@@ -108,6 +108,88 @@ diamonds >> drop_through(X.clarity) >> select_to(X.x) >> head(2)
 1   59.8   61.0    326
 ```
 
+### Subsetting and filtering
+
+Slices of rows can be selected with the `row_slice()` function. You can pass
+single integer indices and/or lists of integer indices to select rows as with
+pandas' `.iloc`.
+
+```python
+diamonds >> row_slice(1,2,[10,15])
+
+    carat      cut color clarity  depth  table  price     x     y     z
+1    0.21  Premium     E     SI1   59.8   61.0    326  3.89  3.84  2.31
+2    0.23     Good     E     VS1   56.9   65.0    327  4.05  4.07  2.31
+10   0.30     Good     J     SI1   64.0   55.0    339  4.25  4.28  2.73
+15   0.32  Premium     E      I1   60.9   58.0    345  4.38  4.42  2.68
+```
+
+The `sample()` function functions exactly the same as pandas' `.sample()` method
+for DataFrames. Arguments and keyword arguments will be passed through to the
+DataFrame sample method.
+
+```python
+diamonds >> sample(frac=0.0001, replace=False)
+
+       carat        cut color clarity  depth  table  price     x     y     z
+19736   1.02      Ideal     E     VS1   62.2   54.0   8303  6.43  6.46  4.01
+37159   0.32    Premium     D     VS2   60.3   60.0    972  4.44  4.42  2.67
+1699    0.72  Very Good     E     VS2   63.8   57.0   3035  5.66  5.69  3.62
+20955   1.71  Very Good     J     VS2   62.6   55.0   9170  7.58  7.65  4.77
+5168    0.91  Very Good     E     SI2   63.0   56.0   3772  6.12  6.16  3.87
+
+
+diamonds >> sample(n=3, replace=True)
+
+       carat        cut color clarity  depth  table  price     x     y     z
+52892   0.73  Very Good     G     SI1   60.6   59.0   2585  5.83  5.85  3.54
+39454   0.57      Ideal     H     SI2   62.3   56.0   1077  5.31  5.28  3.30
+39751   0.43      Ideal     H    VVS1   62.3   54.0   1094  4.84  4.85  3.02
+```
+
+Selection of unique rows is done with `distinct()`, which similarly passes
+arguments and keyword arguments through to the DataFrame's `.drop_duplicates()`
+method.
+
+```python
+diamonds >> distinct(X.color)
+
+    carat        cut color clarity  depth  table  price     x     y     z
+0    0.23      Ideal     E     SI2   61.5   55.0    326  3.95  3.98  2.43
+3    0.29    Premium     I     VS2   62.4   58.0    334  4.20  4.23  2.63
+4    0.31       Good     J     SI2   63.3   58.0    335  4.34  4.35  2.75
+7    0.26  Very Good     H     SI1   61.9   55.0    337  4.07  4.11  2.53
+12   0.22    Premium     F     SI1   60.4   61.0    342  3.88  3.84  2.33
+25   0.23  Very Good     G    VVS2   60.4   58.0    354  3.97  4.01  2.41
+28   0.23  Very Good     D     VS2   60.5   61.0    357  3.96  3.97  2.40
+```
+
+Filtering rows with logical criteria is done with `mask()`, which accepts
+boolean arrays "masking out" False labeled rows and keeping True labeled rows.
+These are best created with logical statements on symbolic Series objects as
+shown below. Multiple criteria can be supplied as arguments and their intersection
+will be used as the mask.
+
+```python
+diamonds >> mask(X.cut == 'Ideal') >> head(4)
+
+    carat    cut color clarity  depth  table  price     x     y     z
+0    0.23  Ideal     E     SI2   61.5   55.0    326  3.95  3.98  2.43
+11   0.23  Ideal     J     VS1   62.8   56.0    340  3.93  3.90  2.46
+13   0.31  Ideal     J     SI2   62.2   54.0    344  4.35  4.37  2.71
+16   0.30  Ideal     I     SI2   62.0   54.0    348  4.31  4.34  2.68
+
+diamonds >> mask(X.cut == 'Ideal', X.color == 'E', X.table < 55, X.price < 500)
+
+       carat    cut color clarity  depth  table  price     x     y     z
+26683   0.33  Ideal     E     SI2   62.2   54.0    427  4.44  4.46  2.77
+32297   0.34  Ideal     E     SI2   62.4   54.0    454  4.49  4.52  2.81
+40928   0.30  Ideal     E     SI1   61.6   54.0    499  4.32  4.35  2.67
+50623   0.30  Ideal     E     SI2   62.1   54.0    401  4.32  4.35  2.69
+50625   0.30  Ideal     E     SI2   62.0   54.0    401  4.33  4.35  2.69
+```
+
+
 ### DataFrame transformation
 
 New variables can be created with the `mutate()` function (named that to match
@@ -149,7 +231,13 @@ diamonds >> transmute(x_plus_y=X.x + X.y, y_div_z=(X.y / X.z)) >> head(3)
 2  1.761905      8.12
 ```
 
+### Grouping
 
+DataFrames are grouped along variables using the `groupby()` function and
+ungrouped with the `ungroup()` function. Functions chained after grouping a
+DataFrame are applied by group until returning or ungrouping.
+
+Hierarchical/multiindexing is automatically removed.
 
 
 
@@ -166,3 +254,5 @@ subsequent variable in the same function call.
 - Not all functions have unit tests yet.
 - More complete/advanced unit tests.
 - Complete and improve function documentation.
+- Better handling of numpy row indexers in row_slice. Should boolean be allowed
+here? What about mixed boolean and integer? Currently not handled.

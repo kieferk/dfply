@@ -11,33 +11,6 @@ import numpy as np
 #
 # ==============================================================================
 
-#
-# def arg_indices_to_integer(f):
-#     @wraps(f)
-#     def arg_indices_to_integer_wrapped(*args, **kwargs):
-#         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
-#         rows = np.arange(args[0].shape[0])
-#         positions = []
-#         for ind in args[1:]:
-#             if type(ind) in (tuple, list):
-#                 ind = np.array(ind)
-#             if type(ind) == pd.Series:
-#                 ind = ind.values
-#             if type(ind) == int:
-#                 positions.append(np.atleast_1d(ind))
-#             elif type(ind) == np.ndarray:
-#                 if ind.dtype == int:
-#                     positions.append(ind)
-#                 elif ind.dtype == bool:
-#                     positions.append(rows[ind])
-#         if len(positions) == 0:
-#             return f(args[0], list(positions), **kwargs)
-#         elif len(positions) == 1:
-#             return f(args[0], list(positions[0]), **kwargs)
-#         else:
-#             return f(args[0], list(reduce(np.intersect1d, positions)), **kwargs)
-#     return arg_indices_to_integer_wrapped
-
 
 # ------------------------------------------------------------------------------
 # `head` and `tail`
@@ -62,9 +35,11 @@ def sample(df, *args, **kwargs):
     return df.sample(*args, **kwargs)
 
 
-@dfpipe
-def distict(df, *args, **kwargs):
-    drop_indices = df.drop_duplicates(**kwargs).index
+@Pipe
+@GroupDelegation
+@SymbolicReference
+def distinct(df, *args, **kwargs):
+    drop_indices = df.drop_duplicates(*args, **kwargs).index
     return df.loc[drop_indices]
 
 
