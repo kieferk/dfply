@@ -12,9 +12,8 @@ setup(
         'dfply.vendor.pandas_ply',
         'dfply.data'
     ],
-    #description = 'functional data manipulation for pandas',
-    #long_description = open('README.rst').read(),
-    #license = 'Apache License 2.0',
-    #url = 'https://github.com/coursera/pandas-ply',
-    classifiers = [],
+    description = 'dplyr-style piping operations for pandas dataframes',
+    long_description = open('README.rst').read(),
+    license = 'GNU General Public License v3.0',
+    url = 'https://github.com/kieferk/dfply'
 )

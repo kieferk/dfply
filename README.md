@@ -18,7 +18,7 @@ customized later in the readme.
 <!-- START doctoc -->
 <!-- END doctoc -->
 
-# Overview and basic usage
+## Overview
 
 > (An ipython notebook showcasing working features of dfply [can be
 found here](https://github.com/kieferk/dfply/blob/master/examples/dfply-example-gallery.ipynb))
@@ -50,3 +50,26 @@ carat        cut color clarity  depth  table  price     x     y     z
 8   0.22       Fair     E     VS2   65.1   61.0    337  3.87  3.78  2.49
 9   0.23  Very Good     H     VS1   59.4   61.0    338  4.00  4.05  2.39
 ```
+
+### Selecting and dropping
+
+A variety of selection functions are available. The current functions are:
+
+- `select(*columns)` returns the columns specified by the arguments
+- `select_containing(*substrings)` returns columns containing substrings
+- `select_startswith(*substrings)` returns columns starting with substrings
+- `select_endswith(*substrings)` returns columns ending with substrings
+- `select_between(column1, column2)` returns columns between two specified columns (inclusive)
+- `select_to(column)` returns columns up to a specified column (exclusive)
+- `select_through(column)` returns columns up through a specified column (exclusive)
+
+There are complimentary dropping functions to all the selection functions,
+which will remove the specified columns instead of selecting them:
+
+- `drop(*columns)`
+- `drop_containing(*substrings)`
+- `drop_startswith(*substrings)`
+- `drop_endswith(*substrings)`
+- `drop_between(column1, column2)`
+- `drop_to(column)`
+- `drop_through(column)`
