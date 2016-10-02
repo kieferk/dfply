@@ -73,3 +73,19 @@ which will remove the specified columns instead of selecting them:
 - `drop_between(column1, column2)`
 - `drop_to(column)`
 - `drop_through(column)`
+
+Column selection and dropping functions are designed to work with an arbitrary
+combination of string labels, positional integers, or symbolic (`X.column`)
+pandas Series objects.
+
+The functions also "flatten" their arguments so that lists or tuples of selectors
+will become individual arguments. This doesn't impact the user except for the
+fact that you can mix single selectors and lists of selectors as arguments.
+
+```python
+diamonds >> select(1, X.price, ['x', 'y']) >> head(2)
+
+cut  price     x     y
+0    Ideal    326  3.95  3.98
+1  Premium    326  3.89  3.84
+```
