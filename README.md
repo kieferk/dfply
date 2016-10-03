@@ -238,26 +238,50 @@ DataFrames are grouped along variables using the `groupby()` function and
 ungrouped with the `ungroup()` function. Functions chained after grouping a
 DataFrame are applied by group until returning or ungrouping. Hierarchical/multiindexing is automatically removed.
 
-In the example below, the `lead()` function is a dfply convenience function
-wrapping around the pandas `.shift` function.
+In the example below, the `lead()` and `lag()` functions are dfply convenience
+wrappers around the pandas `.shift()` Series method.
+
 
 ```python
 (diamonds >> groupby(X.cut) >>
- mutate(price_lead=lead(X.price)) >>
+ mutate(price_lead=lead(X.price), price_lag=lag(X.price)) >>
  head(2) >> select(X.cut, X.price, X.price_lead))
 
-          cut  price  price_lead
-8        Fair    337         NaN
-91       Fair   2757       337.0
-2        Good    327         NaN
-4        Good    335       327.0
-0       Ideal    326         NaN
-11      Ideal    340       326.0
-1     Premium    326         NaN
-3     Premium    334       326.0
-5   Very Good    336         NaN
-6   Very Good    336       336.0
+          cut  price  price_lead  price_lag
+8        Fair    337         NaN     2757.0
+91       Fair   2757       337.0     2759.0
+2        Good    327         NaN      335.0
+4        Good    335       327.0      339.0
+0       Ideal    326         NaN      340.0
+11      Ideal    340       326.0      344.0
+1     Premium    326         NaN      334.0
+3     Premium    334       326.0      342.0
+5   Very Good    336         NaN      336.0
+6   Very Good    336       336.0      337.0
 ```
+
+
+### Reshaping
+
+Sorting is done by the `arrange()` function, which wraps around the pandas
+`.sort_values()` DataFrame method. Arguments and keyword arguments are passed
+through to that function (arguments are also currently flattened like in the select
+functions).
+
+```python
+diamonds >> arrange(X.table, ascending=False) >> head(5)
+
+       carat   cut color clarity  depth  table  price     x     y     z
+24932   2.01  Fair     F     SI1   58.6   95.0  13387  8.32  8.31  4.87
+50773   0.81  Fair     F     SI2   68.8   79.0   2301  5.26  5.20  3.58
+51342   0.79  Fair     G     SI1   65.3   76.0   2362  5.52  5.13  3.35
+52860   0.50  Fair     E     VS2   79.0   73.0   2579  5.21  5.18  4.09
+49375   0.70  Fair     H     VS1   62.0   73.0   2100  5.65  5.54  3.47
+
+(diamonds >> groupby(X.cut) >> arrange(X.price) >>
+ head(3) >> ungroup() >> mask(X.carat < 0.23))
+```
+
 
 **...UNDER CONSTRUCTION...**
 
