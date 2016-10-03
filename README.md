@@ -15,8 +15,19 @@ goal of this choice of architecture is to make dfply concise and easily
 extensible. There is a more in-depth overview of the decorators and how dfply can be
 customized later in the readme.
 
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Overview](#overview)
+  - [Selecting and dropping](#selecting-and-dropping)
+  - [Subsetting and filtering](#subsetting-and-filtering)
+  - [DataFrame transformation](#dataframe-transformation)
+  - [Grouping](#grouping)
+  - [Reshaping](#reshaping)
+- [TODO:](#todo)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Overview
 
