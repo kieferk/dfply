@@ -278,12 +278,134 @@ diamonds >> arrange(X.table, ascending=False) >> head(5)
 52860   0.50  Fair     E     VS2   79.0   73.0   2579  5.21  5.18  4.09
 49375   0.70  Fair     H     VS1   62.0   73.0   2100  5.65  5.54  3.47
 
+
 (diamonds >> groupby(X.cut) >> arrange(X.price) >>
  head(3) >> ungroup() >> mask(X.carat < 0.23))
+       carat        cut color clarity  depth  table  price     x     y     z
+28270   0.25       Fair     E     VS1   55.2   64.0    361  4.21  4.23  2.33
+13      0.31      Ideal     J     SI2   62.2   54.0    344  4.35  4.37  2.71
+5       0.24  Very Good     J    VVS2   62.8   57.0    336  3.94  3.96  2.48
+```
+
+The `rename()` function will rename columns provided as values to what you set
+as the keys in the keyword arguments. You can indicate columns with symbols or
+with their labels.
+
+```python
+diamonds >> rename(CUT=X.cut, COLOR='color') >> head(2)
+
+   carat      CUT COLOR clarity  depth  table  price     x     y     z
+0   0.23    Ideal     E     SI2   61.5   55.0    326  3.95  3.98  2.43
+1   0.21  Premium     E     SI1   59.8   61.0    326  3.89  3.84  2.31
+```
+
+Transforming between "wide" and "long" format is a common pattern in data munging.
+The `gather(key, value, *columns)` function melts the specified columns in your
+DataFrame into two key:value columns.
+
+```python
+diamonds >> gather('variable', 'value', ['price', 'depth','x','y','z']) >> head(5)
+
+   carat      cut color clarity  table variable  value
+0   0.23    Ideal     E     SI2   55.0    price  326.0
+1   0.21  Premium     E     SI1   61.0    price  326.0
+2   0.23     Good     E     VS1   65.0    price  327.0
+3   0.29  Premium     I     VS2   58.0    price  334.0
+4   0.31     Good     J     SI2   58.0    price  335.0
+```
+
+Without any columns specified, your entire DataFrame will be transformed into
+two key:value pair columns.
+
+```python
+diamonds >> gather('variable', 'value') >> head(5)
+
+  variable value
+0    carat  0.23
+1    carat  0.21
+2    carat  0.23
+3    carat  0.29
+4    carat  0.31
+```
+
+If the `add_id` keyword argument is set to true, an id column is added to the
+new elongated DataFrame that acts as a row id from the original wide DataFrame.
+
+```python
+elongated = diamonds >> gather('variable', 'value', add_id=True)
+elongated >> head(5)
+
+   _ID variable value
+0    0    carat  0.23
+1    1    carat  0.21
+2    2    carat  0.23
+3    3    carat  0.29
+4    4    carat  0.31
+```
+
+Likewise, you can transform a "long" DataFrame into a "wide" format with the
+`spread(key, values)` function. Converting the previously created elongated
+DataFrame for example would be done like so.
+
+```python
+widened = elongated >> spread(X.variable, X.value)
+widened >> head(5)
+
+    _ID carat clarity color        cut depth price table     x     y     z
+0     0  0.23     SI2     E      Ideal  61.5   326    55  3.95  3.98  2.43
+1     1  0.21     SI1     E    Premium  59.8   326    61  3.89  3.84  2.31
+2    10   0.3     SI1     J       Good    64   339    55  4.25  4.28  2.73
+3   100  0.75     SI1     D  Very Good  63.2  2760    56   5.8  5.75  3.65
+4  1000  0.75     SI1     D      Ideal  62.3  2898    55  5.83   5.8  3.62
+```
+
+In this case the `_ID` column comes in handy since it is necessary to not have
+any duplicated identifiers.
+
+If you have a mixed datatype column in your long-format DataFrame then the
+default behavior is for the spread columns to be of type object.
+
+```python
+widened.dtypes
+
+_ID         int64
+carat      object
+clarity    object
+color      object
+cut        object
+depth      object
+price      object
+table      object
+x          object
+y          object
+z          object
+dtype: object
+```
+
+If you want to try to convert dtypes when spreading, you can set the `convert`
+keyword argument in spread to True like so.
+
+```python
+widened = elongated >> spread(X.variable, X.value, convert=True)
+widened.dtypes
+
+_ID          int64
+carat      float64
+clarity     object
+color       object
+cut         object
+depth      float64
+price        int64
+table      float64
+x          float64
+y          float64
+z          float64
+dtype: object
 ```
 
 
-**...UNDER CONSTRUCTION...**
+
+**...README UNDER CONSTRUCTION...**
 
 
 
@@ -299,3 +421,13 @@ subsequent variable in the same function call.
 - Complete and improve function documentation.
 - Better handling of numpy row indexers in row_slice. Should boolean be allowed
 here? What about mixed boolean and integer? Currently not handled.
+- Add summarization functions to the readme.
+- Make the `separate` and `unite` dplyr functions for splitting and joining
+columns.
+- Add built-in summary functions for convenience.
+  - [See summary function section here.](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
+- Add many more built-in window functions for convenience
+  - [See window function section here.](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
+- Add `semi_join` and `anti_join`
+- Add `union`, `intersect`, and `setdiff` functions for rows.
+- Add `bind_rows` and `bind_cols`, which would essentially just wrap `pd.concat`
