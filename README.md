@@ -4,9 +4,10 @@ The dfply package makes it possible to do R's dplyr-style data manipulation with
 in python on pandas DataFrames.
 
 This package is an alternative to [pandas-ply](https://github.com/coursera/pandas-ply)
-and [dplython](https://github.com/dodger487/dplython). In fact, the symbolic
+and [dplython](https://github.com/dodger487/dplython) and heavily inspired by
+both of them. In fact, the symbolic
 representation of pandas DataFrames and Series objects for delayed calculation
-is directly imported from pandas-ply.
+is imported from pandas-ply.
 
 The syntax and functionality of the package should in most cases look identical
 to dplython. The major differences are in the code; dfply makes heavy use of
@@ -235,10 +236,28 @@ diamonds >> transmute(x_plus_y=X.x + X.y, y_div_z=(X.y / X.z)) >> head(3)
 
 DataFrames are grouped along variables using the `groupby()` function and
 ungrouped with the `ungroup()` function. Functions chained after grouping a
-DataFrame are applied by group until returning or ungrouping.
+DataFrame are applied by group until returning or ungrouping. Hierarchical/multiindexing is automatically removed.
 
-Hierarchical/multiindexing is automatically removed.
+In the example below, the `lead()` function is a dfply convenience function
+wrapping around the pandas `.shift` function.
 
+```python
+(diamonds >> groupby(X.cut) >>
+ mutate(price_lead=lead(X.price)) >>
+ head(2) >> select(X.cut, X.price, X.price_lead))
+
+          cut  price  price_lead
+8        Fair    337         NaN
+91       Fair   2757       337.0
+2        Good    327         NaN
+4        Good    335       327.0
+0       Ideal    326         NaN
+11      Ideal    340       326.0
+1     Premium    326         NaN
+3     Premium    334       326.0
+5   Very Good    336         NaN
+6   Very Good    336       336.0
+```
 
 
 
