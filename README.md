@@ -4,10 +4,9 @@ The dfply package makes it possible to do R's dplyr-style data manipulation with
 in python on pandas DataFrames.
 
 This package is an alternative to [pandas-ply](https://github.com/coursera/pandas-ply)
-and [dplython](https://github.com/dodger487/dplython) but heavily inspired by
-both of them. In fact, the symbolic
-representation of pandas DataFrames and Series objects for delayed calculation
-is imported from pandas-ply.
+and [dplython](https://github.com/dodger487/dplython). It is heavily inspired by
+both of them, and in fact the code for symbolic representation of pandas DataFrames
+and series (such as `X.variable`) is directly imported from pandas-ply.
 
 The syntax and functionality of the package should in most cases look identical
 to dplython. The major differences are in the code; dfply makes heavy use of
@@ -422,6 +421,7 @@ subsequent variable in the same function call.
 - Better handling of numpy row indexers in row_slice. Should boolean be allowed
 here? What about mixed boolean and integer? Currently not handled.
 - Add summarization functions to the readme.
+- Add join functions to the readme.
 - Make the `separate` and `unite` dplyr functions for splitting and joining
 columns.
 - Add built-in summary functions for convenience.
