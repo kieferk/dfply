@@ -4,7 +4,7 @@ The dfply package makes it possible to do R's dplyr-style data manipulation with
 in python on pandas DataFrames.
 
 This package is an alternative to [pandas-ply](https://github.com/coursera/pandas-ply)
-and [dplython](https://github.com/dodger487/dplython) and heavily inspired by
+and [dplython](https://github.com/dodger487/dplython) but heavily inspired by
 both of them. In fact, the symbolic
 representation of pandas DataFrames and Series objects for delayed calculation
 is imported from pandas-ply.
@@ -259,7 +259,7 @@ wrapping around the pandas `.shift` function.
 6   Very Good    336       336.0
 ```
 
-
+**...UNDER CONSTRUCTION...**
 
 
 
