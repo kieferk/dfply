@@ -63,4 +63,6 @@ def mask(df, *args):
         if arg.dtype != bool:
             raise Exception("Arguments must be boolean.")
         mask = mask & arg
-    return df[mask]
+    print mask.shape
+    print mask
+    return df[mask.values]
