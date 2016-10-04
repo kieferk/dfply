@@ -62,6 +62,24 @@ lowprice
 9   0.23  Very Good     H     VS1   59.4   61.0    338  4.00  4.05  2.39
 ```
 
+### The `X` symbol
+
+The DataFrame as it is passed through the piping operations is represented
+by the symbol `X`. This functionality is imported from pandas-ply, and allows
+operations on the DataFrame to be deferred until the appropriate time. Selecting
+two of the columns, for example, can be done using the symbolic `X` DataFrame
+during the piping operations.
+
+```python
+diamonds >> select(X.carat, X.cut) >> head(3)
+
+   carat      cut
+0   0.23    Ideal
+1   0.21  Premium
+2   0.23     Good
+```
+
+
 ### Selecting and dropping
 
 A variety of selection functions are available. The current functions are:
@@ -413,10 +431,186 @@ z          float64
 dtype: object
 ```
 
+### Joining
+
+Currently implemented joins are:
+
+1. `inner_join()`
+- `outer_join()` (which works the same as `full_join()`)
+- `right_join()`
+- `left_join()`
+
+The functionality of the join functions are outlined with toy example
+DataFrames below.
+
+```python
+a = pd.DataFrame({
+        'x1':['A','B','C'],
+        'x2':[1,2,3]
+    })
+b = pd.DataFrame({
+    'x1':['A','B','D'],
+    'x3':[True,False,True]
+})
+
+a >> inner_join(b, by='x1')
+
+  x1  x2     x3
+0  A   1   True
+1  B   2  False
+
+a >> outer_join(b, by='x1')
+
+  x1   x2     x3
+0  A  1.0   True
+1  B  2.0  False
+2  C  3.0    NaN
+3  D  NaN   True
+
+a >> left_join(b, by='x1')
+
+  x1  x2     x3
+0  A   1   True
+1  B   2  False
+2  C   3    NaN
+
+a >> right_join(b, by='x1')
+
+  x1   x2     x3
+0  A  1.0   True
+1  B  2.0  False
+2  D  NaN   True
+```
+
+## Decorators
+
+Under the hood, dfply functions work using a collection of different decorators.
+Each decorator performs a specific operation on the function parameters, and
+the variety of dfply function behavior is made possible by this compartmentalization.
+
+### `@Pipe`
+
+The primary decorator that makes chaining functions with the `>>` operator
+is `@Pipe`. For functions to work with the piping syntax they must be decorated
+with `@Pipe`.
+
+Any function decorated with `@Pipe` implicitly receives a single first argument
+expected to be a pandas DataFrame. This is the DataFrame being passed through
+the pipe. For example, `mutate` and `select` have function specifications
+`mutate(df, **kwargs)` and `select(df, *args, **kwargs)`, but when used
+do not require the user to insert the DataFrame as an argument.
+
+```python
+# the DataFrame is implicitly passed as the first argument
+diamonds >> mutate(new_var=X.price + X.depth) >> select(X.new_var)
+```
+
+If you create a new function decorated by `@Pipe`, the function definition
+should contain an initial argument that represents the DataFrame being passed
+through the piping operations.
+
+```python
+@Pipe
+def myfunc(df, *args, **kwargs):
+  # code
+```
+
+### `@GroupDelegation`
+
+In order to delegate a function across specified groupings (assigned by the
+`groupby()` function), decorate the function with the `@GroupDelegation`
+decorator. This decorator will query the DataFrame for assigned groupings and
+apply the function to those groups individually.
+
+Groupings are assigned by dfply as an attribute `._grouped_by` to the DataFrame
+proceeding through the piped functions. `@GroupDelegation` checks for the
+attribute and applies the function by group if groups exist. Any hierarchical
+indexing is removed by the decorator as well.
+
+Decoration by `@GroupDelegation` should come after (internal) to the `@Pipe`
+decorator to function as intended.
+
+```python
+@Pipe
+@GroupDelegation
+def myfunc(df, *args, **kwargs):
+  # code
+```
+
+### `@SymbolicEvaluation` and `@SymbolicReference`
+
+Evaluation of the symbolic pandas-ply `X` DataFrame by piped functions is
+handled by the `@SymbolicEvaluation` function. For example, when calling
+`mutate(new_price = X.price * 2.5)` the `X.price` symbolic representation of
+the price column in the DataFrame will be evaluated to the actual Series
+by the decorator.
+
+`@SymbolicReference` tries to evaluate the _label_ or name of the symbolic object
+rather than the actual values. This is particularly useful for the selection
+and dropping functions where the index of the columns is desired rather than
+the actual values of the column. That being said, `@SymbolicReference` is merely
+a convenience; decorating a function with `@SymbolicEvaluation` and then
+manually extracting the labels of the Series or DataFrame objects within the
+decorated function would behave the same.
 
 
-**...README UNDER CONSTRUCTION...**
+### `@dfpipe`
 
+Most new or custom functions for dfply will be decorated with the pattern:
+
+```python
+@Pipe
+@GroupDelegation
+@SymbolicEvaluation
+def myfunc(df, *args, **kwargs):
+  # code
+```
+
+Because of this, the decorator `@dfpipe` is defined as exactly this combination
+of decorators for your convenience. The above decoration pattern for the function
+can be simply written as:
+
+```python
+@dfpipe
+def myfunc(df, *args, **kwargs):
+  # code
+```
+
+This allows you to easily create new functions that can be chained together
+with pipes, respect grouping, and evaluate symbolic DataFrames and Series
+correctly.
+
+
+### Extending and mixing behavior with decorators
+
+One of the primary reasons that the dfply logic was built on these decorators
+was to make the package easily extensible. Though decoration
+of functions should typically follow a basic order (`@Pipe` first, then `@GroupDelegation`,
+etc.), choosing to include or omit certain decorators in the chain allows the behavior of
+your functions to be easily customized.
+
+The currently built-in decorators are:
+
+- `@Pipe`: controlling piping through `>>` operators.
+- `@GroupDelegation`: controlling the delegation of functions by grouping.
+- `@SymbolicEvaluation`: evaluating symbolic pandas-ply DataFrames and Series.
+- `@SymbolicReference`: evaluating symbolic objects to their labels/names.
+- `@dfpipe`: decorator chaining `@Pipe`, `@GroupDelegation`, and `@SymbolicEvaluation`.
+- `@flatten_arguments`: extracts arguments in lists/tuples to be single arguments
+for the decorated function.
+- `@join_index_arguments`: joins single and list/array arguments into a single
+numpy array (used by row_slice).
+- `@column_indices_as_labels`: converts string, integer, and symbolic arguments
+referring to columns into string column labels for the decorated function.
+- `@column_indices_as_positions`: converts string, integer, and symbolic arguments
+referring to columns into integer column positions for the decorated function.
+- `@label_selection`: chains together `@Pipe`, `@GroupDelegation`, `@SymbolicReference`,
+and `@column_indices_as_labels`.
+- `@positional_selection`: chains together `@Pipe`, `@GroupDelegation`, `@SymbolicReference`,
+and `@column_indices_as_positions`.
+
+For many examples of these decorators and how they can be used together to achieve
+different types of behavior on piped DataFrames, please see the source code!
 
 
 
