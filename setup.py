@@ -13,7 +13,7 @@ setup(
         'dfply.data'
     ],
     description = 'dplyr-style piping operations for pandas dataframes',
-    long_description = open('README.rst').read(),
+    long_description = open('README.md').read(),
     license = 'GNU General Public License v3.0',
     url = 'https://github.com/kieferk/dfply'
 )

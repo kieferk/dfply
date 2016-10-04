@@ -8,12 +8,12 @@ and [dplython](https://github.com/dodger487/dplython). It is heavily inspired by
 both of them, and in fact the code for symbolic representation of pandas DataFrames
 and series (such as `X.variable`) is directly imported from pandas-ply.
 
-The syntax and functionality of the package should in most cases look identical
-to dplython. The major differences are in the code; dfply makes heavy use of
-decorators to "categorize" the operation of data manipulation functions. The
-goal of this choice of architecture is to make dfply concise and easily
+The syntax and functionality of the package is in most cases be identical
+to dplython. The major difference is in the structure of the code; dfply makes heavy use of
+decorators to "categorize" and compartmentalize the operation of data manipulation functions. The
+goal of this architecture is to make dfply concise and easily
 extensible. There is a more in-depth overview of the decorators and how dfply can be
-customized later in the readme.
+customized further down.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -33,6 +33,7 @@ customized later in the readme.
   - [`@SymbolicEvaluation` and `@SymbolicReference`](#symbolicevaluation-and-symbolicreference)
   - [`@dfpipe`](#dfpipe)
   - [Extending and mixing behavior with decorators](#extending-and-mixing-behavior-with-decorators)
+- [Contributing](#contributing)
 - [TODO:](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -620,6 +621,12 @@ and `@column_indices_as_positions`.
 For many examples of these decorators and how they can be used together to achieve
 different types of behavior on piped DataFrames, please see the source code!
 
+## Contributing
+
+By all means please feel free to comment or contribute to the package. If you
+submit an issue, pull request, or ask for something to be added I will do my
+best to respond promptly. The TODO list below has an ongoing list of things
+that still need to be resolved.
 
 
 ## TODO:
@@ -646,3 +653,5 @@ columns.
 - Add `bind_rows` and `bind_cols`, which would essentially just wrap `pd.concat`.
 - Put in `six` functions where appropriate to make sure this is compatible with
 both python 2 and python 3 (currently only tested on python 2!).
+- Improve the pypi documentation (PKG-INFO sent in the markdown but it looks
+like crap on there).

@@ -2,8 +2,12 @@ setup.py
 dfply/__init__.py
 dfply/base.py
 dfply/group.py
+dfply/join.py
+dfply/reshape.py
 dfply/select.py
 dfply/subset.py
+dfply/summarize.py
+dfply/transform.py
 dfply.egg-info/PKG-INFO
 dfply.egg-info/SOURCES.txt
 dfply.egg-info/dependency_links.txt
