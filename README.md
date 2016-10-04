@@ -20,11 +20,19 @@ customized later in the readme.
 
 
 - [Overview](#overview)
+  - [The `X` symbol](#the-x-symbol)
   - [Selecting and dropping](#selecting-and-dropping)
   - [Subsetting and filtering](#subsetting-and-filtering)
   - [DataFrame transformation](#dataframe-transformation)
   - [Grouping](#grouping)
   - [Reshaping](#reshaping)
+  - [Joining](#joining)
+- [Decorators](#decorators)
+  - [`@Pipe`](#pipe)
+  - [`@GroupDelegation`](#groupdelegation)
+  - [`@SymbolicEvaluation` and `@SymbolicReference`](#symbolicevaluation-and-symbolicreference)
+  - [`@dfpipe`](#dfpipe)
+  - [Extending and mixing behavior with decorators](#extending-and-mixing-behavior-with-decorators)
 - [TODO:](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
