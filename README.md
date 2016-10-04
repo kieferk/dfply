@@ -631,8 +631,10 @@ here? What about mixed boolean and integer? Currently not handled.
 columns.
 - Add built-in summary functions for convenience.
   - [See summary function section here.](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
-- Add many more built-in window functions for convenience
+- Add many more built-in window functions for convenience.
   - [See window function section here.](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
 - Add `semi_join` and `anti_join`
 - Add `union`, `intersect`, and `setdiff` functions for rows.
-- Add `bind_rows` and `bind_cols`, which would essentially just wrap `pd.concat`
+- Add `bind_rows` and `bind_cols`, which would essentially just wrap `pd.concat`.
+- Put in `six` functions where appropriate to make sure this is compatible with
+both python 2 and python 3 (currently only tested on python 2!).
