@@ -20,7 +20,7 @@ customized later in the readme.
 
 
 - [Overview](#overview)
-  - [The `X` symbol](#the-x-symbol)
+  - [The pandas-ply `X` DataFrame symbol](#the-pandas-ply-x-dataframe-symbol)
   - [Selecting and dropping](#selecting-and-dropping)
   - [Subsetting and filtering](#subsetting-and-filtering)
   - [DataFrame transformation](#dataframe-transformation)
@@ -70,7 +70,7 @@ lowprice
 9   0.23  Very Good     H     VS1   59.4   61.0    338  4.00  4.05  2.39
 ```
 
-### The `X` symbol
+### The pandas-ply `X` DataFrame symbol
 
 The DataFrame as it is passed through the piping operations is represented
 by the symbol `X`. This functionality is imported from pandas-ply, and allows
