@@ -2,4 +2,4 @@ language: python
 python:
 - 2.6
 - 2.7
-script: py.test test/test_base.py
+script: python -m pytest test/
