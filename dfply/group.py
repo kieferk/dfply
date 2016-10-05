@@ -15,7 +15,7 @@ def groupby(df, *args):
     else:
         return df
 
-@Pipe
+@pipe
 def ungroup(df):
     if getattr(df, "_grouped_by", None) is not None:
         df._grouped_by = None

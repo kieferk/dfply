@@ -10,13 +10,13 @@ import warnings
 # Initialize the global X symbol
 X(0)
 
-class Pipe(object):
+class pipe(object):
     """
     Generic pipe decorator class that allows DataFrames to be passed
     through the __rrshift__ binary operator, >>
     """
 
-    __name__ = "Pipe"
+    __name__ = "pipe"
 
     def __init__(self, function, depth=0):
         self.function = function
@@ -25,10 +25,10 @@ class Pipe(object):
         return self.function(other)
 
     def __call__(self, *args, **kwargs):
-        return Pipe(lambda x: self.function(x, *args, **kwargs))
+        return pipe(lambda x: self.function(x, *args, **kwargs))
 
 
-class GroupDelegation(object):
+class group_delegation(object):
     """Decorator class that managing grouped operations on DataFrames.
 
     Checks for an attached `df._grouped_by` attribute added to a
@@ -40,7 +40,7 @@ class GroupDelegation(object):
     indexing is removed.
     """
 
-    __name__ = "GroupDelegation"
+    __name__ = "group_delegation"
 
     def __init__(self, function):
         self.function = function
@@ -81,12 +81,12 @@ class GroupDelegation(object):
 
 
 
-class SymbolicEvaluation(object):
+class symbolic_evaluation(object):
     """Decorator class that evaluates symbolic arguments and keyword arguments
     passed through to the decorated function.
     """
 
-    __name__ = "SymbolicEvaluation"
+    __name__ = "symbolic_evaluation"
 
     def __init__(self, function):
         self.function = function
@@ -107,11 +107,11 @@ class SymbolicEvaluation(object):
 
 
 
-class SymbolicReference(object):
+class symbolic_reference(object):
     """Decorator class that converts symbolic arguments and keyword arguments
     into their names (specifically `pandas.Series` objects)."""
 
-    __name__ = "SymbolicReference"
+    __name__ = "symbolic_reference"
 
     def __init__(self, function):
         self.function = function
@@ -264,8 +264,8 @@ def label_selection(f):
     expectation of having column labels as arguments (despite user potentially
     providing symbolic `pandas.Series` objects or integer column positions).
     """
-    return Pipe(
-        SymbolicReference(
+    return pipe(
+        symbolic_reference(
             flatten_arguments(
                 column_indices_as_labels(f)
             )
@@ -278,8 +278,8 @@ def positional_selection(f):
     expectation of having column integer positions as arguments (despite
     user potentially providing symbolic `pandas.Series` objects or column labels).
     """
-    return Pipe(
-        SymbolicReference(
+    return pipe(
+        symbolic_reference(
             flatten_arguments(
                 column_indices_as_positions(f)
             )
@@ -293,8 +293,8 @@ def dfpipe(f):
     The function can be chained with >> by `Pipe`, application of the function
     to grouped DataFrames is enabled by `GroupDelegation`, and symbolic
     arguments are evaluated as-is using a default `SymbolicEvaluation`."""
-    return Pipe(
-        GroupDelegation(
-            SymbolicEvaluation(f)
+    return pipe(
+        group_delegation(
+            symbolic_evaluation(f)
         )
     )

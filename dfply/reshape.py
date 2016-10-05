@@ -5,9 +5,9 @@ from .base import *
 # Sorting
 # ------------------------------------------------------------------------------
 
-@Pipe
-@GroupDelegation
-@SymbolicReference
+@pipe
+@group_delegation
+@symbolic_reference
 @flatten_arguments
 @column_indices_as_labels
 def arrange(df, *args, **kwargs):
@@ -18,8 +18,8 @@ def arrange(df, *args, **kwargs):
 # Renaming
 # ------------------------------------------------------------------------------
 
-@Pipe
-@SymbolicReference
+@pipe
+@symbolic_reference
 def rename(df, **kwargs):
     return df.rename(columns={v:k for k,v in kwargs.items()})
 

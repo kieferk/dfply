@@ -35,9 +35,9 @@ def sample(df, *args, **kwargs):
     return df.sample(*args, **kwargs)
 
 
-@Pipe
-@GroupDelegation
-@SymbolicReference
+@pipe
+@group_delegation
+@symbolic_reference
 def distinct(df, *args, **kwargs):
     drop_indices = df.drop_duplicates(*args, **kwargs).index
     return df.loc[drop_indices]
