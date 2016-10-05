@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name = 'dfply',
-    version = '0.1.0',
+    version = '0.1.1',
     author = 'Kiefer Katovich',
     author_email = 'kiefer.katovich@gmail.com',
     packages = [
