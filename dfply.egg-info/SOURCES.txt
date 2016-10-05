@@ -1,3 +1,4 @@
+README.rst
 setup.py
 dfply/__init__.py
 dfply/base.py
