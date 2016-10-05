@@ -497,13 +497,13 @@ Under the hood, dfply functions work using a collection of different decorators.
 Each decorator performs a specific operation on the function parameters, and
 the variety of dfply function behavior is made possible by this compartmentalization.
 
-### `@Pipe`
+### `@pipe`
 
 The primary decorator that makes chaining functions with the `>>` operator
-is `@Pipe`. For functions to work with the piping syntax they must be decorated
-with `@Pipe`.
+is `@pipe`. For functions to work with the piping syntax they must be decorated
+with `@pipe`.
 
-Any function decorated with `@Pipe` implicitly receives a single first argument
+Any function decorated with `@pipe` implicitly receives a single first argument
 expected to be a pandas DataFrame. This is the DataFrame being passed through
 the pipe. For example, `mutate` and `select` have function specifications
 `mutate(df, **kwargs)` and `select(df, *args, **kwargs)`, but when used
@@ -514,51 +514,51 @@ do not require the user to insert the DataFrame as an argument.
 diamonds >> mutate(new_var=X.price + X.depth) >> select(X.new_var)
 ```
 
-If you create a new function decorated by `@Pipe`, the function definition
+If you create a new function decorated by `@pipe`, the function definition
 should contain an initial argument that represents the DataFrame being passed
 through the piping operations.
 
 ```python
-@Pipe
+@pipe
 def myfunc(df, *args, **kwargs):
   # code
 ```
 
-### `@GroupDelegation`
+### `@group_delegation`
 
 In order to delegate a function across specified groupings (assigned by the
-`groupby()` function), decorate the function with the `@GroupDelegation`
+`groupby()` function), decorate the function with the `@group_delegation`
 decorator. This decorator will query the DataFrame for assigned groupings and
 apply the function to those groups individually.
 
 Groupings are assigned by dfply as an attribute `._grouped_by` to the DataFrame
-proceeding through the piped functions. `@GroupDelegation` checks for the
+proceeding through the piped functions. `@group_delegation` checks for the
 attribute and applies the function by group if groups exist. Any hierarchical
 indexing is removed by the decorator as well.
 
-Decoration by `@GroupDelegation` should come after (internal) to the `@Pipe`
+Decoration by `@group_delegation` should come after (internal) to the `@pipe`
 decorator to function as intended.
 
 ```python
-@Pipe
-@GroupDelegation
+@pipe
+@group_delegation
 def myfunc(df, *args, **kwargs):
   # code
 ```
 
-### `@SymbolicEvaluation` and `@SymbolicReference`
+### `@symbolic_evaluation` and `@symbolic_reference`
 
 Evaluation of the symbolic pandas-ply `X` DataFrame by piped functions is
-handled by the `@SymbolicEvaluation` function. For example, when calling
+handled by the `@symbolic_evaluation` function. For example, when calling
 `mutate(new_price = X.price * 2.5)` the `X.price` symbolic representation of
 the price column in the DataFrame will be evaluated to the actual Series
 by the decorator.
 
-`@SymbolicReference` tries to evaluate the _label_ or name of the symbolic object
+`@symbolic_reference` tries to evaluate the _label_ or name of the symbolic object
 rather than the actual values. This is particularly useful for the selection
 and dropping functions where the index of the columns is desired rather than
-the actual values of the column. That being said, `@SymbolicReference` is merely
-a convenience; decorating a function with `@SymbolicEvaluation` and then
+the actual values of the column. That being said, `@symbolic_reference` is merely
+a convenience; decorating a function with `@symbolic_evaluation` and then
 manually extracting the labels of the Series or DataFrame objects within the
 decorated function would behave the same.
 
@@ -568,9 +568,9 @@ decorated function would behave the same.
 Most new or custom functions for dfply will be decorated with the pattern:
 
 ```python
-@Pipe
-@GroupDelegation
-@SymbolicEvaluation
+@pipe
+@group_delegation
+@symbolic_evaluation
 def myfunc(df, *args, **kwargs):
   # code
 ```
@@ -594,17 +594,17 @@ correctly.
 
 One of the primary reasons that the dfply logic was built on these decorators
 was to make the package easily extensible. Though decoration
-of functions should typically follow a basic order (`@Pipe` first, then `@GroupDelegation`,
+of functions should typically follow a basic order (`@pipe` first, then `@group_delegation`,
 etc.), choosing to include or omit certain decorators in the chain allows the behavior of
 your functions to be easily customized.
 
 The currently built-in decorators are:
 
-- `@Pipe`: controlling piping through `>>` operators.
-- `@GroupDelegation`: controlling the delegation of functions by grouping.
-- `@SymbolicEvaluation`: evaluating symbolic pandas-ply DataFrames and Series.
-- `@SymbolicReference`: evaluating symbolic objects to their labels/names.
-- `@dfpipe`: decorator chaining `@Pipe`, `@GroupDelegation`, and `@SymbolicEvaluation`.
+- `@pipe`: controlling piping through `>>` operators.
+- `@group_delegation`: controlling the delegation of functions by grouping.
+- `@symbolic_evaluation`: evaluating symbolic pandas-ply DataFrames and Series.
+- `@symbolic_reference`: evaluating symbolic objects to their labels/names.
+- `@dfpipe`: decorator chaining `@pipe`, `@group_delegation`, and `@symbolic_evaluation`.
 - `@flatten_arguments`: extracts arguments in lists/tuples to be single arguments
 for the decorated function.
 - `@join_index_arguments`: joins single and list/array arguments into a single
@@ -613,9 +613,9 @@ numpy array (used by row_slice).
 referring to columns into string column labels for the decorated function.
 - `@column_indices_as_positions`: converts string, integer, and symbolic arguments
 referring to columns into integer column positions for the decorated function.
-- `@label_selection`: chains together `@Pipe`, `@GroupDelegation`, `@SymbolicReference`,
+- `@label_selection`: chains together `@pipe`, `@group_delegation`, `@symbolic_reference`,
 and `@column_indices_as_labels`.
-- `@positional_selection`: chains together `@Pipe`, `@GroupDelegation`, `@SymbolicReference`,
+- `@positional_selection`: chains together `@pipe`, `@group_delegation`, `@symbolic_reference`,
 and `@column_indices_as_positions`.
 
 For many examples of these decorators and how they can be used together to achieve

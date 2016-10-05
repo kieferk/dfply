@@ -15,35 +15,35 @@ def get_join_parameters(join_kwargs):
     return left_on, right_on, suffixes
 
 
-@Pipe
+@pipe
 def inner_join(df, other, **kwargs):
     left_on, right_on, suffixes = get_join_parameters(kwargs)
     joined = df.merge(other, how='inner', left_on=left_on,
                       right_on=right_on, suffixes=suffixes)
     return joined
 
-@Pipe
+@pipe
 def full_join(df, other, **kwargs):
     left_on, right_on, suffixes = get_join_parameters(kwargs)
     joined = df.merge(other, how='outer', left_on=left_on,
                       right_on=right_on, suffixes=suffixes)
     return joined
 
-@Pipe
+@pipe
 def outer_join(df, other, **kwargs):
     left_on, right_on, suffixes = get_join_parameters(kwargs)
     joined = df.merge(other, how='outer', left_on=left_on,
                       right_on=right_on, suffixes=suffixes)
     return joined
 
-@Pipe
+@pipe
 def left_join(df, other, **kwargs):
     left_on, right_on, suffixes = get_join_parameters(kwargs)
     joined = df.merge(other, how='left', left_on=left_on,
                       right_on=right_on, suffixes=suffixes)
     return joined
 
-@Pipe
+@pipe
 def right_join(df, other, **kwargs):
     left_on, right_on, suffixes = get_join_parameters(kwargs)
     joined = df.merge(other, how='right', left_on=left_on,
