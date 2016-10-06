@@ -8,3 +8,7 @@ __pycache__/
 
 # Annoying Mac File
 .DC_Store
+
+# workbook test file
+test/feature_workbook.ipynb
+test/.ipynb_checkpoints/*
