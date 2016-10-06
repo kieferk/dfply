@@ -625,33 +625,12 @@ different types of behavior on piped DataFrames, please see the source code!
 
 By all means please feel free to comment or contribute to the package. If you
 submit an issue, pull request, or ask for something to be added I will do my
-best to respond promptly. The TODO list below has an ongoing list of things
-that still need to be resolved.
+best to respond promptly.
+
+The TODO list (now located in the "Projects" section of the repo) has an
+ongoing list of things that still need to be resolved and features to be added.
 
 
 ## TODO:
 
-1. Variables created by mutate and transform are inserted into the
-DataFrame in the same order that they appear in the function call.
-- A variable created first in the mutate function can be used to create a
-subsequent variable in the same function call.
-- Not all functions have unit tests yet.
-- More complete/advanced unit tests.
-- Complete and improve function documentation.
-- Better handling of numpy row indexers in row_slice. Should boolean be allowed
-here? What about mixed boolean and integer? Currently not handled.
-- Add summarization functions to the readme.
-- Add join functions to the readme.
-- Make the `separate` and `unite` dplyr functions for splitting and joining
-columns.
-- Add built-in summary functions for convenience.
-  - [See summary function section here.](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
-- Add many more built-in window functions for convenience.
-  - [See window function section here.](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
-- Add `semi_join` and `anti_join`
-- Add `union`, `intersect`, and `setdiff` functions for rows.
-- Add `bind_rows` and `bind_cols`, which would essentially just wrap `pd.concat`.
-- Put in `six` functions where appropriate to make sure this is compatible with
-both python 2 and python 3 (currently only tested on python 2!).
-- Improve the pypi documentation (PKG-INFO sent in the markdown but it looks
-like crap on there).
+**TODO list has been moved to the "Projects" section of the github repo.**
