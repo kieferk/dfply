@@ -10,7 +10,7 @@ def summarize(df, **kwargs):
 def summarize_each(df, functions, *args):
     columns, values = [], []
     for arg in args:
-        varname = arg._name
+        varname = arg.name
         for f in functions:
             fname = f.__name__
             columns.append('_'.join([varname, fname]))

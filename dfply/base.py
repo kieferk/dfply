@@ -130,7 +130,7 @@ class symbolic_reference(object):
         argument."""
         arg = symbolic.to_callable(arg)(df)
         if isinstance(arg, pd.Series):
-            return arg._name
+            return arg.name
         elif isinstance(arg, pd.DataFrame):
             return arg.columns.tolist()
         elif isinstance(arg, (list, tuple)):
