@@ -290,14 +290,65 @@ def test_group_transmute():
 ## joins
 ##==============================================================================
 
-def test_inner_join():
+@pytest.fixture
+def dfA(scope='module'):
     a = pd.DataFrame({
         'x1':['A','B','C'],
         'x2':[1,2,3]
     })
+    return a
+
+
+@pytest.fixture
+def dfB(scope='module'):
     b = pd.DataFrame({
         'x1':['A','B','D'],
         'x3':[True,False,True]
     })
-    c = a >> inner_join(b, by='x1')
-    print(c)
+    return b
+
+
+def test_inner_join(dfA, dfB):
+    ab = pd.DataFrame({
+        'x1':['A','B'],
+        'x2':[1,2],
+        'x3':[True, False]
+    })
+
+    c = dfA >> inner_join(dfB, by='x1')
+    assert c.equals(ab)
+
+
+def test_outer_join(dfA, dfB):
+    ab = pd.DataFrame({
+        'x1':['A','B','C','D'],
+        'x2':[1,2,3,np.nan],
+        'x3':[True, False,np.nan,True]
+    })
+
+    c = dfA >> outer_join(dfB, by='x1')
+    assert c.equals(ab)
+    c = dfA >> full_join(dfB, by='x1')
+    assert c.equals(ab)
+
+
+def test_left_join(dfA, dfB):
+    ab = pd.DataFrame({
+        'x1':['A','B','C'],
+        'x2':[1,2,3],
+        'x3':[True, False, np.nan]
+    })
+
+    c = dfA >> left_join(dfB, by='x1')
+    assert c.equals(ab)
+
+
+def test_right_join(dfA, dfB):
+    ab = pd.DataFrame({
+        'x1':['A','B','D'],
+        'x2':[1,2,np.nan],
+        'x3':[True, False, True]
+    })
+
+    c = dfA >> right_join(dfB, by='x1')
+    assert c.equals(ab)
