@@ -10,7 +10,6 @@ def mutate(df, **kwargs):
 
 @dfpipe
 def transmute(df, *keep_columns, **kwargs):
-    print keep_columns, kwargs.keys()
     for key, value in kwargs.items():
         df[key] = value
     columns = kwargs.keys()+list(keep_columns)
