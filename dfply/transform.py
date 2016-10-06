@@ -12,7 +12,7 @@ def mutate(df, **kwargs):
 def transmute(df, *keep_columns, **kwargs):
     for key, value in kwargs.items():
         df[key] = value
-    columns = kwargs.keys()+list(keep_columns)
+    columns = [k for k in kwargs.keys()]+list(keep_columns)
     return df.select(lambda x: x in columns, axis=1)
 
 
