@@ -22,7 +22,7 @@ install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip pytest numpy pandas
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip pytest numpy pandas>=0.18.1
   - source activate test-environment
   - python setup.py install
 script: python -m pytest test/
