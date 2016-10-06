@@ -3,18 +3,17 @@ from .base import *
 
 @dfpipe
 def mutate(df, **kwargs):
-    df = df.copy()
     for key, value in kwargs.items():
         df[key] = value
     return df
 
 
 @dfpipe
-def transmute(df, **kwargs):
-    df = df.copy()
+def transmute(df, *keep_columns, **kwargs):
     for key, value in kwargs.items():
         df[key] = value
-    return df.select(lambda x: x in kwargs.keys(), axis=1)
+    columns = [k for k in kwargs.keys()]+list(keep_columns)
+    return df.select(lambda x: x in columns, axis=1)
 
 
 # ------------------------------------------------------------------------------

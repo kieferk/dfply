@@ -1,5 +1,7 @@
 import pytest
 
+from dfply.vendor.six.moves import reduce
+
 from dfply.data import diamonds
 
 from dfply.base import *
@@ -7,7 +9,7 @@ from dfply.group import *
 from dfply.subset import *
 from dfply.select import *
 from dfply.reshape import *
-from dfply.create import *
+from dfply.transform import *
 from dfply.join import *
 
 
@@ -223,8 +225,8 @@ def test_arrange():
     d = (diamonds >> groupby('cut') >> arrange('depth', ascending=False) >>
          head(2) >> ungroup()).reset_index(drop=True)
 
-    print df.head(5)
-    print d.head(5)
+    print(df.head(5))
+    print(d.head(5))
     assert df.equals(d)
 
 
@@ -257,9 +259,9 @@ def group_mutate_helper(df):
 
 def test_group_mutate():
     df = diamonds.copy()
-    df = df.groupby('cut').apply(group_mutate_helper).reset_index(drop=True)
+    df = df.groupby('cut').apply(group_mutate_helper)
     d = diamonds >> groupby('cut') >> mutate(testcol=X.x*X.shape[0]) >> ungroup()
-    assert df.equals(d.reset_index(drop=True))
+    assert df.equals(d)
 
 
 def test_transmute():
@@ -272,9 +274,9 @@ def test_transmute():
 def test_group_transmute():
     df = diamonds.copy()
     df = df.groupby('cut').apply(group_mutate_helper).reset_index(drop=True)
-    df = df[['testcol']]
+    df = df[['cut','testcol']]
     d = diamonds >> groupby('cut') >> transmute(testcol=X.x*X.shape[0])
-    assert df.equals(d.reset_index(drop=True))
+    assert df.equals(d)
 
 
 ##==============================================================================
@@ -298,4 +300,4 @@ def test_inner_join():
         'x3':[True,False,True]
     })
     c = a >> inner_join(b, by='x1')
-    print c
+    print(c)
