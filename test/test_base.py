@@ -11,6 +11,7 @@ from dfply.select import *
 from dfply.reshape import *
 from dfply.transform import *
 from dfply.join import *
+from dfply.summarize import *
 
 
 ##==============================================================================
@@ -284,20 +285,120 @@ def test_group_transmute():
 ##==============================================================================
 # TODO
 
+def test_summarize():
+    p = pd.DataFrame({
+        'price_mean':[diamonds.price.mean()],
+        'price_std':[diamonds.price.std()]
+    })
+    assert p.equals(diamonds >> summarize(price_mean=X.price.mean(),
+                                          price_std=X.price.std()))
+
+    pcut = pd.DataFrame({
+        'cut':['Fair','Good','Ideal','Premium','Very Good']
+    })
+    pcut['price_mean'] = [diamonds[diamonds.cut == c].price.mean() for c in pcut.cut.values]
+    pcut['price_std'] = [diamonds[diamonds.cut == c].price.std() for c in pcut.cut.values]
+    assert pcut.equals(diamonds >> groupby('cut') >>
+                       summarize(price_mean=X.price.mean(), price_std=X.price.std()))
+
+
+def test_summarize_each():
+    to_match = pd.DataFrame({
+        'price_mean':[np.mean(diamonds.price)],
+        'price_var':[np.var(diamonds.price)],
+        'depth_mean':[np.mean(diamonds.depth)],
+        'depth_var':[np.var(diamonds.depth)]
+    })
+    to_match = to_match[['price_mean','price_var','depth_mean','depth_var']]
+
+    test1 = diamonds >> summarize_each([np.mean, np.var], X.price, 4)
+    test2 = diamonds >> summarize_each([np.mean, np.var], X.price, 'depth')
+    assert to_match.equals(test1)
+    assert to_match.equals(test2)
+
+    group = pd.DataFrame({
+        'cut':['Fair','Good','Ideal','Premium','Very Good']
+    })
+    group['price_mean'] = [np.mean(diamonds[diamonds.cut == c].price) for c in group.cut.values]
+    group['price_var'] = [np.var(diamonds[diamonds.cut == c].price) for c in group.cut.values]
+    group['depth_mean'] = [np.mean(diamonds[diamonds.cut == c].depth) for c in group.cut.values]
+    group['depth_var'] = [np.var(diamonds[diamonds.cut == c].depth) for c in group.cut.values]
+
+    group = group[['cut','price_mean','price_var','depth_mean','depth_var']]
+
+    test1 = (diamonds >> groupby(X.cut) >>
+             summarize_each([np.mean, np.var], X.price, 4))
+    test2 = (diamonds >> groupby('cut') >>
+             summarize_each([np.mean, np.var], X.price, 'depth'))
+
+    assert group.equals(test1)
+    assert group.equals(test2)
+
 
 
 ##==============================================================================
 ## joins
 ##==============================================================================
 
-def test_inner_join():
+@pytest.fixture
+def dfA(scope='module'):
     a = pd.DataFrame({
         'x1':['A','B','C'],
         'x2':[1,2,3]
     })
+    return a
+
+
+@pytest.fixture
+def dfB(scope='module'):
     b = pd.DataFrame({
         'x1':['A','B','D'],
         'x3':[True,False,True]
     })
-    c = a >> inner_join(b, by='x1')
-    print(c)
+    return b
+
+
+def test_inner_join(dfA, dfB):
+    ab = pd.DataFrame({
+        'x1':['A','B'],
+        'x2':[1,2],
+        'x3':[True, False]
+    })
+
+    c = dfA >> inner_join(dfB, by='x1')
+    assert c.equals(ab)
+
+
+def test_outer_join(dfA, dfB):
+    ab = pd.DataFrame({
+        'x1':['A','B','C','D'],
+        'x2':[1,2,3,np.nan],
+        'x3':[True, False,np.nan,True]
+    })
+
+    c = dfA >> outer_join(dfB, by='x1')
+    assert c.equals(ab)
+    c = dfA >> full_join(dfB, by='x1')
+    assert c.equals(ab)
+
+
+def test_left_join(dfA, dfB):
+    ab = pd.DataFrame({
+        'x1':['A','B','C'],
+        'x2':[1,2,3],
+        'x3':[True, False, np.nan]
+    })
+
+    c = dfA >> left_join(dfB, by='x1')
+    assert c.equals(ab)
+
+
+def test_right_join(dfA, dfB):
+    ab = pd.DataFrame({
+        'x1':['A','B','D'],
+        'x2':[1,2,np.nan],
+        'x3':[True, False, True]
+    })
+
+    c = dfA >> right_join(dfB, by='x1')
+    assert c.equals(ab)
