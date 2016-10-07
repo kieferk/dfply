@@ -211,6 +211,19 @@ def test_row_slice():
     assert df.equals(diamonds >> row_slice(X.table > 61))
 
 
+def test_mask():
+    test1 = diamonds >> mask(X.cut == 'Ideal')
+    df = diamonds[diamonds.cut == 'Ideal']
+    assert df.equals(test1)
+
+    test2 = diamonds >> mask(X.cut == 'Ideal', X.color == 'E',
+                             X.table < 55, X.price < 500)
+    df_mask = (diamonds.cut == 'Ideal') & (diamonds.color == 'E')
+    df_mask = df_mask & (diamonds.table < 55) & (diamonds.price < 500)
+    df = diamonds[df_mask]
+    assert df.equals(test2)
+
+
 ##==============================================================================
 ## reshaping
 ##==============================================================================
