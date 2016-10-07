@@ -417,7 +417,7 @@ def test_anti_join(dfA, dfB):
     ab = pd.DataFrame({
         'x1':['C'],
         'x2':[3]
-    })
+    }, index=[2])
 
     c = dfA >> anti_join(dfB, by='x1')
     assert c.equals(ab)
