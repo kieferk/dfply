@@ -402,3 +402,22 @@ def test_right_join(dfA, dfB):
 
     c = dfA >> right_join(dfB, by='x1')
     assert c.equals(ab)
+
+def test_semi_join(dfA, dfB):
+    ab = pd.DataFrame({
+        'x1':['A', 'B'],
+        'x2':[1, 2]
+    })
+
+    c = dfA >> semi_join(dfB, by='x1')
+    assert c.equals(ab)
+
+
+def test_anti_join(dfA, dfB):
+    ab = pd.DataFrame({
+        'x1':['C'],
+        'x2':[3]
+    })
+
+    c = dfA >> anti_join(dfB, by='x1')
+    assert c.equals(ab)
