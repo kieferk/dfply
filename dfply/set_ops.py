@@ -74,3 +74,32 @@ def intersect(df, other, index=False, keep='first'):
                              right_on=df.columns.values.tolist())
         return_df = return_df.drop_duplicates(keep=keep)
         return return_df
+
+
+@pipe
+def set_diff(df, other, index=False, keep='first'):
+    validate_set_ops(df, other)
+    if index:
+        df_reset_index = df.reset_index()
+        other_reset_index = other.reset_index()
+        index_cols = [col for col in df_reset_index.columns if col not in df.columns]
+        df_index_names = df.index.names
+        return_df = (pd.merge(df_reset_index, other_reset_index,
+                              how='left',
+                              left_on=df_reset_index.columns.values.tolist(),
+                              right_on=other_reset_index.columns.values.tolist(),
+                              indicator=True)
+                     .set_index(index_cols))
+        return_df = return_df[return_df._merge == 'left_only']
+        return_df.index.names = df_index_names
+        return_df = return_df.drop_duplicates(keep=keep)[df.columns]
+        return return_df
+    else:
+        return_df = pd.merge(df, other,
+                             how='left',
+                             left_on=df.columns.values.tolist(),
+                             right_on=df.columns.values.tolist(),
+                             indicator=True)
+        return_df = return_df[return_df._merge == 'left_only']
+        return_df = return_df.drop_duplicates(keep=keep)[df.columns]
+        return return_df
