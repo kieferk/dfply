@@ -356,7 +356,7 @@ def test_cummax():
     df_truth['cm'] = pd.Series([3.95, 3.95, 4.05, 4.20, 4.34])
     assert df_cm.equals(df_truth)
     df_cm = df >> groupby(X.cut) >> mutate(cm=cummax(X.x))
-    df_truth['cm'] = pd.Series([3.95, 3.95, 4.05, 4.20, 4.34])
+    df_truth['cm'] = pd.Series([3.95, 3.89, 4.05, 4.20, 4.34])
     assert df_cm.equals(df_truth)
 
 
