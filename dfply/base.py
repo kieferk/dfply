@@ -160,7 +160,7 @@ def _arg_extractor(args):
     """
     flat = []
     for arg in args:
-        if isinstance(arg, (list, tuple)):
+        if hasattr(arg, '__iter__'):
             flat.extend(_arg_extractor(arg))
         else:
             flat.append(arg)
@@ -178,8 +178,12 @@ def flatten_arguments(f):
     """
     @wraps(f)
     def wrapped(*args, **kwargs):
-        flat_args = _arg_extractor(args)
-        return f(*flat_args, **kwargs)
+        assert len(args) > 0 and isinstance(args[0], pd.DataFrame)
+        if len(args) > 1:
+            flat_args = [args[0]]+_arg_extractor(args[1:])
+            return f(*flat_args, **kwargs)
+        else:
+            return f(*args, **kwargs)
     return wrapped
 
 
