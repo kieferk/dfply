@@ -41,3 +41,8 @@ def between(series, a, b, inclusive=True):
     elif inclusive == False:
         met_condition = (series > a) & (series < b)
     return met_condition
+
+
+def dense_rank(series, ascending=True):
+    ranks = series.rank(method='dense', ascending=ascending)
+    return ranks

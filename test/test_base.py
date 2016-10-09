@@ -294,6 +294,22 @@ def test_group_transmute():
     assert df.equals(d)
 
 
+def test_dense_rank():
+    df = diamonds.copy() >> head(5) >> select(X.cut, X.x)
+    df_dr = df >> mutate(dr=dense_rank(X.x))
+    df_truth = df
+    df_truth['dr'] = pd.Series([2.0, 1.0, 3.0, 4.0, 5.0])
+    assert df_dr.equals(df_truth)
+    df_dr = df >> mutate(dr=dense_rank(X.cut))
+    df_truth['dr'] = pd.Series([2.0, 3.0, 1.0, 3.0, 1.0])
+    assert df_dr.equals(df_truth)
+    df_dr = df >> groupby(X.cut) >> mutate(dr=dense_rank(X.x))
+    df_truth['dr'] = pd.Series([1.0, 1.0, 1.0, 2.0, 2.0])
+    assert df_dr.equals(df_truth)
+    df_dr = df >> mutate(dr=dense_rank(X.x, ascending=False))
+    df_truth['dr'] = pd.Series([4.0, 5.0, 3.0, 2.0, 1.0])
+    assert df_dr.equals(df_truth)
+
 ##==============================================================================
 ## summarization
 ##==============================================================================
