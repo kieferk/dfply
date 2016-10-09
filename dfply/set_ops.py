@@ -14,8 +14,7 @@ import warnings
 # `union`
 # ------------------------------------------------------------------------------
 
-@pipe
-def union(df, other, index=False, keep='first'):
+def validate(df, other):
     if df.columns.values.tolist() != other.columns.values.tolist():
         not_in_df = [col for col in other.columns if col not in df.columns]
         not_in_other = [col for col in df.columns if col not in other.columns]
@@ -25,6 +24,13 @@ def union(df, other, index=False, keep='first'):
         if len(not_in_other):
             error_string += ' Cols in x but not y: ' + str(not_in_other) + '.'
         raise ValueError(error_string)
+    else:
+        return
+
+
+@pipe
+def union(df, other, index=False, keep='first'):
+    validate(df, other)
     stacked = df.append(other)
     if index:
         stacked_reset_indexes = stacked.reset_index()
