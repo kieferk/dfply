@@ -1,0 +1,11 @@
+v0.1.5
+dplyr set operations added thanks to bleearmstrong.
+
+`df >> union(other)`
+Rows that appear in either `df` or `other`.
+
+`df >> intersect(other)`
+Rows that appear in both `df` and `other`
+
+`df >> set_diff(other)`
+Rows that appear in `df` but not `other`.
