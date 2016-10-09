@@ -160,7 +160,7 @@ def _arg_extractor(args):
     """
     flat = []
     for arg in args:
-        if hasattr(arg, '__iter__'):
+        if isinstance(arg, (list, tuple, pd.Index)):
             flat.extend(_arg_extractor(arg))
         else:
             flat.append(arg)
