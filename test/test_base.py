@@ -349,6 +349,17 @@ def test_cummean():
     assert df_cm.equals(df_truth)
 
 
+def test_cummax():
+    df = diamonds.copy() >> head(5) >> select(X.cut, X.x)
+    df_cm = df >> mutate(cm=cummax(X.x))
+    df_truth = df
+    df_truth['cm'] = pd.Series([3.95, 3.95, 4.05, 4.20, 4.34])
+    assert df_cm.equals(df_truth)
+    df_cm = df >> groupby(X.cut) >> mutate(cm=cummax(X.x))
+    df_truth['cm'] = pd.Series([3.95, 3.95, 4.05, 4.20, 4.34])
+    assert df_cm.equals(df_truth)
+
+
 ##==============================================================================
 ## summarization
 ##==============================================================================

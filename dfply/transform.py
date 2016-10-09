@@ -61,3 +61,8 @@ def cumsum(series):
 def cummean(series):
     means = series.expanding().mean()
     return means
+
+
+def cummax(series):
+    maxes = series.expanding().max()
+    return maxes
