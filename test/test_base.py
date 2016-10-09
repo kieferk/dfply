@@ -371,6 +371,19 @@ def test_cummin():
     assert df_cm.equals(df_truth)
 
 
+def test_cumprod():
+    df = diamonds.copy() >> head(5) >> select(X.cut, X.x)
+    df_cp = df >> mutate(cp=cumprod(X.x))
+    df_truth = df
+    df_truth['cp'] = pd.Series([3.950000, 15.365500, 62.230275, 261.367155, 1134.333453])
+    assert df_cp.equals(df_truth)
+    df_cp = df >> groupby(X.cut) >> mutate(cp=cumprod(X.x))
+    df_truth['cp'] = pd.Series([3.950, 3.890, 4.050, 16.338, 17.577])
+    # some tricky floating point stuff going on here
+    diffs = df_cp.cp - df_truth.cp
+    assert all(diffs < .0000001)
+
+
 ##==============================================================================
 ## summarization
 ##==============================================================================

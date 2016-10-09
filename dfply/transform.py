@@ -71,3 +71,8 @@ def cummax(series):
 def cummin(series):
     mins = series.expanding().min()
     return mins
+
+
+def cumprod(series):
+    prods = series.cumprod()
+    return prods
