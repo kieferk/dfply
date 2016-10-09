@@ -357,6 +357,14 @@ def dfB(scope='module'):
     })
     return b
 
+@pytest.fixture
+def dfC(scope='module'):
+    c = pd.DataFrame({
+        'x1':['B','C','D'],
+        'x2':[2,3,4]
+    })
+    return c
+
 
 def test_inner_join(dfA, dfB):
     ab = pd.DataFrame({
@@ -421,3 +429,33 @@ def test_anti_join(dfA, dfB):
 
     c = dfA >> anti_join(dfB, by='x1')
     assert c.equals(ab)
+
+
+def test_union(dfA, dfC):
+    ac = pd.DataFrame({
+        'x1': ['A', 'B', 'C', 'D'],
+        'x2': [1, 2, 3, 4]
+    }, index=[0, 1, 2, 2])
+
+    d = dfA >> union(dfC)
+    assert d.equals(ac)
+
+
+def test_intersect(dfA, dfC):
+    ac = pd.DataFrame({
+        'x1': ['B', 'C'],
+        'x2': [2, 3]
+    })
+
+    d = dfA >> intersect(dfC)
+    assert d.equals(ac)
+
+
+def test_set_diff(dfA, dfC):
+    ac = pd.DataFrame({
+        'x1': ['A'],
+        'x2': [1]
+    })
+
+    d = dfA >> set_diff(dfC)
+    assert d.equals(ac)
