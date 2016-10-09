@@ -56,3 +56,8 @@ def min_rank(series, ascending=True):
 def cumsum(series):
     sums = series.cumsum()
     return sums
+
+
+def cummean(series):
+    means = series.expanding().mean()
+    return means

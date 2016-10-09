@@ -338,6 +338,17 @@ def test_cumsum():
     assert df_cs.equals(df_truth)
 
 
+def test_cummean():
+    df = diamonds.copy() >> head(5) >> select(X.cut, X.x)
+    df_cm = df >> mutate(cm=cummean(X.x))
+    df_truth = df
+    df_truth['cm'] = pd.Series([3.950000, 3.920000, 3.963333, 4.022500, 4.086000])
+    assert df_cm.equals(df_truth)
+    df_cm = df >> groupby(X.cut) >> mutate(cm=cummean(X.x))
+    df_truth['cm'] = pd.Series([3.950, 3.890, 4.050, 4.045, 4.195])
+    assert df_cm.equals(df_truth)
+
+
 ##==============================================================================
 ## summarization
 ##==============================================================================
