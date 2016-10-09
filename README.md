@@ -630,6 +630,9 @@ best to respond promptly.
 The TODO list (now located in the "Projects" section of the repo) has an
 ongoing list of things that still need to be resolved and features to be added.
 
+If you submit a pull request with features or bugfixes, please target the
+"develop" branch rather than the "master" branch.
+
 
 ## TODO:
 
