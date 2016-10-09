@@ -310,6 +310,22 @@ def test_dense_rank():
     df_truth['dr'] = pd.Series([4.0, 5.0, 3.0, 2.0, 1.0])
     assert df_dr.equals(df_truth)
 
+def test_min_rank():
+    df = diamonds.copy() >> head(5) >> select(X.cut, X.x)
+    df_mr = df >> mutate(mr=min_rank(X.x))
+    df_truth = df
+    df_truth['mr'] = pd.Series([2.0, 1.0, 3.0, 4.0, 5.0])
+    assert df_mr.equals(df_truth)
+    df_mr = df >> mutate(mr=min_rank(X.cut))
+    df_truth['mr'] = pd.Series([3.0, 4.0, 1.0, 4.0, 1.0])
+    assert df_mr.equals(df_truth)
+    df_mr = df >> groupby(X.cut) >> mutate(mr=min_rank(X.x))
+    df_truth['mr'] = pd.Series([1.0, 1.0, 1.0, 2.0, 2.0])
+    assert df_mr.equals(df_truth)
+    df_mr = df >> mutate(mr=min_rank(X.x, ascending=False))
+    df_truth['mr'] = pd.Series([4.0, 5.0, 3.0, 2.0, 1.0])
+    assert df_mr.equals(df_truth)
+
 ##==============================================================================
 ## summarization
 ##==============================================================================
