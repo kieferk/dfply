@@ -24,7 +24,7 @@ def summarize_each(df, functions, *args):
             fname = f.__name__
             columns.append('_'.join([varname, fname]))
             values.append(f(col))
-            
+
     return pd.DataFrame([values], columns=columns)
 
 

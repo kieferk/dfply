@@ -12,6 +12,7 @@ from dfply.reshape import *
 from dfply.transform import *
 from dfply.join import *
 from dfply.summarize import *
+from dfply.set_ops import *
 
 
 ##==============================================================================
@@ -211,6 +212,19 @@ def test_row_slice():
     assert df.equals(diamonds >> row_slice(X.table > 61))
 
 
+def test_mask():
+    test1 = diamonds >> mask(X.cut == 'Ideal')
+    df = diamonds[diamonds.cut == 'Ideal']
+    assert df.equals(test1)
+
+    test2 = diamonds >> mask(X.cut == 'Ideal', X.color == 'E',
+                             X.table < 55, X.price < 500)
+    df_mask = (diamonds.cut == 'Ideal') & (diamonds.color == 'E')
+    df_mask = df_mask & (diamonds.table < 55) & (diamonds.price < 500)
+    df = diamonds[df_mask]
+    assert df.equals(test2)
+
+
 ##==============================================================================
 ## reshaping
 ##==============================================================================
@@ -357,6 +371,14 @@ def dfB(scope='module'):
     })
     return b
 
+@pytest.fixture
+def dfC(scope='module'):
+    c = pd.DataFrame({
+        'x1':['B','C','D'],
+        'x2':[2,3,4]
+    })
+    return c
+
 
 def test_inner_join(dfA, dfB):
     ab = pd.DataFrame({
@@ -421,3 +443,33 @@ def test_anti_join(dfA, dfB):
 
     c = dfA >> anti_join(dfB, by='x1')
     assert c.equals(ab)
+
+
+def test_union(dfA, dfC):
+    ac = pd.DataFrame({
+        'x1': ['A', 'B', 'C', 'D'],
+        'x2': [1, 2, 3, 4]
+    }, index=[0, 1, 2, 2])
+
+    d = dfA >> union(dfC)
+    assert d.equals(ac)
+
+
+def test_intersect(dfA, dfC):
+    ac = pd.DataFrame({
+        'x1': ['B', 'C'],
+        'x2': [2, 3]
+    })
+
+    d = dfA >> intersect(dfC)
+    assert d.equals(ac)
+
+
+def test_set_diff(dfA, dfC):
+    ac = pd.DataFrame({
+        'x1': ['A'],
+        'x2': [1]
+    })
+
+    d = dfA >> set_diff(dfC)
+    assert d.equals(ac)
