@@ -12,6 +12,7 @@ from dfply.reshape import *
 from dfply.transform import *
 from dfply.join import *
 from dfply.summarize import *
+from dfply.set_ops import *
 
 
 ##==============================================================================

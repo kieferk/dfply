@@ -24,13 +24,16 @@ def lead(series, i=1):
     shifted = series.shift(i)
     return shifted
 
+
 def lag(series, i=1):
     shifted = series.shift(i * -1)
     return shifted
 
+
 def row_number(series):
     row_numbers = np.arange(len(series))
     return row_numbers
+
 
 def between(series, a, b, inclusive=True):
     if inclusive == True:
