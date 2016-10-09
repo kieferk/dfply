@@ -19,3 +19,4 @@ dfply/vendor/six.py
 dfply/vendor/pandas_ply/__init__.py
 dfply/vendor/pandas_ply/symbolic.py
 test/test_base.py
+dfply/set_ops.py
