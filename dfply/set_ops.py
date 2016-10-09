@@ -11,10 +11,6 @@ import pandas as pd
 # ==============================================================================
 
 
-# ------------------------------------------------------------------------------
-# `union`
-# ------------------------------------------------------------------------------
-
 def validate_set_ops(df, other):
     # ensure that dataframes are valid for set operations:
     #   columns must be the same name in the same order
@@ -35,6 +31,9 @@ def validate_set_ops(df, other):
     else:
         return
 
+# ------------------------------------------------------------------------------
+# `union`
+# ------------------------------------------------------------------------------
 
 @pipe
 def union(df, other, index=False, keep='first'):
@@ -49,6 +48,10 @@ def union(df, other, index=False, keep='first'):
         return return_df
     else:
         return stacked.drop_duplicates(keep=keep)
+
+# ------------------------------------------------------------------------------
+# `intersect`
+# ------------------------------------------------------------------------------
 
 
 @pipe
@@ -74,6 +77,10 @@ def intersect(df, other, index=False, keep='first'):
                              right_on=df.columns.values.tolist())
         return_df = return_df.drop_duplicates(keep=keep)
         return return_df
+
+# ------------------------------------------------------------------------------
+# `set_diff`
+# ------------------------------------------------------------------------------
 
 
 @pipe
