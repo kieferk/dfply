@@ -326,6 +326,18 @@ def test_min_rank():
     df_truth['mr'] = pd.Series([4.0, 5.0, 3.0, 2.0, 1.0])
     assert df_mr.equals(df_truth)
 
+
+def test_cumsum():
+    df = diamonds.copy() >> head(5) >> select(X.cut, X.x)
+    df_cs = df >> mutate(cs=cumsum(X.x))
+    df_truth = df
+    df_truth['cs'] = pd.Series([3.95, 7.84, 11.89, 16.09, 20.43])
+    assert df_cs.equals(df_truth)
+    df_cs = df >> groupby(X.cut) >> mutate(cs=cumsum(X.x))
+    df_truth['cs'] = pd.Series([3.95, 3.89, 4.05, 8.09, 8.39])
+    assert df_cs.equals(df_truth)
+
+
 ##==============================================================================
 ## summarization
 ##==============================================================================
