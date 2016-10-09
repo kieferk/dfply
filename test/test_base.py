@@ -360,6 +360,17 @@ def test_cummax():
     assert df_cm.equals(df_truth)
 
 
+def test_cummin():
+    df = diamonds.copy() >> head(5) >> select(X.cut, X.x)
+    df_cm = df >> mutate(cm=cummin(X.x))
+    df_truth = df
+    df_truth['cm'] = pd.Series([3.95, 3.89, 3.89, 3.89, 3.89])
+    assert df_cm.equals(df_truth)
+    df_cm = df >> groupby(X.cut) >> mutate(cm=cummin(X.x))
+    df_truth['cm'] = pd.Series([3.95, 3.89, 4.05, 3.89, 4.05])
+    assert df_cm.equals(df_truth)
+
+
 ##==============================================================================
 ## summarization
 ##==============================================================================

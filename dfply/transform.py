@@ -66,3 +66,8 @@ def cummean(series):
 def cummax(series):
     maxes = series.expanding().max()
     return maxes
+
+
+def cummin(series):
+    mins = series.expanding().min()
+    return mins
