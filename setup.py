@@ -13,5 +13,5 @@ setup(
     long_description = 'See https://github.com/kieferk/dfply/blob/master/README.md for details.',
     license = 'GNU General Public License v3.0',
     url = 'https://github.com/kieferk/dfply',
-    test_suite='tests',
+    test_suite='test',
 )
