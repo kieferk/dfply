@@ -41,3 +41,38 @@ def between(series, a, b, inclusive=True):
     elif inclusive == False:
         met_condition = (series > a) & (series < b)
     return met_condition
+
+
+def dense_rank(series, ascending=True):
+    ranks = series.rank(method='dense', ascending=ascending)
+    return ranks
+
+
+def min_rank(series, ascending=True):
+    ranks = series.rank(method='min', ascending=ascending)
+    return ranks
+
+
+def cumsum(series):
+    sums = series.cumsum()
+    return sums
+
+
+def cummean(series):
+    means = series.expanding().mean()
+    return means
+
+
+def cummax(series):
+    maxes = series.expanding().max()
+    return maxes
+
+
+def cummin(series):
+    mins = series.expanding().min()
+    return mins
+
+
+def cumprod(series):
+    prods = series.cumprod()
+    return prods
