@@ -1,7 +1,9 @@
-from .vendor.pandas_ply import symbolic
-from .vendor.pandas_ply.symbolic import X
-from .vendor.six.moves import reduce
-from .vendor.six import wraps
+from __future__ import absolute_import
+
+from pandas_ply import symbolic
+from pandas_ply.symbolic import X
+from six.moves import reduce
+from six import wraps
 
 import pandas as pd
 import numpy as np
