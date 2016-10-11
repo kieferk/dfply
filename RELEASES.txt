@@ -1,3 +1,8 @@
+v0.1.8
+The pipe decorator now copies the dataframe upon each chained function, along
+with the `_grouped_by` attribute, if any. Before, operations with the pipe
+functions were modifying the original dataframe (such as `mutate`).
+
 v0.1.7
 Restructuring of package to include `diamonds.csv` with pip installation
 and require `six` and `pandas-ply` rather than come pre-packaged with them.
