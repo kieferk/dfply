@@ -21,11 +21,13 @@ class pipe(object):
 
     __name__ = "pipe"
 
-    def __init__(self, function, depth=0):
+    def __init__(self, function):
         self.function = function
 
     def __rrshift__(self, other):
-        return self.function(other)
+        other_copy = other.copy()
+        other_copy._grouped_by = getattr(other, '_grouped_by', None)
+        return self.function(other_copy)
 
     def __call__(self, *args, **kwargs):
         return pipe(lambda x: self.function(x, *args, **kwargs))
@@ -71,8 +73,7 @@ class group_delegation(object):
         grouped_by = getattr(df, "_grouped_by", None)
 
         if grouped_by is not None:
-            df_copy = df.copy()
-            df_copy = df_copy.groupby(grouped_by)
+            df = df.groupby(grouped_by)
 
             try:
                 assert self.function.function.__name__ == 'transmute'
@@ -80,12 +81,12 @@ class group_delegation(object):
             except:
                 pass_args = args[1:]
 
-            df_copy = self._apply_combine_reset(df_copy, *pass_args, **kwargs)
+            df = self._apply_combine_reset(df, *pass_args, **kwargs)
             if all([True if group in df.columns else False for group in grouped_by]):
-                df_copy._grouped_by = grouped_by
+                df._grouped_by = grouped_by
             else:
                 warnings.warn('Grouping lost due to transformation.')
-            return df_copy
+            return df
 
         else:
             return self.function(*args, **kwargs)

@@ -328,10 +328,12 @@ def test_cumsum():
     df_cs = df >> mutate(cs=cumsum(X.x))
     df_truth = df
     df_truth['cs'] = pd.Series([3.95, 7.84, 11.89, 16.09, 20.43])
-    assert df_cs.equals(df_truth)
+    pd.util.testing.assert_frame_equal(df_cs, df_truth)
+    #assert df_cs.equals(df_truth)
     df_cs = df >> groupby(X.cut) >> mutate(cs=cumsum(X.x))
     df_truth['cs'] = pd.Series([3.95, 3.89, 4.05, 8.09, 8.39])
-    assert df_cs.equals(df_truth)
+    pd.util.testing.assert_frame_equal(df_cs, df_truth)
+    #assert df_cs.equals(df_truth)
 
 
 def test_cummean():
@@ -339,10 +341,12 @@ def test_cummean():
     df_cm = df >> mutate(cm=cummean(X.x))
     df_truth = df
     df_truth['cm'] = pd.Series([3.950000, 3.920000, 3.963333, 4.022500, 4.086000])
-    assert df_cm.equals(df_truth)
+    pd.util.testing.assert_frame_equal(df_cm, df_truth)
+    #assert df_cm.equals(df_truth)
     df_cm = df >> groupby(X.cut) >> mutate(cm=cummean(X.x))
     df_truth['cm'] = pd.Series([3.950, 3.890, 4.050, 4.045, 4.195])
-    assert df_cm.equals(df_truth)
+    pd.util.testing.assert_frame_equal(df_cm, df_truth)
+    #assert df_cm.equals(df_truth)
 
 
 def test_cummax():
@@ -350,10 +354,12 @@ def test_cummax():
     df_cm = df >> mutate(cm=cummax(X.x))
     df_truth = df
     df_truth['cm'] = pd.Series([3.95, 3.95, 4.05, 4.20, 4.34])
-    assert df_cm.equals(df_truth)
+    pd.util.testing.assert_frame_equal(df_cm, df_truth)
+    #assert df_cm.equals(df_truth)
     df_cm = df >> groupby(X.cut) >> mutate(cm=cummax(X.x))
     df_truth['cm'] = pd.Series([3.95, 3.89, 4.05, 4.20, 4.34])
-    assert df_cm.equals(df_truth)
+    pd.util.testing.assert_frame_equal(df_cm, df_truth)
+    #assert df_cm.equals(df_truth)
 
 
 def test_cummin():
@@ -361,18 +367,21 @@ def test_cummin():
     df_cm = df >> mutate(cm=cummin(X.x))
     df_truth = df
     df_truth['cm'] = pd.Series([3.95, 3.89, 3.89, 3.89, 3.89])
-    assert df_cm.equals(df_truth)
+    pd.util.testing.assert_frame_equal(df_cm, df_truth)
+    #assert df_cm.equals(df_truth)
     df_cm = df >> groupby(X.cut) >> mutate(cm=cummin(X.x))
     df_truth['cm'] = pd.Series([3.95, 3.89, 4.05, 3.89, 4.05])
-    assert df_cm.equals(df_truth)
+    pd.util.testing.assert_frame_equal(df_cm, df_truth)
+    #assert df_cm.equals(df_truth)
 
 
 def test_cumprod():
     df = diamonds.copy() >> head(5) >> select(X.cut, X.x)
     df_cp = df >> mutate(cp=cumprod(X.x))
-    df_truth = df
+    df_truth = df.copy()
     df_truth['cp'] = pd.Series([3.950000, 15.365500, 62.230275, 261.367155, 1134.333453])
-    assert df_cp.equals(df_truth)
+    pd.util.testing.assert_frame_equal(df_cp, df_truth)
+    #assert df_cp.equals(df_truth)
     df_cp = df >> groupby(X.cut) >> mutate(cp=cumprod(X.x))
     df_truth['cp'] = pd.Series([3.950, 3.890, 4.050, 16.338, 17.577])
     # some tricky floating point stuff going on here
@@ -383,7 +392,6 @@ def test_cumprod():
 ##==============================================================================
 ## summarization
 ##==============================================================================
-# TODO
 
 def test_summarize():
     p = pd.DataFrame({
