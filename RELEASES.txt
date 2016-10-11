@@ -1,3 +1,18 @@
+v0.1.7
+Restructuring of package to include `diamonds.csv` with pip installation
+and require `six` and `pandas-ply` rather than come pre-packaged with them.
+
+v0.1.6
+Added window functions:
+`dense_rank`
+`min_rank`
+`cumsum`
+`cummean`
+`cummax`
+`cummin`
+`cumprod`
+
+
 v0.1.5
 dplyr set operations added thanks to bleearmstrong.
 

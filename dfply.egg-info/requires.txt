@@ -1,0 +1,4 @@
+numpy
+pandas
+six
+pandas_ply
