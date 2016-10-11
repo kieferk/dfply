@@ -1,4 +1,3 @@
-README.rst
 setup.py
 dfply/__init__.py
 dfply/base.py
@@ -6,6 +5,7 @@ dfply/group.py
 dfply/join.py
 dfply/reshape.py
 dfply/select.py
+dfply/set_ops.py
 dfply/subset.py
 dfply/summarize.py
 dfply/transform.py
@@ -19,4 +19,3 @@ dfply/vendor/six.py
 dfply/vendor/pandas_ply/__init__.py
 dfply/vendor/pandas_ply/symbolic.py
 test/test_base.py
-dfply/set_ops.py
