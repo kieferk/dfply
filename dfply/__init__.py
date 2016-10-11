@@ -8,4 +8,4 @@ from dfply.set_ops import *
 from dfply.subset import *
 from dfply.summarize import *
 from dfply.transform import *
-
+from dfply.data import *
