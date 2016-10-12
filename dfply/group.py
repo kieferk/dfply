@@ -9,11 +9,10 @@ def groupby(df, *args):
         group_by = list(set(existing_groups) | set(group_by))
 
     if len(group_by) > 0:
-        df_copy = df.copy()
-        df_copy._grouped_by = group_by
-        return df_copy
-    else:
-        return df
+        df._grouped_by = group_by
+
+    return df
+
 
 @pipe
 def ungroup(df):
