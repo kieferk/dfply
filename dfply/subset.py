@@ -39,8 +39,7 @@ def sample(df, *args, **kwargs):
 @group_delegation
 @symbolic_reference
 def distinct(df, *args, **kwargs):
-    drop_indices = df.drop_duplicates(*args, **kwargs).index
-    return df.loc[drop_indices]
+    return df.drop_duplicates(list(args), **kwargs)
 
 
 @dfpipe
