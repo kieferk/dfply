@@ -20,3 +20,10 @@ dfply.egg-info/requires.txt
 dfply.egg-info/top_level.txt
 test/__init__.py
 test/test_base.py
+test/test_group.py
+test/test_join.py
+test/test_reshape.py
+test/test_select.py
+test/test_subset.py
+test/test_summarize.py
+test/test_transform.py
