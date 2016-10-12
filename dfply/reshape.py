@@ -98,4 +98,7 @@ def spread(df, key, values, convert=False):
 
     out_df = out_df[id_cols].drop_duplicates()
     out_df = out_df.merge(spread_data, left_index=True, right_index=True).reset_index(drop=True)
+
+    out_df = (out_df >> arrange(id_cols)).reset_index(drop=True)
+
     return out_df
