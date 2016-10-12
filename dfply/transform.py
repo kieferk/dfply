@@ -35,7 +35,7 @@ def row_number(series):
     return row_numbers
 
 
-def between(series, a, b, inclusive=True):
+def between(series, a, b, inclusive=False):
     if inclusive == True:
         met_condition = (series >= a) & (series <= b)
     elif inclusive == False:

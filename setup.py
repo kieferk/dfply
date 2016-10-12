@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'dfply',
-    version = '0.1.8',
+    version = '0.1.9',
     author = 'Kiefer Katovich',
     author_email = 'kiefer.katovich@gmail.com',
     packages = find_packages(),
