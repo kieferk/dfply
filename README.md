@@ -1,5 +1,7 @@
 # dfply
 
+### Version: 0.1.9
+
 The dfply package makes it possible to do R's dplyr-style data manipulation with pipes
 in python on pandas DataFrames.
 
@@ -14,6 +16,9 @@ decorators to "categorize" and compartmentalize the operation of data manipulati
 goal of this architecture is to make dfply concise and easily
 extensible. There is a more in-depth overview of the decorators and how dfply can be
 customized further down.
+
+**Expect frequent updates to the package version as features are added and
+any bugs are fixed.**
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
