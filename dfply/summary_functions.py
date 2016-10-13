@@ -9,3 +9,8 @@ def mean(series):
 def first(series):
     first_s = series.iloc[0]
     return first_s
+
+
+def last(series):
+    last_s = series.iloc[series.size - 1]
+    return last_s
