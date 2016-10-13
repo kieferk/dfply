@@ -129,3 +129,52 @@ def test_set_diff(dfA, dfC):
 
     d = dfA >> set_diff(dfC)
     assert d.equals(ac)
+
+
+##==============================================================================
+## bind rows, cols
+##==============================================================================
+
+@pytest.fixture
+def dfA(scope='module'):
+    a = pd.DataFrame({
+        'x1':['A','B','C'],
+        'x2':[1,2,3]
+    })
+    return a
+
+
+@pytest.fixture
+def dfB(scope='module'):
+    b = pd.DataFrame({
+        'x1':['A','B','D'],
+        'x3':[True,False,True]
+    })
+    return b
+
+
+def test_bind_rows(dfA, dfB):
+    inner = pd.DataFrame({
+        'x1':['A','B','C','A','B','D']
+    })
+    outer = pd.DataFrame({
+        'x1':['A','B','C','A','B','D'],
+        'x2':[1,2,3,np.nan,np.nan,np.nan],
+        'x3':[np.nan,np.nan,np.nan,True,False,True]
+    })
+    ab_inner = dfA >> bind_rows(dfB, join='inner')
+    ab_outer = dfA >> bind_rows(dfB, join='outer')
+    assert inner.equals(ab_inner.reset_index(drop=True))
+    assert outer.equals(ab_outer.reset_index(drop=True))
+
+
+def test_bind_cols(dfA, dfB):
+    dfB.columns = ['x3','x4']
+    df = pd.DataFrame({
+        'x1':['A','B','C'],
+        'x2':[1,2,3],
+        'x3':['A','B','D'],
+        'x4':[True,False,True]
+    })
+    d = dfA >> bind_cols(dfB)
+    assert df.equals(d)

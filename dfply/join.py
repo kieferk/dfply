@@ -22,12 +22,14 @@ def inner_join(df, other, **kwargs):
                       right_on=right_on, suffixes=suffixes)
     return joined
 
+
 @pipe
 def full_join(df, other, **kwargs):
     left_on, right_on, suffixes = get_join_parameters(kwargs)
     joined = df.merge(other, how='outer', left_on=left_on,
                       right_on=right_on, suffixes=suffixes)
     return joined
+
 
 @pipe
 def outer_join(df, other, **kwargs):
@@ -36,6 +38,7 @@ def outer_join(df, other, **kwargs):
                       right_on=right_on, suffixes=suffixes)
     return joined
 
+
 @pipe
 def left_join(df, other, **kwargs):
     left_on, right_on, suffixes = get_join_parameters(kwargs)
@@ -43,12 +46,14 @@ def left_join(df, other, **kwargs):
                       right_on=right_on, suffixes=suffixes)
     return joined
 
+
 @pipe
 def right_join(df, other, **kwargs):
     left_on, right_on, suffixes = get_join_parameters(kwargs)
     joined = df.merge(other, how='right', left_on=left_on,
                       right_on=right_on, suffixes=suffixes)
     return joined
+
 
 @pipe
 def semi_join(df, other, **kwargs):
@@ -64,6 +69,7 @@ def semi_join(df, other, **kwargs):
                       indicator=True).query('_merge=="both"')[df.columns.values.tolist()]
     return joined
 
+
 @pipe
 def anti_join(df, other, **kwargs):
     left_on, right_on, suffixes = get_join_parameters(kwargs)
@@ -77,3 +83,15 @@ def anti_join(df, other, **kwargs):
                       right_on=right_on, suffixes=('', '_y'),
                       indicator=True).query('_merge=="left_only"')[df.columns.values.tolist()]
     return joined
+
+
+@pipe
+def bind_rows(df, other, join='outer', ignore_index=False):
+    df = pd.concat([df, other], join=join, ignore_index=ignore_index, axis=0)
+    return df
+
+
+@pipe
+def bind_cols(df, other, join='outer', ignore_index=False):
+    df = pd.concat([df, other], join=join, ignore_index=ignore_index, axis=1)
+    return df
