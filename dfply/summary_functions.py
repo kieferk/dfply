@@ -19,3 +19,8 @@ def last(series):
 def n(series):
     n_s = series.size
     return n_s
+
+
+def n_distinct(series):
+    n_distinct_s = series.unique().size
+    return n_distinct_s

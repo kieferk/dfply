@@ -115,3 +115,26 @@ def test_n():
     t = df >> groupby(X.cut) >> mutate(n=n(X.x))
     df_truth['n'] = pd.Series([1, 2, 2, 2, 2, 2])
     assert t.equals(df_truth)
+
+
+def test_n_distinct():
+    df = pd.DataFrame({'col_1': ['a', 'a', 'a', 'b', 'b', 'b', 'c', 'c'],
+                       'col_2': [1, 1, 1, 2, 3, 3, 4, 5]})
+    # straight summarize
+    t = df >> summarize(n=n_distinct(X.col_2))
+    df_truth = pd.DataFrame({'n': [5]})
+    assert t.equals(df_truth)
+    # grouped summarize
+    t = df >> groupby(X.col_1) >> summarize(n=n_distinct(X.col_2))
+    df_truth = pd.DataFrame({'col_1': ['a', 'b', 'c'],
+                             'n': [1, 2, 2]})
+    assert t.equals(df_truth)
+    # straight mutate
+    t = df >> mutate(n=n_distinct(X.col_2))
+    df_truth = df.copy()
+    df_truth['n'] = 5
+    assert t.equals(df_truth)
+    # grouped mutate
+    t = df >> groupby(X.col_1) >> mutate(n=n_distinct(X.col_2))
+    df_truth['n'] = pd.Series([1, 1, 1, 2, 2, 2, 2, 2])
+    assert t.equals(df_truth)
