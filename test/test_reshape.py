@@ -156,3 +156,39 @@ def test_separate():
         'col3':[np.nan,np.nan,np.nan,np.nan,np.nan]
     })
     assert true6.equals(test6)
+
+
+def test_unite():
+    d = pd.DataFrame({
+        'a':[1,2,3],
+        'b':['a','b','c'],
+        'c':[True, False, np.nan]
+    })
+
+    test1 = d >> unite('united', X.a, 'b', 2, remove=True, na_action='maintain')
+    true1 = pd.DataFrame({
+        'united':['1_a_True','2_b_False',np.nan]
+    })
+    assert true1.equals(test1)
+
+    test2 = d >> unite('united', ['a','b','c'], remove=True, na_action='ignore',
+                       sep='*')
+    true2 = pd.DataFrame({
+        'united':['1*a*True','2*b*False','3*c']
+    })
+    assert test2.equals(true2)
+
+    test3 = d >> unite('united', d.columns, remove=True, na_action='as_string')
+    true3 = pd.DataFrame({
+        'united':['1_a_True','2_b_False','3_c_nan']
+    })
+    assert true3.equals(test3)
+
+    test4 = d >> unite('united', d.columns, remove=False, na_action='as_string')
+    true4 = pd.DataFrame({
+        'a':[1,2,3],
+        'b':['a','b','c'],
+        'c':[True, False, np.nan],
+        'united':['1_a_True','2_b_False','3_c_nan']
+    })
+    assert true4.equals(test4)
