@@ -150,7 +150,7 @@ def test_IQR():
     t = df >> groupby(X.cut) >> summarize(i=IQR(X.x))
     df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
                              'i': [0.145, 0.000, 0.155]})
-    test_vector = t.i - df_truth.i
+    test_vector = abs(t.i - df_truth.i)
     assert all(test_vector < 0.000000001)
     # straight mutate
     t = df >> mutate(i=IQR(X.x))
@@ -160,5 +160,5 @@ def test_IQR():
     # grouped mutate
     t = df >> groupby(X.cut) >> mutate(i=IQR(X.x))
     df_truth['i'] = pd.Series([0.000, 0.155, 0.145, 0.155, 0.145])
-    test_vector = t.i - df_truth.i
+    test_vector = abs(t.i - df_truth.i)
     assert all(test_vector < 0.000000001)
