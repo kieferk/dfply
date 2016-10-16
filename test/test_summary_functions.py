@@ -93,3 +93,25 @@ def test_last():
     t = df >> groupby(X.cut) >> mutate(l=last(X.x))
     df_truth['l'] = pd.Series([3.95, 4.20, 4.34, 4.20, 4.34])
     assert t.equals(df_truth)
+
+
+def test_n():
+    df = diamonds >> select(X.cut, X.x) >> head(5)
+    # straight summarize
+    t = df >> summarize(n=n(X.x))
+    df_truth = pd.DataFrame({'n': [5]})
+    assert t.equals(df_truth)
+    # grouped summarize
+    t = df >> groupby(X.cut) >> summarize(n=n(X.x))
+    df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
+                             'n': [2, 1, 2]})
+    assert t.equals(df_truth)
+    # straight mutate
+    t = df >> mutate(n=n(X.x))
+    df_truth = df.copy()
+    df_truth['n'] = 5
+    assert t.equals(df_truth)
+    # grouped mutate
+    t = df >> groupby(X.cut) >> mutate(n=n(X.x))
+    df_truth['n'] = pd.Series([1, 2, 2, 2, 2, 2])
+    assert t.equals(df_truth)

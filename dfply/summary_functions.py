@@ -14,3 +14,8 @@ def first(series):
 def last(series):
     last_s = series.iloc[series.size - 1]
     return last_s
+
+
+def n(series):
+    n_s = series.size
+    return n_s
