@@ -135,16 +135,16 @@ def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
         maxsplit = len(into)-1 if extra == 'merge' else 0
         splits = df[column].map(lambda x: re.split(sep, x, maxsplit))
 
-    if fill == 'right':
-        splits = map(lambda x: x + [np.nan for i in range(len(into)-len(x))],
-                     splits)
+    right_filler = lambda x: x + [np.nan for i in range(len(into)-len(x))]
+    left_filler = lambda x: [np.nan for i in range(len(into)-len(x))] + x
 
+    if fill == 'right':
+        splits = [right_filler(x) for x in splits]
     elif fill == 'left':
-        splits = map(lambda x: [np.nan for i in range(len(into)-len(x))] + x,
-                     splits)
+        splits = [left_filler(x) for x in splits]
 
     for i, split_col in enumerate(into):
-        df[split_col] = map(lambda x: x[i] if not x[i] == '' else np.nan, splits)
+        df[split_col] = [x[i] if not x[i] == '' else np.nan for x in splits]
 
     if convert:
         df = convert_type(df, into)
