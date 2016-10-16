@@ -109,7 +109,6 @@ def spread(df, key, values, convert=False):
 # Separate columns
 # ------------------------------------------------------------------------------
 
-
 @pipe
 @symbolic_reference
 def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
@@ -151,5 +150,36 @@ def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
 
     if remove:
         df.drop(column, axis=1, inplace=True)
+
+    return df
+
+
+# ------------------------------------------------------------------------------
+# Unite columns
+# ------------------------------------------------------------------------------
+
+@label_selection
+def unite(df, colname, *args, **kwargs):
+    to_unite = list(args)
+    sep = kwargs.get('sep', '_')
+    remove = kwargs.get('remove', True)
+    # possible na_action values
+    # ignore: empty string
+    # maintain: keep as np.nan (default)
+    # as_string: becomes string 'nan'
+    na_action = kwargs.get('na_action', 'maintain')
+
+
+    if na_action == 'maintain':
+        df[colname] = df[to_unite].apply(lambda x: np.nan if any(x.isnull())
+                                     else sep.join(x.map(str)), axis=1)
+    elif na_action == 'ignore':
+        df[colname] = df[to_unite].apply(lambda x: sep.join(x[~x.isnull()].map(str)),
+                                     axis=1)
+    elif na_action == 'as_string':
+        df[colname] = df[to_unite].astype(str).apply(lambda x: sep.join(x), axis=1)
+
+    if remove:
+        df.drop(to_unite, axis=1, inplace=True)
 
     return df
