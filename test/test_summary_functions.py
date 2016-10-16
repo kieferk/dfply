@@ -162,3 +162,25 @@ def test_IQR():
     df_truth['i'] = pd.Series([0.000, 0.155, 0.145, 0.155, 0.145])
     test_vector = abs(t.i - df_truth.i)
     assert all(test_vector < 0.000000001)
+
+
+def test_min():
+    df = diamonds >> select(X.cut, X.x) >> head(5)
+    # straight summarize
+    t = df >> summarize(m=min(X.x))
+    df_truth = pd.DataFrame({'m': [3.89]})
+    assert t.equals(df_truth)
+    # grouped summarize
+    t = df >> groupby(X.cut) >> summarize(m=min(X.x))
+    df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
+                             'm': [4.05, 3.95, 3.89]})
+    assert t.equals(df_truth)
+    # straight mutate
+    t = df >> mutate(m=min(X.x))
+    df_truth = df.copy()
+    df_truth['m'] = 3.89
+    assert t.equals(df_truth)
+    # grouped mutate
+    t = df >> groupby(X.cut) >> mutate(m=min(X.x))
+    df_truth['m'] = pd.Series([3.95, 3.89, 4.05, 3.89, 4.05])
+    assert t.equals(df_truth)

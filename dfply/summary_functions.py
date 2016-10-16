@@ -29,3 +29,8 @@ def n_distinct(series):
 def IQR(series):
     iqr_s = series.quantile(.75) - series.quantile(.25)
     return iqr_s
+
+
+def min(series):
+    min_s = series.min()
+    return min_s
