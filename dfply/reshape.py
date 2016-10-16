@@ -12,6 +12,15 @@ import re
 @flatten_arguments
 @column_indices_as_labels
 def arrange(df, *args, **kwargs):
+    """Calls `pandas.DataFrame.sort_values` to sort a DataFrame according to
+    criteria.
+
+    See:
+    http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_values.html
+
+    Returns:
+        Sorted DataFrame.
+    """
     return df.sort_values(list(args), **kwargs)
 
 
@@ -22,6 +31,17 @@ def arrange(df, *args, **kwargs):
 @pipe
 @symbolic_reference
 def rename(df, **kwargs):
+    """Renames columns, where keyword argument values are the current names
+    of columns and keys are the new names.
+
+    Args:
+        df (:obj:`pandas.DataFrame`): DataFrame passed in via `>>` pipe.
+        **kwargs: key:value pairs where keys are new names for columns and
+            values are current names of columns.
+
+    Returns:
+        DataFrame with columns renamed.
+    """
     return df.rename(columns={v:k for k,v in kwargs.items()})
 
 
