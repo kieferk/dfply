@@ -1,4 +1,5 @@
 from .base import *
+import re
 
 
 # ------------------------------------------------------------------------------
@@ -44,13 +45,13 @@ def gather(df, key, values, *args, **kwargs):
 # ------------------------------------------------------------------------------
 # Widen
 # ------------------------------------------------------------------------------
-# TODO
 
 def convert_type(df, columns):
     # taken in part from the dplython package
     out_df = df.copy()
     for col in columns:
         column_values = pd.Series(out_df[col].unique())
+        column_values = column_values[~column_values.isnull()]
         # empty
         if len(column_values) == 0:
             continue
@@ -102,3 +103,53 @@ def spread(df, key, values, convert=False):
     out_df = (out_df >> arrange(id_cols)).reset_index(drop=True)
 
     return out_df
+
+
+# ------------------------------------------------------------------------------
+# Separate columns
+# ------------------------------------------------------------------------------
+
+
+@pipe
+@symbolic_reference
+def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
+             extra='drop', fill='right'):
+
+    assert isinstance(into, (tuple, list))
+
+    if isinstance(sep, (tuple, list)):
+        inds = [0]+list(sep)
+        if len(inds) > len(into):
+            if extra == 'drop':
+                inds = inds[:len(into)+1]
+            elif extra == 'merge':
+                inds = inds[:len(into)]+[None]
+        else:
+            inds = inds+[None]
+
+        splits = df[column].map(lambda x: [str(x)[slice(inds[i], inds[i+1])]
+                                           if i < len(inds)-1 else np.nan
+                                           for i in range(len(into))])
+
+    else:
+        maxsplit = len(into)-1 if extra == 'merge' else 0
+        splits = df[column].map(lambda x: re.split(sep, x, maxsplit))
+
+    if fill == 'right':
+        splits = map(lambda x: x + [np.nan for i in range(len(into)-len(x))],
+                     splits)
+
+    elif fill == 'left':
+        splits = map(lambda x: [np.nan for i in range(len(into)-len(x))] + x,
+                     splits)
+
+    for i, split_col in enumerate(into):
+        df[split_col] = map(lambda x: x[i] if not x[i] == '' else np.nan, splits)
+
+    if convert:
+        df = convert_type(df, into)
+
+    if remove:
+        df.drop(column, axis=1, inplace=True)
+
+    return df

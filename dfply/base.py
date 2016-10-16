@@ -33,6 +33,7 @@ class pipe(object):
         return pipe(lambda x: self.function(x, *args, **kwargs))
 
 
+
 class group_delegation(object):
     """Decorator class that managing grouped operations on DataFrames.
 
