@@ -138,3 +138,27 @@ def test_n_distinct():
     t = df >> groupby(X.col_1) >> mutate(n=n_distinct(X.col_2))
     df_truth['n'] = pd.Series([1, 1, 1, 2, 2, 2, 2, 2])
     assert t.equals(df_truth)
+
+
+def test_IQR():
+    df = diamonds >> select(X.cut, X.x) >> head(5)
+    # straight summarize
+    t = df >> summarize(i=IQR(X.x))
+    df_truth = pd.DataFrame({'i': [.25]})
+    assert t.equals(df_truth)
+    # grouped summarize
+    t = df >> groupby(X.cut) >> summarize(i=IQR(X.x))
+    df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
+                             'i': [0.145, 0.000, 0.155]})
+    test_vector = t.i - df_truth.i
+    assert all(test_vector < 0.000000001)
+    # straight mutate
+    t = df >> mutate(i=IQR(X.x))
+    df_truth = df.copy()
+    df_truth['i'] = 0.25
+    assert t.equals(df_truth)
+    # grouped mutate
+    t = df >> groupby(X.cut) >> mutate(i=IQR(X.x))
+    df_truth['i'] = pd.Series([0.000, 0.155, 0.145, 0.155, 0.145])
+    test_vector = t.i - df_truth.i
+    assert all(test_vector < 0.000000001)

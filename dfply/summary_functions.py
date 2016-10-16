@@ -24,3 +24,8 @@ def n(series):
 def n_distinct(series):
     n_distinct_s = series.unique().size
     return n_distinct_s
+
+
+def IQR(series):
+    iqr_s = series.quantile(.75) - series.quantile(.25)
+    return iqr_s
