@@ -102,8 +102,8 @@ def test_separate():
         'a2':['a','b','c','d',np.nan],
         'a3':['3',np.nan,'3-4','1',np.nan]
     })
-    print test1
-    print true1
+    print(test1)
+    print(true1)
     assert true1.equals(test1)
 
     test2 = d >> separate(X.a, ['a1','a2','a3'],
