@@ -49,3 +49,8 @@ def median(series):
 def var(series):
     var_s = series.var()
     return var_s
+
+
+def sd(series):
+    sd_s = series.std()
+    return sd_s

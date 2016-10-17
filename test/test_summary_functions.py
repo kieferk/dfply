@@ -36,28 +36,6 @@ def test_first():
     df_truth = pd.DataFrame({'f': [3.95]})
     assert t.equals(df_truth)
     # grouped summarize
-    t = df >> groupby(X.cut) >> summarize(m=mean(X.x))
-    df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
-                             'm': [4.195, 3.950, 4.045]})
-    assert t.equals(df_truth)
-    # straight mutate
-    t = df >> mutate(m=mean(X.x))
-    df_truth = df.copy()
-    df_truth['m'] = df_truth.x.mean()
-    assert t.equals(df_truth)
-    # grouped mutate
-    t = df >> groupby(X.cut) >> mutate(m=mean(X.x))
-    df_truth['m'] = pd.Series([3.950, 4.045, 4.195, 4.045, 4.195])
-    assert t.equals(df_truth)
-
-
-def test_first():
-    df = diamonds >> select(X.cut, X.x) >> head(5)
-    # straight summarize
-    t = df >> summarize(f=first(X.x))
-    df_truth = pd.DataFrame({'f': [3.95]})
-    assert t.equals(df_truth)
-    # grouped summarize
     t = df >> groupby(X.cut) >> summarize(f=first(X.x))
     df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
                              'f': [4.05, 3.95, 3.89]})
@@ -82,7 +60,7 @@ def test_last():
     # grouped summarize
     t = df >> groupby(X.cut) >> summarize(l=last(X.x))
     df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
-                             'f': [4.34, 3.95, 4.20]})
+                             'l': [4.34, 3.95, 4.20]})
     assert t.equals(df_truth)
     # straight mutate
     t = df >> mutate(l=last(X.x))
@@ -271,4 +249,39 @@ def test_var():
     t = df >> groupby(X.cut) >> summarize(v=var(X.x))
     df_truth = pd.DataFrame({'cut': ['Fair', 'Good', 'Ideal', 'Premium', 'Very Good'],
                              'v': [np.nan, np.nan, np.nan, np.nan, np.nan]})
+    assert t.equals(df_truth)
+
+
+def test_sd():
+    df = diamonds >> groupby(X.cut) >> head(3) >> select(X.cut, X.x)
+    # straight summarize
+    t = df >> summarize(s=sd(X.x))
+    df_truth = pd.DataFrame({'s': [0.829091]})
+    test_vector = abs(t.s - df_truth.s)
+    assert all(test_vector < .00001)
+    # grouped summarize
+    t = df >> groupby(X.cut) >> summarize(s=sd(X.x))
+    df_truth = pd.DataFrame({'cut': ['Fair', 'Good', 'Ideal', 'Premium', 'Very Good'],
+                             's': [1.440417, 0.148436, 0.236925, 0.181934, 0.072342]})
+    test_vector = abs(t.s - df_truth.s)
+    assert all(test_vector < .00001)
+    # straight mutate
+    t = df >> mutate(s=sd(X.x))
+    df_truth = df.copy()
+    df_truth['s'] = 0.829091
+    test_vector = abs(t.s - df_truth.s)
+    assert all(test_vector < .00001)
+    # grouped mutate
+    t = df >> groupby(X.cut) >> mutate(s=sd(X.x))
+    df_truth['s'] = pd.Series([1.440417, 1.440417, 1.440417, 0.148436, 0.148436, 0.148436,
+                               0.236925, 0.236925, 0.236925, 0.181934, 0.181934, 0.181934,
+                               0.072342, 0.072342, 0.072342],
+                              index=t.index)
+    test_vector = abs(t.s - df_truth.s)
+    assert all(test_vector < .00001)
+    # test with single value (var undefined)
+    df = diamonds >> groupby(X.cut) >> head(1) >> select(X.cut, X.x)
+    t = df >> groupby(X.cut) >> summarize(s=sd(X.x))
+    df_truth = pd.DataFrame({'cut': ['Fair', 'Good', 'Ideal', 'Premium', 'Very Good'],
+                             's': [np.nan, np.nan, np.nan, np.nan, np.nan]})
     assert t.equals(df_truth)
