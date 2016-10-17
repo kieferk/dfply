@@ -206,3 +206,34 @@ def test_max():
     t = df >> groupby(X.cut) >> mutate(m=max(X.x))
     df_truth['m'] = pd.Series([3.95, 4.20, 4.34, 4.20, 4.34])
     assert t.equals(df_truth)
+
+
+def test_median():
+    df = diamonds >> groupby(X.cut) >> head(3) >> select(X.cut, X.x)
+    # straight summarize
+    t = df >> summarize(m=median(X.x))
+    df_truth = pd.DataFrame({'m': [4.05]})
+    assert t.equals(df_truth)
+    # grouped summarize
+    t = df >> groupby(X.cut) >> summarize(m=median(X.x))
+    df_truth = pd.DataFrame({'cut': ['Fair', 'Good', 'Ideal', 'Premium', 'Very Good'],
+                             'm': [6.27, 4.25, 3.95, 3.89, 3.95]})
+    assert t.equals(df_truth)
+    # straight mutate
+    t = df >> mutate(m=median(X.x))
+    df_truth = df.copy()
+    df_truth['m'] = 4.05
+    assert t.equals(df_truth)
+    # grouped mutate
+    t = df >> groupby(X.cut) >> mutate(m=median(X.x))
+    df_truth['m'] = pd.Series(
+        [6.27, 6.27, 6.27, 4.25, 4.25, 4.25, 3.95, 3.95, 3.95, 3.89, 3.89, 3.89, 3.95, 3.95, 3.95],
+        index=t.index)
+    assert t.equals(df_truth)
+    # make sure it handles case with even counts properly
+    df = diamonds >> groupby(X.cut) >> head(2) >> select(X.cut, X.x)
+    t = df >> groupby(X.cut) >> summarize(m=median(X.x))
+    df_truth = pd.DataFrame({'cut': ['Fair', 'Good', 'Ideal', 'Premium', 'Very Good'],
+                             'm': [5.160, 4.195, 3.940, 4.045, 3.945]})
+    test_vector = abs(t.m - df_truth.m)
+    assert all(test_vector < .000000001)

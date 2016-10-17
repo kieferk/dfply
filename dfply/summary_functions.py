@@ -39,3 +39,8 @@ def min(series):
 def max(series):
     max_s = series.max()
     return max_s
+
+
+def median(series):
+    median_s = series.median()
+    return median_s
