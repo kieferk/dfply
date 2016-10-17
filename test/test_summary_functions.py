@@ -237,3 +237,38 @@ def test_median():
                              'm': [5.160, 4.195, 3.940, 4.045, 3.945]})
     test_vector = abs(t.m - df_truth.m)
     assert all(test_vector < .000000001)
+
+
+def test_var():
+    df = diamonds >> groupby(X.cut) >> head(3) >> select(X.cut, X.x)
+    # straight summarize
+    t = df >> summarize(v=var(X.x))
+    df_truth = pd.DataFrame({'v': [0.687392]})
+    test_vector = abs(t.v - df_truth.v)
+    assert all(test_vector < .00001)
+    # grouped summarize
+    t = df >> groupby(X.cut) >> summarize(v=var(X.x))
+    df_truth = pd.DataFrame({'cut': ['Fair', 'Good', 'Ideal', 'Premium', 'Very Good'],
+                             'v': [2.074800, 0.022033, 0.056133, 0.033100, 0.005233]})
+    test_vector = abs(t.v - df_truth.v)
+    assert all(test_vector < .00001)
+    # straight mutate
+    t = df >> mutate(v=var(X.x))
+    df_truth = df.copy()
+    df_truth['v'] = 0.687392
+    test_vector = abs(t.v - df_truth.v)
+    assert all(test_vector < .00001)
+    # grouped mutate
+    t = df >> groupby(X.cut) >> mutate(v=var(X.x))
+    df_truth['v'] = pd.Series([2.074800, 2.074800, 2.074800, 0.022033, 0.022033, 0.022033,
+                               0.056133, 0.056133, 0.056133, 0.033100, 0.033100, 0.033100,
+                               0.005233, 0.005233, 0.005233],
+                              index=t.index)
+    test_vector = abs(t.v - df_truth.v)
+    assert all(test_vector < .00001)
+    # test with single value (var undefined)
+    df = diamonds >> groupby(X.cut) >> head(1) >> select(X.cut, X.x)
+    t = df >> groupby(X.cut) >> summarize(v=var(X.x))
+    df_truth = pd.DataFrame({'cut': ['Fair', 'Good', 'Ideal', 'Premium', 'Very Good'],
+                             'v': [np.nan, np.nan, np.nan, np.nan, np.nan]})
+    assert t.equals(df_truth)

@@ -44,3 +44,8 @@ def max(series):
 def median(series):
     median_s = series.median()
     return median_s
+
+
+def var(series):
+    var_s = series.var()
+    return var_s
