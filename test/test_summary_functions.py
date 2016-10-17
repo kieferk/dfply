@@ -184,3 +184,25 @@ def test_min():
     t = df >> groupby(X.cut) >> mutate(m=min(X.x))
     df_truth['m'] = pd.Series([3.95, 3.89, 4.05, 3.89, 4.05])
     assert t.equals(df_truth)
+
+
+def test_max():
+    df = diamonds >> select(X.cut, X.x) >> head(5)
+    # straight summarize
+    t = df >> summarize(m=max(X.x))
+    df_truth = pd.DataFrame({'m': [4.34]})
+    assert t.equals(df_truth)
+    # grouped summarize
+    t = df >> groupby(X.cut) >> summarize(m=max(X.x))
+    df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
+                             'm': [4.34, 3.95, 4.20]})
+    assert t.equals(df_truth)
+    # straight mutate
+    t = df >> mutate(m=max(X.x))
+    df_truth = df.copy()
+    df_truth['m'] = 4.34
+    assert t.equals(df_truth)
+    # grouped mutate
+    t = df >> groupby(X.cut) >> mutate(m=max(X.x))
+    df_truth['m'] = pd.Series([3.95, 4.20, 4.34, 4.20, 4.34])
+    assert t.equals(df_truth)

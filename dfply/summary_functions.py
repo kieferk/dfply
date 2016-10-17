@@ -34,3 +34,8 @@ def IQR(series):
 def min(series):
     min_s = series.min()
     return min_s
+
+
+def max(series):
+    max_s = series.max()
+    return max_s
