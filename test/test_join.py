@@ -135,24 +135,6 @@ def test_set_diff(dfA, dfC):
 ## bind rows, cols
 ##==============================================================================
 
-@pytest.fixture
-def dfA(scope='module'):
-    a = pd.DataFrame({
-        'x1':['A','B','C'],
-        'x2':[1,2,3]
-    })
-    return a
-
-
-@pytest.fixture
-def dfB(scope='module'):
-    b = pd.DataFrame({
-        'x1':['A','B','D'],
-        'x3':[True,False,True]
-    })
-    return b
-
-
 def test_bind_rows(dfA, dfB):
     inner = pd.DataFrame({
         'x1':['A','B','C','A','B','D']

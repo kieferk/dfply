@@ -171,7 +171,7 @@ def test_colmax():
     df_truth = pd.DataFrame({'m': [4.34]})
     assert t.equals(df_truth)
     # grouped summarize
-    t = df >> groupby(X.cut) >> summarize(m=coolmax(X.x))
+    t = df >> groupby(X.cut) >> summarize(m=colmax(X.x))
     df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
                              'm': [4.34, 3.95, 4.20]})
     assert t.equals(df_truth)
