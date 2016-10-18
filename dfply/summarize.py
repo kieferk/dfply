@@ -32,19 +32,58 @@ def summarize_each(df, functions, *args):
 # Series summary functions
 # ------------------------------------------------------------------------------
 
+def _order_by(series, order_series):
+    assert series.shape[0] == order_series.shape[0]
+    if isinstance(order_series, pd.Series):
+        sorted_series = pd.DataFrame({
+            'series':series.values,
+            'order':order_series.values
+        }).sort_values('order', ascending=True)['series']
+        return sorted_series
+    elif isinstance(order_series, (list, tuple)):
+        sorter = pd.concat(list(order_series), axis=1)
+        sorter_columns = ['_sorter'+str(i) for i in range(sorter.shape[1])]
+        sorter.columns = sorter_columns
+        sorter['series'] = series.values
+        sorted_series = sorter.sort_values(sorter_columns)['series']
+        return sorted_series
+
+
+def desc(series):
+    descending = pd.DataFrame({
+        'series':series.values,
+        'order':np.arange(series.shape[0])
+    }).sort_values('series', ascending=False)
+    descending['desc'] = np.arange(series.shape[0])
+    return descending.sort_values('order', ascending=True)['desc']
+
+
 def mean(series):
     mean_s = series.mean()
     return mean_s
 
 
-def first(series):
+def first(series, order_by=None):
+    if order_by is not None:
+        series = _order_by(series, order_by)
     first_s = series.iloc[0]
     return first_s
 
 
-def last(series):
+def last(series, order_by=None):
+    if order_by is not None:
+        series = _order_by(series, order_by)
     last_s = series.iloc[series.size - 1]
     return last_s
+
+
+def nth(series, n, order_by=None):
+    if order_by is not None:
+        series = _order_by(series, order_by)
+    try:
+        return series.iloc[n]
+    except:
+        return np.nan
 
 
 def n(series):
