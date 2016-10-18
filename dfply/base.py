@@ -177,6 +177,7 @@ class symbolic_evaluation(object):
 
     __name__ = "symbolic_evaluation"
 
+
     def __init__(self, function):
         """Upon decoration, function is assigned as a class attribute.
 
@@ -216,6 +217,7 @@ class symbolic_evaluation(object):
         """
         return {k:symbolic.to_callable(v)(df) for k,v in kwargs.items()}
 
+
     def __call__(self, *args, **kwargs):
         """Attempts evaluation of any symbolic representations of pandas
         objects in the decorated function's arguments or keyword arguments.
@@ -248,6 +250,7 @@ class symbolic_reference(object):
     """
 
     __name__ = "symbolic_reference"
+
 
     def __init__(self, function):
         """Upon decoration, function is assigned as a class attribute.
@@ -332,6 +335,7 @@ class symbolic_reference(object):
         return self.function(*args, **kwargs)
 
 
+
 def _arg_extractor(args):
     """Extracts arguments from lists or tuples and returns them
     "flattened" (extracting lists within lists to a flat list).
@@ -393,7 +397,6 @@ def join_index_arguments(f):
     Returns:
         decorated function
     """
-
     @wraps(f)
     def wrapped(*args, **kwargs):
         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
