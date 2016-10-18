@@ -1,6 +1,6 @@
 # dfply
 
-### Version: 0.1.9
+### Version: 0.1.10
 
 The dfply package makes it possible to do R's dplyr-style data manipulation with pipes
 in python on pandas DataFrames.
