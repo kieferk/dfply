@@ -26,4 +26,5 @@ test/test_reshape.py
 test/test_select.py
 test/test_subset.py
 test/test_summarize.py
+test/test_summary_functions.py
 test/test_transform.py

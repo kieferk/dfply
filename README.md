@@ -1,32 +1,71 @@
 # dfply
 
+### Version: 0.1.10
+
 The dfply package makes it possible to do R's dplyr-style data manipulation with pipes
 in python on pandas DataFrames.
 
-This package is an alternative to [pandas-ply](https://github.com/coursera/pandas-ply)
+This is an alternative to [pandas-ply](https://github.com/coursera/pandas-ply)
 and [dplython](https://github.com/dodger487/dplython). It is heavily inspired by
 both of them, and in fact the code for symbolic representation of pandas DataFrames
-and series (such as `X.variable`) is directly imported from pandas-ply.
+and series (e.g. `X.variable`) is imported from pandas-ply.
 
-The syntax and functionality of the package is in most cases be identical
-to dplython. The major difference is in the structure of the code; dfply makes heavy use of
-decorators to "categorize" and compartmentalize the operation of data manipulation functions. The
-goal of this architecture is to make dfply concise and easily
+The syntax and functionality of the package will in most cases be identical
+to dplyr and dplython. dfply uses a decorator-based structure for piping and categorizing
+data manipulation functions. The goal of the decorator architecture is to make dfply concise and easily
 extensible. There is a more in-depth overview of the decorators and how dfply can be
-customized further down.
+customized below.
+
+Dfply is intended to mimic the functionality of dplyr. The syntax, while most often
+the same, varies in cases where it makes more sense to do it differently in python.
+
+
+**Expect frequent updates to the package version as features are added and
+any bugs are fixed.**
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
 - [Overview](#overview)
+  - [The `>>` pipe operator](#the--pipe-operator)
   - [The pandas-ply `X` DataFrame symbol](#the-pandas-ply-x-dataframe-symbol)
   - [Selecting and dropping](#selecting-and-dropping)
+    - [`select*()` and `drop*()` functions](#select-and-drop-functions)
   - [Subsetting and filtering](#subsetting-and-filtering)
+    - [`row_slice()`](#row_slice)
+    - [`sample()`](#sample)
+    - [`distinct()`](#distinct)
+    - [`mask()`](#mask)
   - [DataFrame transformation](#dataframe-transformation)
+    - [`mutate()`](#mutate)
+    - [`transmute()`](#transmute)
   - [Grouping](#grouping)
+    - [`groupby()` and `ungroup()`](#groupby-and-ungroup)
   - [Reshaping](#reshaping)
+    - [`arrange()`](#arrange)
+    - [`rename()`](#rename)
+    - [`gather()`](#gather)
+    - [`spread()`](#spread)
+    - [`separate()`](#separate)
+    - [`unite()`](#unite)
   - [Joining](#joining)
+    - [`inner_join()`](#inner_join)
+    - [`outer_join()` or `full_join()`](#outer_join-or-full_join)
+    - [`left_join()`](#left_join)
+    - [`right_join()`](#right_join)
+    - [`semi_join()`](#semi_join)
+    - [`anti_join()`](#anti_join)
+  - [Set operations](#set-operations)
+    - [`union()`](#union)
+    - [`intersect()`](#intersect)
+    - [`set_diff()`](#set_diff)
+  - [Binding](#binding)
+    - [`bind_rows()`](#bind_rows)
+    - [`bind_cols()`](#bind_cols)
+  - [Summarization](#summarization)
+    - [`summarize()`](#summarize)
+    - [`summarize_each()`](#summarize_each)
 - [Decorators](#decorators)
   - [`@pipe`](#pipe)
   - [`@group_delegation`](#group_delegation)
@@ -42,6 +81,8 @@ customized further down.
 
 > (A notebook showcasing most of the working functions in dfply [can be
 found here](https://github.com/kieferk/dfply/blob/master/examples/dfply-example-gallery.ipynb))
+
+### The `>>` pipe operator
 
 dfply works directly on pandas DataFrames, chaining operations on the data with
 the `>>` operator.
@@ -90,6 +131,8 @@ diamonds >> select(X.carat, X.cut) >> head(3)
 
 
 ### Selecting and dropping
+
+#### `select*()` and `drop*()` functions
 
 A variety of selection functions are available. The current functions are:
 
@@ -148,6 +191,8 @@ diamonds >> drop_through(X.clarity) >> select_to(X.x) >> head(2)
 
 ### Subsetting and filtering
 
+#### `row_slice()`
+
 Slices of rows can be selected with the `row_slice()` function. You can pass
 single integer indices and/or lists of integer indices to select rows as with
 pandas' `.iloc`.
@@ -161,6 +206,8 @@ diamonds >> row_slice(1,2,[10,15])
 10   0.30     Good     J     SI1   64.0   55.0    339  4.25  4.28  2.73
 15   0.32  Premium     E      I1   60.9   58.0    345  4.38  4.42  2.68
 ```
+
+#### `sample()`
 
 The `sample()` function functions exactly the same as pandas' `.sample()` method
 for DataFrames. Arguments and keyword arguments will be passed through to the
@@ -185,6 +232,8 @@ diamonds >> sample(n=3, replace=True)
 39751   0.43      Ideal     H    VVS1   62.3   54.0   1094  4.84  4.85  3.02
 ```
 
+#### `distinct()`
+
 Selection of unique rows is done with `distinct()`, which similarly passes
 arguments and keyword arguments through to the DataFrame's `.drop_duplicates()`
 method.
@@ -201,6 +250,8 @@ diamonds >> distinct(X.color)
 25   0.23  Very Good     G    VVS2   60.4   58.0    354  3.97  4.01  2.41
 28   0.23  Very Good     D     VS2   60.5   61.0    357  3.96  3.97  2.40
 ```
+
+#### `mask()`
 
 Filtering rows with logical criteria is done with `mask()`, which accepts
 boolean arrays "masking out" False labeled rows and keeping True labeled rows.
@@ -230,6 +281,8 @@ diamonds >> mask(X.cut == 'Ideal', X.color == 'E', X.table < 55, X.price < 500)
 
 ### DataFrame transformation
 
+#### `mutate()`
+
 New variables can be created with the `mutate()` function (named that to match
 dplyr).
 
@@ -257,6 +310,8 @@ NOTE: because of python's unordered keyword arguments, the new variables
 created with mutate are not (yet) guaranteed to be created in the same order
 that they are input into the function call. This is on the todo list.
 
+#### `transmute()`
+
 The `transmute()` function is a combination of a mutate and a selection of the
 created variables.
 
@@ -270,6 +325,8 @@ diamonds >> transmute(x_plus_y=X.x + X.y, y_div_z=(X.y / X.z)) >> head(3)
 ```
 
 ### Grouping
+
+#### `groupby()` and `ungroup()`
 
 DataFrames are grouped along variables using the `groupby()` function and
 ungrouped with the `ungroup()` function. Functions chained after grouping a
@@ -300,6 +357,8 @@ wrappers around the pandas `.shift()` Series method.
 
 ### Reshaping
 
+#### `arrange()`
+
 Sorting is done by the `arrange()` function, which wraps around the pandas
 `.sort_values()` DataFrame method. Arguments and keyword arguments are passed
 through to that function (arguments are also currently flattened like in the select
@@ -324,6 +383,8 @@ diamonds >> arrange(X.table, ascending=False) >> head(5)
 5       0.24  Very Good     J    VVS2   62.8   57.0    336  3.94  3.96  2.48
 ```
 
+#### `rename()`
+
 The `rename()` function will rename columns provided as values to what you set
 as the keys in the keyword arguments. You can indicate columns with symbols or
 with their labels.
@@ -335,6 +396,8 @@ diamonds >> rename(CUT=X.cut, COLOR='color') >> head(2)
 0   0.23    Ideal     E     SI2   61.5   55.0    326  3.95  3.98  2.43
 1   0.21  Premium     E     SI1   59.8   61.0    326  3.89  3.84  2.31
 ```
+
+#### `gather()`
 
 Transforming between "wide" and "long" format is a common pattern in data munging.
 The `gather(key, value, *columns)` function melts the specified columns in your
@@ -379,6 +442,8 @@ elongated >> head(5)
 3    3    carat  0.29
 4    4    carat  0.31
 ```
+
+#### `spread()`
 
 Likewise, you can transform a "long" DataFrame into a "wide" format with the
 `spread(key, values)` function. Converting the previously created elongated
@@ -440,16 +505,138 @@ z          float64
 dtype: object
 ```
 
+#### `separate()`
+
+Columns can be split into multiple columns with the
+`separate(column, into, sep="[\W_]+", remove=True, convert=False,
+extra='drop', fill='right')` function. `separate()` takes a variety of arguments:
+
+- `column`: the column to split.
+- `into`: the names of the new columns.
+- `sep`: either a regex string or integer positions to split the column on.
+- `remove`: boolean indicating whether to remove the original column.
+- `convert`: boolean indicating whether the new columns should be converted to
+the appropriate type (same as in `spread` above).
+- `extra`: either `drop`, where split pieces beyond the specified new columns
+are dropped, or `merge`, where the final split piece contains the remainder of
+the original column.
+- `fill`: either `right`, where `np.nan` values are filled in the right-most
+columns for missing pieces, or `left` where `np.nan` values are filled in the
+left-most columns.
+
+```python
+print d
+
+         a
+0    1-a-3
+1      1-b
+2  1-c-3-4
+3    9-d-1
+4       10
+
+d >> separate(X.a, ['col1', 'col2'], remove=True, convert=True,
+              extra='drop', fill='right')
+
+   col1 col2
+0     1    a
+1     1    b
+2     1    c
+3     9    d
+4    10  NaN
+
+d >> separate(X.a, ['col1', 'col2'], remove=True, convert=True,
+              extra='drop', fill='left')
+
+   col1 col2
+0   1.0    a
+1   1.0    b
+2   1.0    c
+3   9.0    d
+4   NaN   10
+
+d >> separate(X.a, ['col1', 'col2'], remove=False, convert=True,
+              extra='merge', fill='right')
+
+         a  col1   col2
+0    1-a-3     1    a-3
+1      1-b     1      b
+2  1-c-3-4     1  c-3-4
+3    9-d-1     9    d-1
+4       10    10    NaN
+
+d >> separate(X.a, ['col1', 'col2', 'col3'], sep=[2,4], remove=True, convert=True,
+              extra='merge', fill='right')
+
+  col1 col2 col3
+0   1-   a-    3
+1   1-    b  NaN
+2   1-   c-  3-4
+3   9-   d-    1
+4   10  NaN  NaN
+```
+
+#### `unite()`
+
+The `unite(colname, *args, sep='_', remove=True, na_action='maintain')` function
+does the inverse of `separate()`, joining columns together by a separator. Any
+columns that are not strings will be converted to strings. The arguments for
+`unite()` are:
+
+- `colname`: the name of the new joined column.
+- `*args`: list of columns to be joined, which can be strings, symbolic, or
+integer positions.
+- `sep`: the string separator to join the columns with.
+- `remove`: boolean indicating whether or not to remove the original columns.
+- `na_action`: can be one of `"maintain"` (the default), `"ignore"`, or
+`"as_string"`. The default `"maintain"` will make the new column row a `NaN` value
+if any of the original column cells at that row contained `NaN`. `"ignore"` will
+treat any `NaN` value as an empty string during joining. `"as_string"` will convert
+any `NaN` value to the string `"nan"` prior to joining.
+
+```python
+
+print d
+
+a  b      c
+0  1  a   True
+1  2  b  False
+2  3  c    NaN
+
+d >> unite('united', X.a, 'b', 2, remove=False, na_action='maintain')
+
+   a  b      c     united
+0  1  a   True   1_a_True
+1  2  b  False  2_b_False
+2  3  c    NaN        NaN
+
+d >> unite('united', ['a','b','c'], remove=True, na_action='ignore', sep='*')
+
+      united
+0   1*a*True
+1  2*b*False
+2        3*c
+
+d >> unite('united', d.columns, remove=True, na_action='as_string')
+
+      united
+0   1_a_True
+1  2_b_False
+2    3_c_nan
+```
+
+
 ### Joining
 
 Currently implemented joins are:
 
-1. `inner_join()`
-- `outer_join()` (which works the same as `full_join()`)
-- `right_join()`
-- `left_join()`
+1. `inner_join(other, by='column')`
+- `outer_join(other, by='column')` (which works the same as `full_join()`)
+- `right_join(other, by='column')`
+- `left_join(other, by='column')`
+- `semi_join(other, by='column')`
+- `anti_join(other, by='column')`
 
-The functionality of the join functions are outlined with toy example
+The functionality of the join functions are outlined with the toy example
 DataFrames below.
 
 ```python
@@ -461,13 +648,26 @@ b = pd.DataFrame({
     'x1':['A','B','D'],
     'x3':[True,False,True]
 })
+```
 
+#### `inner_join()`
+
+`inner_join()` joins on values present in both DataFrames' `by` columns.
+
+```python
 a >> inner_join(b, by='x1')
 
   x1  x2     x3
 0  A   1   True
 1  B   2  False
+```
 
+#### `outer_join()` or `full_join()`
+
+`outer_join` merges DataFrame's together on values present in either frame's
+`by` columns.
+
+```python
 a >> outer_join(b, by='x1')
 
   x1   x2     x3
@@ -475,14 +675,26 @@ a >> outer_join(b, by='x1')
 1  B  2.0  False
 2  C  3.0    NaN
 3  D  NaN   True
+```
 
+#### `left_join()`
+
+`left_join` merges on the values present in the left DataFrame's `by` columns.
+
+```python
 a >> left_join(b, by='x1')
 
   x1  x2     x3
 0  A   1   True
 1  B   2  False
 2  C   3    NaN
+```
 
+#### `right_join()`
+
+`right_join` merges on the values present in the right DataFrame's `by` columns.
+
+```python
 a >> right_join(b, by='x1')
 
   x1   x2     x3
@@ -490,6 +702,219 @@ a >> right_join(b, by='x1')
 1  B  2.0  False
 2  D  NaN   True
 ```
+
+#### `semi_join()`
+
+`semi_join()` returns all of the rows in the left DataFrame that have a match
+in the right DataFrame in the `by` columns.
+
+```python
+a >> semi_join(b, by='x1')
+
+  x1  x2
+0  A   1
+1  B   2
+```
+
+#### `anti_join()`
+
+`anti_join()` returns all of the rows in the left DataFrame that do not have a
+match in the right DataFrame within the `by` columns.
+
+```python
+a >> anti_join(b, by='x1')
+
+  x1  x2
+2  C   3
+```
+
+
+### Set operations
+
+The set operation functions filter a DataFrame based on row comparisons with
+another DataFrame.
+
+Each of the set operation functions `union()`, `intersect()`, and `set_diff()`
+take the same arguments:
+
+- `other`: the DataFrame to compare to
+- `index`: a boolean (default `False`) indicating whether to consider the pandas
+index during comparison.
+- `keep`: string (default `"first"`) to be passed through to `.drop_duplicates()`
+controlling how to handle duplicate rows.
+
+With set operations columns are expected to be in the same order in both
+DataFrames.
+
+The function examples use the following two toy DataFrames.
+
+```python
+a = pd.DataFrame({
+        'x1':['A','B','C'],
+        'x2':[1,2,3]
+    })
+c = pd.DataFrame({
+      'x1':['B','C','D'],
+      'x2':[2,3,4]
+})
+```
+
+#### `union()`
+
+The `union()` function returns rows that appear in either DataFrame.
+
+```python
+a >> union(c)
+
+  x1  x2
+0  A   1
+1  B   2
+2  C   3
+2  D   4
+```
+
+#### `intersect()`
+
+`intersect()` returns rows that appear in both DataFrames.
+
+```python
+a >> intersect(c)
+
+  x1  x2
+0  B   2
+1  C   3
+```
+
+
+#### `set_diff()`
+
+`set_diff()` returns the rows in the left DataFrame that do not appear in the
+right DataFrame.
+
+```python
+a >> set_diff(c)
+
+  x1  x2
+0  A   1
+```
+
+
+### Binding
+
+dfply comes with convenience wrappers around `pandas.concat()` for joining
+DataFrames by rows or by columns.
+
+The toy DataFrames below (`a` and `b`) are the same as the ones used to display
+the join functions above.
+
+#### `bind_rows()`
+
+The `bind_rows(other, join='outer', ignore_index=False)` function is an exact
+call to `pandas.concat([df, other], join=join, ignore_index=ignore_index, axis=0)`,
+joining two DataFrames "vertically".
+
+```python
+a >> bind_rows(b, join='inner')
+
+x1
+0  A
+1  B
+2  C
+0  A
+1  B
+2  D
+
+a >> bind_rows(b, join='outer')
+
+  x1   x2     x3
+0  A  1.0    NaN
+1  B  2.0    NaN
+2  C  3.0    NaN
+0  A  NaN   True
+1  B  NaN  False
+2  D  NaN   True
+```
+
+Note that `bind_rows()` does not reset the index for you!
+
+#### `bind_cols()`
+
+The `bind_cols(other, join='outer', ignore_index=False)` is likewise just a
+call to `pandas.concat([df, other], join=join, ignore_index=ignore_index, axis=1)`,
+joining DataFrames "horizontally".
+
+```python
+a >> bind_cols(b)
+
+  x1  x2 x1     x3
+0  A   1  A   True
+1  B   2  B  False
+2  C   3  D   True
+```
+
+Note that you may well end up with duplicate column labels after binding columns
+as can be seen above.
+
+
+### Summarization
+
+There are two summarization functions in dfply that match dplr: `summarize` and
+`summarize_each` (though these functions use the 'z' spelling rather than 's').
+
+#### `summarize()`
+
+`summarize(**kwargs)` takes an arbitrary number of keyword arguments that will
+return new columns labeled with the keys that are summary functions of columns
+in the original DataFrame.
+
+```python
+diamonds >> summarize(price_mean=X.price.mean(), price_std=X.price.std())
+
+    price_mean    price_std
+0  3932.799722  3989.439738
+```
+
+`summarize()` can of course be used with groupings as well.
+
+```python
+diamonds >> groupby('cut') >> summarize(price_mean=X.price.mean(), price_std=X.price.std())
+
+         cut   price_mean    price_std
+0       Fair  4358.757764  3560.386612
+1       Good  3928.864452  3681.589584
+2      Ideal  3457.541970  3808.401172
+3    Premium  4584.257704  4349.204961
+4  Very Good  3981.759891  3935.862161
+```
+
+#### `summarize_each()`
+
+The `summarize_each(function_list, *columns)` is a more general summarization
+function. It takes a list of summary functions to apply as its first argument and
+then a list of columns to apply the summary functions to. Columns can be specified
+with either symbolic, string label, or integer position like in the selection
+functions for convenience.
+
+```python
+diamonds >> summarize_each([np.mean, np.var], X.price, 'depth')
+
+    price_mean     price_var  depth_mean  depth_var
+0  3932.799722  1.591533e+07   61.749405   2.052366
+```
+
+`summarize_each()` works with groupings as well.
+
+```python
+diamonds >> groupby(X.cut) >> summarize_each([np.mean, np.var], X.price, 4)
+
+         cut   price_mean     price_var  depth_mean  depth_var
+0       Fair  4358.757764  1.266848e+07   64.041677  13.266319
+1       Good  3928.864452  1.355134e+07   62.365879   4.705224
+2      Ideal  3457.541970  1.450325e+07   61.709401   0.516274
+3    Premium  4584.257704  1.891421e+07   61.264673   1.342755
+4  Very Good  3981.759891  1.548973e+07   61.818275   1.900466
+```
+
 
 ## Decorators
 

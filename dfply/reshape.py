@@ -1,4 +1,5 @@
 from .base import *
+import re
 
 
 # ------------------------------------------------------------------------------
@@ -11,6 +12,15 @@ from .base import *
 @flatten_arguments
 @column_indices_as_labels
 def arrange(df, *args, **kwargs):
+    """Calls `pandas.DataFrame.sort_values` to sort a DataFrame according to
+    criteria.
+
+    See:
+    http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_values.html
+
+    Returns:
+        Sorted DataFrame.
+    """
     return df.sort_values(list(args), **kwargs)
 
 
@@ -21,6 +31,17 @@ def arrange(df, *args, **kwargs):
 @pipe
 @symbolic_reference
 def rename(df, **kwargs):
+    """Renames columns, where keyword argument values are the current names
+    of columns and keys are the new names.
+
+    Args:
+        df (:obj:`pandas.DataFrame`): DataFrame passed in via `>>` pipe.
+        **kwargs: key:value pairs where keys are new names for columns and
+            values are current names of columns.
+
+    Returns:
+        DataFrame with columns renamed.
+    """
     return df.rename(columns={v:k for k,v in kwargs.items()})
 
 
@@ -44,13 +65,13 @@ def gather(df, key, values, *args, **kwargs):
 # ------------------------------------------------------------------------------
 # Widen
 # ------------------------------------------------------------------------------
-# TODO
 
 def convert_type(df, columns):
     # taken in part from the dplython package
     out_df = df.copy()
     for col in columns:
         column_values = pd.Series(out_df[col].unique())
+        column_values = column_values[~column_values.isnull()]
         # empty
         if len(column_values) == 0:
             continue
@@ -102,3 +123,83 @@ def spread(df, key, values, convert=False):
     out_df = (out_df >> arrange(id_cols)).reset_index(drop=True)
 
     return out_df
+
+
+# ------------------------------------------------------------------------------
+# Separate columns
+# ------------------------------------------------------------------------------
+
+@pipe
+@symbolic_reference
+def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
+             extra='drop', fill='right'):
+
+    assert isinstance(into, (tuple, list))
+
+    if isinstance(sep, (tuple, list)):
+        inds = [0]+list(sep)
+        if len(inds) > len(into):
+            if extra == 'drop':
+                inds = inds[:len(into)+1]
+            elif extra == 'merge':
+                inds = inds[:len(into)]+[None]
+        else:
+            inds = inds+[None]
+
+        splits = df[column].map(lambda x: [str(x)[slice(inds[i], inds[i+1])]
+                                           if i < len(inds)-1 else np.nan
+                                           for i in range(len(into))])
+
+    else:
+        maxsplit = len(into)-1 if extra == 'merge' else 0
+        splits = df[column].map(lambda x: re.split(sep, x, maxsplit))
+
+    right_filler = lambda x: x + [np.nan for i in range(len(into)-len(x))]
+    left_filler = lambda x: [np.nan for i in range(len(into)-len(x))] + x
+
+    if fill == 'right':
+        splits = [right_filler(x) for x in splits]
+    elif fill == 'left':
+        splits = [left_filler(x) for x in splits]
+
+    for i, split_col in enumerate(into):
+        df[split_col] = [x[i] if not x[i] == '' else np.nan for x in splits]
+
+    if convert:
+        df = convert_type(df, into)
+
+    if remove:
+        df.drop(column, axis=1, inplace=True)
+
+    return df
+
+
+# ------------------------------------------------------------------------------
+# Unite columns
+# ------------------------------------------------------------------------------
+
+@label_selection
+def unite(df, colname, *args, **kwargs):
+    to_unite = list(args)
+    sep = kwargs.get('sep', '_')
+    remove = kwargs.get('remove', True)
+    # possible na_action values
+    # ignore: empty string
+    # maintain: keep as np.nan (default)
+    # as_string: becomes string 'nan'
+    na_action = kwargs.get('na_action', 'maintain')
+
+
+    if na_action == 'maintain':
+        df[colname] = df[to_unite].apply(lambda x: np.nan if any(x.isnull())
+                                     else sep.join(x.map(str)), axis=1)
+    elif na_action == 'ignore':
+        df[colname] = df[to_unite].apply(lambda x: sep.join(x[~x.isnull()].map(str)),
+                                     axis=1)
+    elif na_action == 'as_string':
+        df[colname] = df[to_unite].astype(str).apply(lambda x: sep.join(x), axis=1)
+
+    if remove:
+        df.drop(to_unite, axis=1, inplace=True)
+
+    return df

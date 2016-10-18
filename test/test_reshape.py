@@ -85,3 +85,110 @@ def test_spread(elongated):
 
     assert df_spread.equals(d_spread)
     assert df_conv.equals(d_spread_conv)
+
+
+def test_separate():
+
+    d = pd.DataFrame({
+        'a':['1-a-3','1-b','1-c-3-4','9-d-1','10']
+    })
+
+    test1 = d >> separate(X.a, ['a1','a2','a3'],
+                          remove=True, convert=False,
+                          extra='merge', fill='right')
+
+    true1 = pd.DataFrame({
+        'a1':['1','1','1','9','10'],
+        'a2':['a','b','c','d',np.nan],
+        'a3':['3',np.nan,'3-4','1',np.nan]
+    })
+    print(test1)
+    print(true1)
+    assert true1.equals(test1)
+
+    test2 = d >> separate(X.a, ['a1','a2','a3'],
+                          remove=True, convert=False,
+                          extra='merge', fill='left')
+
+    true2 = pd.DataFrame({
+        'a1':['1',np.nan,'1','9',np.nan],
+        'a2':['a','1','c','d',np.nan],
+        'a3':['3','b','3-4','1','10']
+    })
+    assert true2.equals(test2)
+
+    test3 = d >> separate(X.a, ['a1','a2','a3'],
+                          remove=True, convert=True,
+                          extra='merge', fill='right')
+
+    true3 = pd.DataFrame({
+        'a1':[1,1,1,9,10],
+        'a2':['a','b','c','d',np.nan],
+        'a3':['3',np.nan,'3-4','1',np.nan]
+    })
+    assert true3.equals(test3)
+
+    test4 = d >> separate(X.a, ['col1','col2'], sep=[1,3],
+                          remove=True, convert=False, extra='drop', fill='left')
+
+    true4 = pd.DataFrame({
+        'col1':['1','1','1','9','1'],
+        'col2':['-a','-b','-c','-d','0']
+    })
+    assert true4.equals(test4)
+
+    test5 = d >> separate(X.a, ['col1','col2'], sep=[1,3],
+                          remove=False, convert=False, extra='drop', fill='left')
+
+    true5 = pd.DataFrame({
+        'a':['1-a-3','1-b','1-c-3-4','9-d-1','10'],
+        'col1':['1','1','1','9','1'],
+        'col2':['-a','-b','-c','-d','0']
+    })
+    assert true5.equals(test5)
+
+    test6 = d >> separate(X.a, ['col1','col2','col3'], sep=[30],
+                          remove=True, convert=False, extra='drop', fill='left')
+
+    true6 = pd.DataFrame({
+        'col1':['1-a-3','1-b','1-c-3-4','9-d-1','10'],
+        'col2':[np.nan,np.nan,np.nan,np.nan,np.nan],
+        'col3':[np.nan,np.nan,np.nan,np.nan,np.nan]
+    })
+    assert true6.equals(test6)
+
+
+def test_unite():
+    d = pd.DataFrame({
+        'a':[1,2,3],
+        'b':['a','b','c'],
+        'c':[True, False, np.nan]
+    })
+
+    test1 = d >> unite('united', X.a, 'b', 2, remove=True, na_action='maintain')
+    true1 = pd.DataFrame({
+        'united':['1_a_True','2_b_False',np.nan]
+    })
+    assert true1.equals(test1)
+
+    test2 = d >> unite('united', ['a','b','c'], remove=True, na_action='ignore',
+                       sep='*')
+    true2 = pd.DataFrame({
+        'united':['1*a*True','2*b*False','3*c']
+    })
+    assert test2.equals(true2)
+
+    test3 = d >> unite('united', d.columns, remove=True, na_action='as_string')
+    true3 = pd.DataFrame({
+        'united':['1_a_True','2_b_False','3_c_nan']
+    })
+    assert true3.equals(test3)
+
+    test4 = d >> unite('united', d.columns, remove=False, na_action='as_string')
+    true4 = pd.DataFrame({
+        'a':[1,2,3],
+        'b':['a','b','c'],
+        'c':[True, False, np.nan],
+        'united':['1_a_True','2_b_False','3_c_nan']
+    })
+    assert true4.equals(test4)

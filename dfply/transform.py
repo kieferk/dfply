@@ -17,7 +17,7 @@ def transmute(df, *keep_columns, **kwargs):
 
 
 # ------------------------------------------------------------------------------
-# Series operation helper functions
+# Window functions
 # ------------------------------------------------------------------------------
 
 def lead(series, i=1):
@@ -30,9 +30,9 @@ def lag(series, i=1):
     return shifted
 
 
-def row_number(series):
-    row_numbers = np.arange(len(series))
-    return row_numbers
+# def row_number(series):
+#     row_numbers = np.arange(len(series))
+#     return row_numbers
 
 
 def between(series, a, b, inclusive=False):
