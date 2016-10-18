@@ -12,6 +12,7 @@ dfply/select.py
 dfply/set_ops.py
 dfply/subset.py
 dfply/summarize.py
+dfply/summary_functions.py
 dfply/transform.py
 dfply.egg-info/PKG-INFO
 dfply.egg-info/SOURCES.txt
@@ -26,4 +27,5 @@ test/test_reshape.py
 test/test_select.py
 test/test_subset.py
 test/test_summarize.py
+test/test_summary_functions.py
 test/test_transform.py
