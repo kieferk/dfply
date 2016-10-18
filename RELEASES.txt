@@ -1,6 +1,12 @@
+v0.1.10
+- `separate` and `unite` functions added.
+- Summary functions added for series operations.
+- README improved dramatically.
+- Function docstrings added to more functions (still not all).
+
 v0.1.9
 Moved unit tests into individual files that reflect the categories of the
-functions/features they are testing. Some small bugs have been fixed as well. 
+functions/features they are testing. Some small bugs have been fixed as well.
 
 v0.1.8
 The pipe decorator now copies the dataframe upon each chained function, along
