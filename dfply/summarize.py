@@ -62,12 +62,12 @@ def IQR(series):
     return iqr_s
 
 
-def min(series):
+def colmin(series):
     min_s = series.min()
     return min_s
 
 
-def max(series):
+def colmax(series):
     max_s = series.max()
     return max_s
 

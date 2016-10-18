@@ -142,46 +142,46 @@ def test_IQR():
     assert all(test_vector < 0.000000001)
 
 
-def test_min():
+def test_colmin():
     df = diamonds >> select(X.cut, X.x) >> head(5)
     # straight summarize
-    t = df >> summarize(m=min(X.x))
+    t = df >> summarize(m=colmin(X.x))
     df_truth = pd.DataFrame({'m': [3.89]})
     assert t.equals(df_truth)
     # grouped summarize
-    t = df >> groupby(X.cut) >> summarize(m=min(X.x))
+    t = df >> groupby(X.cut) >> summarize(m=colmin(X.x))
     df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
                              'm': [4.05, 3.95, 3.89]})
     assert t.equals(df_truth)
     # straight mutate
-    t = df >> mutate(m=min(X.x))
+    t = df >> mutate(m=colmin(X.x))
     df_truth = df.copy()
     df_truth['m'] = 3.89
     assert t.equals(df_truth)
     # grouped mutate
-    t = df >> groupby(X.cut) >> mutate(m=min(X.x))
+    t = df >> groupby(X.cut) >> mutate(m=colmin(X.x))
     df_truth['m'] = pd.Series([3.95, 3.89, 4.05, 3.89, 4.05])
     assert t.equals(df_truth)
 
 
-def test_max():
+def test_colmax():
     df = diamonds >> select(X.cut, X.x) >> head(5)
     # straight summarize
-    t = df >> summarize(m=max(X.x))
+    t = df >> summarize(m=colmax(X.x))
     df_truth = pd.DataFrame({'m': [4.34]})
     assert t.equals(df_truth)
     # grouped summarize
-    t = df >> groupby(X.cut) >> summarize(m=max(X.x))
+    t = df >> groupby(X.cut) >> summarize(m=coolmax(X.x))
     df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
                              'm': [4.34, 3.95, 4.20]})
     assert t.equals(df_truth)
     # straight mutate
-    t = df >> mutate(m=max(X.x))
+    t = df >> mutate(m=colmax(X.x))
     df_truth = df.copy()
     df_truth['m'] = 4.34
     assert t.equals(df_truth)
     # grouped mutate
-    t = df >> groupby(X.cut) >> mutate(m=max(X.x))
+    t = df >> groupby(X.cut) >> mutate(m=colmax(X.x))
     df_truth['m'] = pd.Series([3.95, 4.20, 4.34, 4.20, 4.34])
     assert t.equals(df_truth)
 
