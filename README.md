@@ -5,17 +5,16 @@
 The dfply package makes it possible to do R's dplyr-style data manipulation with pipes
 in python on pandas DataFrames.
 
-This package is an alternative to [pandas-ply](https://github.com/coursera/pandas-ply)
+This is an alternative to [pandas-ply](https://github.com/coursera/pandas-ply)
 and [dplython](https://github.com/dodger487/dplython). It is heavily inspired by
 both of them, and in fact the code for symbolic representation of pandas DataFrames
-and series (such as `X.variable`) is directly imported from pandas-ply.
+and series (e.g. `X.variable`) is imported from pandas-ply.
 
-The syntax and functionality of the package is in most cases be identical
-to dplython. The major difference is in the structure of the code; dfply makes heavy use of
-decorators to "categorize" and compartmentalize the operation of data manipulation functions. The
-goal of this architecture is to make dfply concise and easily
+The syntax and functionality of the package will in most cases be identical
+to dplyr and dplython. dfply uses a decorator-based structure for piping and categorizing
+data manipulation functions. The goal of the decorator architecture is to make dfply concise and easily
 extensible. There is a more in-depth overview of the decorators and how dfply can be
-customized further down.
+customized below.
 
 **Expect frequent updates to the package version as features are added and
 any bugs are fixed.**
