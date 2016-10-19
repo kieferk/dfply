@@ -37,14 +37,30 @@ def mean(series):
     return mean_s
 
 
-def first(series):
+@make_symbolic
+def first(series, order_by=None):
+    if order_by is not None:
+        series = order_series_by(series, order_by)
     first_s = series.iloc[0]
     return first_s
 
 
-def last(series):
+@make_symbolic
+def last(series, order_by=None):
+    if order_by is not None:
+        series = order_series_by(series, order_by)
     last_s = series.iloc[series.size - 1]
     return last_s
+
+
+@make_symbolic
+def nth(series, n, order_by=None):
+    if order_by is not None:
+        series = order_series_by(series, order_by)
+    if (n+1 > series.shape[0]) or (np.abs(n) > series.shape[0]):
+        return np.nan
+    else:
+        return series.iloc[n]
 
 
 def n(series):
