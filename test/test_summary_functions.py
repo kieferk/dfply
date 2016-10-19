@@ -40,6 +40,9 @@ def test_first():
     df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
                              'f': [4.05, 3.95, 3.89]})
     assert t.equals(df_truth)
+    # summarize with order_by
+    t = df >> summarize(f=first(X.x, order_by=desc(X.cut)))
+    df_truth = pd.DataFrame({'f':[3.89]})
     # straight mutate
     t = df >> mutate(f=first(X.x))
     df_truth = df.copy()
@@ -62,6 +65,11 @@ def test_last():
     df_truth = pd.DataFrame({'cut': ['Good', 'Ideal', 'Premium'],
                              'l': [4.34, 3.95, 4.20]})
     assert t.equals(df_truth)
+    # summarize with order_by
+    #t = df >> summarize(f=last(X.x, order_by=desc(X.cut)))
+    t = df >> summarize(f=last(X.x, order_by=[desc(X.cut), desc(X.x)]))
+    df_truth = pd.DataFrame({'f':[4.05]})
+    assert df_truth.equals(t)
     # straight mutate
     t = df >> mutate(l=last(X.x))
     df_truth = df.copy()
@@ -70,6 +78,38 @@ def test_last():
     # grouped mutate
     t = df >> groupby(X.cut) >> mutate(l=last(X.x))
     df_truth['l'] = pd.Series([3.95, 4.20, 4.34, 4.20, 4.34])
+    assert t.equals(df_truth)
+
+
+def test_nth():
+    df = diamonds >> select(X.cut, X.x) >> head(10)
+    # straight summarize
+    t = df >> summarize(second=nth(X.x, 1))
+    df_truth = pd.DataFrame({'second': [3.89]})
+    assert t.equals(df_truth)
+    # grouped summarize
+    t = df >> groupby(X.cut) >> summarize(first=nth(X.x, 0))
+    df_truth = pd.DataFrame({'cut': ['Fair','Good', 'Ideal', 'Premium','Very Good'],
+                             'first': [3.87,4.05,3.95,3.89,3.94]})
+    assert t.equals(df_truth)
+    # summarize with order_by
+    t = df >> summarize(last=nth(X.x, -1, order_by=[desc(X.cut), desc(X.x)]))
+    #print t
+    df_truth = pd.DataFrame({'last':[3.87]})
+    #print df_truth
+    assert df_truth.equals(t)
+    # straight mutate
+    t = df >> mutate(out_of_range=nth(X.x, 500))
+    df_truth = df.copy()
+    df_truth['out_of_range'] = np.nan
+    assert t.equals(df_truth)
+    # grouped mutate
+    t = df >> groupby(X.cut) >> mutate(penultimate=nth(X.x, -2))
+    print t
+    df_truth = df.copy()
+    df_truth['penultimate'] = pd.Series([np.nan,3.89,4.05,3.89,4.05,4.07,
+                                         4.07,4.07,np.nan,4.07])
+    print df_truth
     assert t.equals(df_truth)
 
 

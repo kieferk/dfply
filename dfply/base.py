@@ -165,7 +165,6 @@ class group_delegation(object):
             return self.function(*args, **kwargs)
 
 
-
 class symbolic_evaluation(object):
     """Decorator class that evaluates symbolic arguments and keyword arguments
     passed through to the decorated function.
@@ -187,6 +186,14 @@ class symbolic_evaluation(object):
         self.function = function
 
 
+    def _recursive_to_callable(self, df, arg):
+        if isinstance(arg, (list, tuple)):
+            return [self._recursive_to_callable(df, subarg) for subarg in arg]
+        if isinstance(arg, (symbolic.Symbol, symbolic.GetAttr, symbolic.Call)):
+            arg = symbolic.to_callable(arg)(df)
+        return arg
+
+
     def _args_eval(self, df, args):
         """Use the `symbolic.to_callable` to evaluate any symbolically
         represented arguments.
@@ -199,7 +206,7 @@ class symbolic_evaluation(object):
         Returns:
             list
         """
-        return [df]+[symbolic.to_callable(arg)(df) for arg in args]
+        return [df]+[self._recursive_to_callable(df, arg) for arg in args]
 
 
     def _kwargs_eval(self, df, kwargs):
@@ -215,7 +222,7 @@ class symbolic_evaluation(object):
         Returns:
             dict
         """
-        return {k:symbolic.to_callable(v)(df) for k,v in kwargs.items()}
+        return {k:self._recursive_to_callable(df, v) for k,v in kwargs.items()}
 
 
     def __call__(self, *args, **kwargs):
@@ -564,3 +571,104 @@ def dfpipe(f):
             symbolic_evaluation(f)
         )
     )
+
+
+# ------------------------------------------------------------------------------
+# Series functions
+# ------------------------------------------------------------------------------
+
+def symbolic_list_handler(*args):
+    return args
+
+
+class make_symbolic(object):
+    """Turns a function into a symbolic function, whose evaluation will be
+    delayed until it has access to the DataFrame to be evaluated against.
+
+    Args:
+        f (function): function to be converted to symbolic.
+
+    Returns:
+        symbolic function
+    """
+
+    __name__ = "make_symbolic"
+
+    def __init__(self, function):
+        self.function = function
+
+    def check_arg(self, arg):
+        if isinstance(arg, (list, tuple)):
+            conv_arg = [self.check_arg(subarg) for subarg in arg]
+            return symbolic.sym_call(symbolic_list_handler, *conv_arg)
+        else:
+            return arg
+
+    def __call__(self, *args, **kwargs):
+        #print args, kwargs
+        args = [self.check_arg(arg) for arg in args]
+        kwargs = {k:self.check_arg(v) for k,v in kwargs.items()}
+        return symbolic.sym_call(self.function, *args, **kwargs)
+
+
+def order_series_by(series, order_series):
+    """Orders one series according to another series, or a list of other
+    series. If a list of other series are specified, ordering is done hierarchically
+    like when a list of columns is supplied to `.sort_values()`.
+
+    Args:
+        series (:obj:`pandas.Series`): the pandas Series object to be reordered.
+        order_series: either a pandas Series object or a list of pandas Series
+            objects. These will be sorted using `.sort_values()` with
+            `ascending=True`, and the new order will be used to reorder the
+            Series supplied in the first argument.
+
+    Returns:
+        reordered `pandas.Series` object
+
+    """
+
+    if isinstance(order_series, (list, tuple)):
+        sorter = pd.concat(order_series, axis=1)
+        sorter_columns = ['_sorter'+str(i) for i in range(len(order_series))]
+        sorter.columns = sorter_columns
+        sorter['series'] = series.values
+        sorted_series = sorter.sort_values(sorter_columns)['series']
+        return sorted_series
+    else:
+        sorted_series = pd.DataFrame({
+            'series':series.values,
+            'order':order_series.values
+        }).sort_values('order', ascending=True)['series']
+        return sorted_series
+
+
+def desc(series):
+    """Mimics the functionality of the R desc function. Essentially inverts a
+    series object to make ascending sort act like descending sort.
+
+    Example:
+
+    First group by cut, then find the first value of price when ordering by
+    price ascending, and ordering by price descending using the `desc` function.
+
+    diamonds >> group_by(X.cut) >> summarize(carat_low=first(X.price, order_by=X.price),
+                                             carat_high=first(X.price, order_by=desc(X.price)))
+
+             cut  carat_high  carat_low
+    0       Fair       18574        337
+    1       Good       18788        327
+    2      Ideal       18806        326
+    3    Premium       18823        326
+    4  Very Good       18818        336
+
+    Args:
+        series (:obj:`pandas.Series`): pandas series to be inverted prior to
+            ordering/sorting.
+
+    Returns:
+        inverted `pandas.Series`. The returned series will be numeric (integers),
+            regardless of the type of the original series.
+
+    """
+    return series.rank(method='min', ascending=False)
