@@ -605,7 +605,6 @@ class make_symbolic(object):
             return arg
 
     def __call__(self, *args, **kwargs):
-        #print args, kwargs
         args = [self.check_arg(arg) for arg in args]
         kwargs = {k:self.check_arg(v) for k,v in kwargs.items()}
         return symbolic.sym_call(self.function, *args, **kwargs)

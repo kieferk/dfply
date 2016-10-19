@@ -105,11 +105,9 @@ def test_nth():
     assert t.equals(df_truth)
     # grouped mutate
     t = df >> groupby(X.cut) >> mutate(penultimate=nth(X.x, -2))
-    print t
     df_truth = df.copy()
     df_truth['penultimate'] = pd.Series([np.nan,3.89,4.05,3.89,4.05,4.07,
                                          4.07,4.07,np.nan,4.07])
-    print df_truth
     assert t.equals(df_truth)
 
 
