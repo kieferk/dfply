@@ -57,10 +57,10 @@ def last(series, order_by=None):
 def nth(series, n, order_by=None):
     if order_by is not None:
         series = order_series_by(series, order_by)
-    if (n+1 > series.shape[0]) or (np.abs(n) > series.shape[0]):
-        return np.nan
-    else:
+    try:
         return series.iloc[n]
+    except:
+        return np.nan
 
 
 def n(series):
