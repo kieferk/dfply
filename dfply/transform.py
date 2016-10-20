@@ -20,11 +20,13 @@ def transmute(df, *keep_columns, **kwargs):
 # Window functions
 # ------------------------------------------------------------------------------
 
+@make_symbolic
 def lead(series, i=1):
     shifted = series.shift(i)
     return shifted
 
 
+@make_symbolic
 def lag(series, i=1):
     shifted = series.shift(i * -1)
     return shifted
@@ -34,7 +36,7 @@ def lag(series, i=1):
 #     row_numbers = np.arange(len(series))
 #     return row_numbers
 
-
+@make_symbolic
 def between(series, a, b, inclusive=False):
     if inclusive == True:
         met_condition = (series >= a) & (series <= b)
@@ -43,21 +45,25 @@ def between(series, a, b, inclusive=False):
     return met_condition
 
 
+@make_symbolic
 def dense_rank(series, ascending=True):
     ranks = series.rank(method='dense', ascending=ascending)
     return ranks
 
 
+@make_symbolic
 def min_rank(series, ascending=True):
     ranks = series.rank(method='min', ascending=ascending)
     return ranks
 
 
+@make_symbolic
 def cumsum(series):
     sums = series.cumsum()
     return sums
 
 
+@make_symbolic
 def cummean(series):
     means = series.expanding().mean()
     return means

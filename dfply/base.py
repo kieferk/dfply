@@ -102,93 +102,110 @@ class group_delegation(object):
 
 
 
-class symbolic_evaluation(object):
-    """Decorator class that evaluates symbolic arguments and keyword arguments
-    passed through to the decorated function.
+class SymbolicHandler(object):
 
-    The pandas-ply special symbolic representation of the DataFrame is `X`.
-    Decorating a function with this decorator will evaluate any arguments or
-    keyword arguments that are symbolic pandas objects.
-    """
-
-    __name__ = "symbolic_evaluation"
-
+    __name__ = "SymbolicHandler"
 
     def __init__(self, function):
         self.function = function
 
 
-    def _recursive_to_callable(self, df, arg):
+    def recursive_action(self, arg):
         if isinstance(arg, (list, tuple)):
-            return [self._recursive_to_callable(df, subarg) for subarg in arg]
-        if isinstance(arg, (symbolic.Symbol, symbolic.GetAttr, symbolic.Call)):
-            arg = symbolic.to_callable(arg)(df)
-        return arg
+            return [self.recursive_action(subarg) for subarg in arg]
+        else:
+            return arg
 
 
-    def _args_eval(self, df, args):
-        return [df]+[self._recursive_to_callable(df, arg) for arg in args]
+    def recurse_args(self, args):
+        return [self.recursive_action(arg) for arg in args]
 
 
-    def _kwargs_eval(self, df, kwargs):
-        return {k:self._recursive_to_callable(df, v) for k,v in kwargs.items()}
+    def recurse_kwargs(self, kwargs):
+        return {k:self.recursive_action(v) for k,v in kwargs.items()}
+
+
+    def call_wrapper(self, args, kwargs):
+        return self.function(*self.recurse_args(args),
+                             **self.recurse_kwargs(kwargs))
 
 
     def __call__(self, *args, **kwargs):
-        assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
-        if len(args) > 1:
-            args = self._args_eval(args[0], args[1:])
-        if len(kwargs) > 0:
-            kwargs = self._kwargs_eval(args[0], kwargs)
-        return self.function(*args, **kwargs)
+        return self.call_wrapper(args, kwargs)
 
 
 
-class symbolic_reference(object):
-    """Decorator class that converts symbolic arguments and keyword arguments
-    into their names (typically `pandas.Series` objects).
+class make_symbolic(SymbolicHandler):
 
-    This is similar to the `symbolic_evaluation` decorator, but when names or
-    labels of the pandas objects are desired over their full evaluated form.
-    This decorator is purely for convenience; using `symbolic_evaluation` and
-    then manually extracting the labels within the decorated function would
-    do the same thing.
-    """
+    __name__ = "make_symbolic"
+
+    def __init__(self, function):
+        super(make_symbolic, self).__init__(function)
+
+
+    def recursive_action(self, arg):
+        if isinstance(arg, (list, tuple)):
+            conv_arg = [self.recursive_action(subarg) for subarg in arg]
+            return symbolic.sym_call(lambda *x: x, *conv_arg)
+        else:
+            return arg
+
+
+    def call_wrapper(self, args, kwargs):
+        return symbolic.sym_call(self.function,
+                                 *self.recurse_args(args),
+                                 **self.recurse_kwargs(kwargs))
+
+
+
+class symbolic_evaluation(SymbolicHandler):
+
+    __name__ = "symbolic_evaluation"
+
+    def __init__(self, function):
+        super(symbolic_evaluation, self).__init__(function)
+
+
+    def recursive_action(self, arg):
+        if isinstance(arg, (list, tuple)):
+            return [self.recursive_action(subarg) for subarg in arg]
+        elif callable(arg) and not isinstance(arg, symbolic.Expression):
+            return arg
+        else:
+            return symbolic.to_callable(arg)(self.df)
+
+
+    def call_wrapper(self, args, kwargs):
+        self.df = args[0]
+        return self.function(*[self.df]+self.recurse_args(args[1:]),
+                             **self.recurse_kwargs(kwargs))
+
+
+
+class symbolic_reference(SymbolicHandler):
 
     __name__ = "symbolic_reference"
 
-
     def __init__(self, function):
-        self.function = function
+        super(symbolic_reference, self).__init__(function)
 
 
-    def _label_or_arg(self, df, arg):
-        arg = symbolic.to_callable(arg)(df)
+    def recursive_action(self, arg):
+        arg = symbolic.to_callable(arg)(self.df)
         if isinstance(arg, pd.Series):
             return arg.name
         elif isinstance(arg, pd.DataFrame):
             return arg.columns.tolist()
         elif isinstance(arg, (list, tuple)):
-            return [self._label_or_arg(df, subarg) for subarg in arg]
-        else:
-            return arg
+            return [self.recursive_action(subarg) for subarg in arg]
+        return arg
 
 
-    def _args_eval(self, df, args):
-        return [df]+[self._label_or_arg(df, arg) for arg in args]
+    def call_wrapper(self, args, kwargs):
+        self.df = args[0]
+        return self.function(*[self.df]+self.recurse_args(args[1:]),
+                             **self.recurse_kwargs(kwargs))
 
-
-    def _kwargs_eval(self, df, kwargs):
-        return {k:self._label_or_arg(df, v) for k,v in kwargs.items()}
-
-
-    def __call__(self, *args, **kwargs):
-        assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
-        if len(args) > 1:
-            args = self._args_eval(args[0], args[1:])
-        if len(kwargs) > 0:
-            kwargs = self._kwargs_eval(args[0], kwargs)
-        return self.function(*args, **kwargs)
 
 
 
@@ -425,41 +442,6 @@ def dfpipe(f):
 # ------------------------------------------------------------------------------
 # Series functions
 # ------------------------------------------------------------------------------
-
-class make_symbolic(object):
-    """Turns a function into a symbolic function, whose evaluation will be
-    delayed until it has access to the DataFrame to be evaluated against.
-
-    Args:
-        f (function): function to be converted to symbolic.
-
-    Returns:
-        symbolic function
-    """
-
-    __name__ = "make_symbolic"
-
-    def __init__(self, function):
-        self.function = function
-
-
-    def symbolic_list_handler(self, *args):
-        return args
-
-
-    def check_arg(self, arg):
-        if isinstance(arg, (list, tuple)):
-            conv_arg = [self.check_arg(subarg) for subarg in arg]
-            return symbolic.sym_call(self.symbolic_list_handler, *conv_arg)
-        else:
-            return arg
-
-
-    def __call__(self, *args, **kwargs):
-        args = [self.check_arg(arg) for arg in args]
-        kwargs = {k:self.check_arg(v) for k,v in kwargs.items()}
-        return symbolic.sym_call(self.function, *args, **kwargs)
-
 
 
 def order_series_by(series, order_series):
