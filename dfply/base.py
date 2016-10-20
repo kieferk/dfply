@@ -101,6 +101,7 @@ class group_delegation(object):
             return self.function(*args, **kwargs)
 
 
+
 class symbolic_evaluation(object):
     """Decorator class that evaluates symbolic arguments and keyword arguments
     passed through to the decorated function.
