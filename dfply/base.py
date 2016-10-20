@@ -28,43 +28,16 @@ class pipe(object):
     __name__ = "pipe"
 
     def __init__(self, function):
-        """Upon decoration, function is assigned as a class attribute.
-
-        Args:
-            function (function): the function to be wrappped.
-        """
         self.function = function
 
 
     def __rrshift__(self, other):
-        """Overloads the `>>` operator, calling the decorated function on
-        the pandas DataFrame being passed through the pipe.
-
-        The DataFrame is copied prior to its call by the subsequent function
-        and any dfply grouping is preserved.
-
-        Args:
-            other (:obj:`pandas.DataFrame`): a DataFramet that is often the
-                output of another dfply pipe function.
-
-        """
         other_copy = other.copy()
         other_copy._grouped_by = getattr(other, '_grouped_by', None)
         return self.function(other_copy)
 
 
     def __call__(self, *args, **kwargs):
-        """Allows the arguments and keyword arguments of the decorated
-        function to be used with the piped DataFrame.
-
-        Args:
-            *args: any arguments passed to the decorated function.
-            **kwargs: any arguments passed to the decorated function.
-
-        Returns:
-            `pipe` decorated lambda function with argument `x`, which will
-                be the piped DataFrame.
-        """
         return pipe(lambda x: self.function(x, *args, **kwargs))
 
 
@@ -84,27 +57,10 @@ class group_delegation(object):
     __name__ = "group_delegation"
 
     def __init__(self, function):
-        """Upon decoration, function is assigned as a class attribute.
-
-        Args:
-            function (function): the function to be wrappped.
-        """
         self.function = function
 
 
     def _apply_combine_reset(self, grouped, *args, **kwargs):
-        """Apply the decorated function and remove any hierarchical indexing
-        that pandas creates in the process.
-
-        Args:
-            grouped (:obj:`pandas.core.groupby.DataFrameGroupBy`): pandas grouped
-                DataFrame.
-            *args: arguments of the decorated function.
-            **kwargs: keyword arguments of the decorated function.
-
-        Returns:
-            `pandas.DataFrame`
-        """
         combined = grouped.apply(self.function, *args, **kwargs)
 
         for name in combined.index.names[:-1]:
@@ -120,26 +76,6 @@ class group_delegation(object):
 
 
     def __call__(self, *args, **kwargs):
-        """Checks for grouping on the piped DataFrame and applies the decorated
-        function accordingly.
-
-        dfply stores groupings on piped DataFrames in the `._grouped_by`
-        attribute. `group_delegation` checks this attribute to determine whether
-        to apply the function on groups or to the DataFrame as a whole.
-
-        The `transmute` function requires special behavior in that its argument
-        will be the grouping.
-
-        Args:
-            *args: arguments of the decorated function.
-            **kwargs: keyword arguments of the decorated function.
-
-        Returns:
-            If no grouping, the return of the wrapped function call (which
-                will almost certainly be a `pandas.DataFrame`).
-            If grouping, a `pandas.DataFrame`.
-
-        """
         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
 
         df = args[0]
@@ -178,11 +114,6 @@ class symbolic_evaluation(object):
 
 
     def __init__(self, function):
-        """Upon decoration, function is assigned as a class attribute.
-
-        Args:
-            function (function): the function to be decorated.
-        """
         self.function = function
 
 
@@ -195,47 +126,14 @@ class symbolic_evaluation(object):
 
 
     def _args_eval(self, df, args):
-        """Use the `symbolic.to_callable` to evaluate any symbolically
-        represented arguments.
-
-        Args:
-            df (:obj:`pandas.DataFrame`): the DataFrame with which to evaluate
-                the symbolic placeholder against.
-            args: arguments of the decorated function to evaluate (if neccessary).
-
-        Returns:
-            list
-        """
         return [df]+[self._recursive_to_callable(df, arg) for arg in args]
 
 
     def _kwargs_eval(self, df, kwargs):
-        """Use the `symbolic.to_callable` to evaluate any symbolically
-        represented keyword arguments.
-
-        Args:
-            df (:obj:`pandas.DataFrame`): the DataFrame with which to evaluate
-                the symbolic placeholder against.
-            kwargs: keyword arguments of the decorated function to evaluate
-                (if neccessary).
-
-        Returns:
-            dict
-        """
         return {k:self._recursive_to_callable(df, v) for k,v in kwargs.items()}
 
 
     def __call__(self, *args, **kwargs):
-        """Attempts evaluation of any symbolic representations of pandas
-        objects in the decorated function's arguments or keyword arguments.
-
-        Args:
-            *args: arguments of the decorated function.
-            **kwargs: keyword arguments of the decorated function.
-
-        Returns:
-            Return value of the called decorated function.
-        """
         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
         if len(args) > 1:
             args = self._args_eval(args[0], args[1:])
@@ -260,26 +158,10 @@ class symbolic_reference(object):
 
 
     def __init__(self, function):
-        """Upon decoration, function is assigned as a class attribute.
-
-        Args:
-            function (function): the function to be wrappped.
-        """
         self.function = function
 
 
     def _label_or_arg(self, df, arg):
-        """Recursively extracts pandas object labels from symbolic arguments,
-        otherwise preserves the argument.
-
-        Args:
-            df (:obj:`pandas.DataFrame`): the DataFrame to evaluate a symbolic
-                argument against.
-            arg: an argument of the decorated function.
-
-        Returns:
-            Original argument or label of symbolic pandas object.
-        """
         arg = symbolic.to_callable(arg)(df)
         if isinstance(arg, pd.Series):
             return arg.name
@@ -292,48 +174,14 @@ class symbolic_reference(object):
 
 
     def _args_eval(self, df, args):
-        """Use the `symbolic.to_callable` to evaluate any symbolically
-        represented pandas object arguments as their labels.
-
-        Args:
-            df (:obj:`pandas.DataFrame`): the DataFrame with which to evaluate
-                the symbolic placeholder against.
-            args: arguments of the decorated function to evaluate (if neccessary).
-
-        Returns:
-            list
-        """
         return [df]+[self._label_or_arg(df, arg) for arg in args]
 
 
     def _kwargs_eval(self, df, kwargs):
-        """Use the `symbolic.to_callable` to evaluate any symbolically
-        represented pandas object keyword arguments as their labels.
-
-        Args:
-            df (:obj:`pandas.DataFrame`): the DataFrame with which to evaluate
-                the symbolic placeholder against.
-            kwargs: keyword arguments of the decorated function to evaluate
-                (if neccessary).
-
-        Returns:
-            dict
-        """
         return {k:self._label_or_arg(df, v) for k,v in kwargs.items()}
 
 
     def __call__(self, *args, **kwargs):
-        """Attempts evaluation to a label of any symbolic representations
-        of pandas objects in the decorated function's arguments or
-        keyword arguments.
-
-        Args:
-            *args: arguments of the decorated function.
-            **kwargs: keyword arguments of the decorated function.
-
-        Returns:
-            Return value of the called decorated function.
-        """
         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
         if len(args) > 1:
             args = self._args_eval(args[0], args[1:])
@@ -577,10 +425,6 @@ def dfpipe(f):
 # Series functions
 # ------------------------------------------------------------------------------
 
-def symbolic_list_handler(*args):
-    return args
-
-
 class make_symbolic(object):
     """Turns a function into a symbolic function, whose evaluation will be
     delayed until it has access to the DataFrame to be evaluated against.
@@ -597,17 +441,24 @@ class make_symbolic(object):
     def __init__(self, function):
         self.function = function
 
+
+    def symbolic_list_handler(self, *args):
+        return args
+
+
     def check_arg(self, arg):
         if isinstance(arg, (list, tuple)):
             conv_arg = [self.check_arg(subarg) for subarg in arg]
-            return symbolic.sym_call(symbolic_list_handler, *conv_arg)
+            return symbolic.sym_call(self.symbolic_list_handler, *conv_arg)
         else:
             return arg
+
 
     def __call__(self, *args, **kwargs):
         args = [self.check_arg(arg) for arg in args]
         kwargs = {k:self.check_arg(v) for k,v in kwargs.items()}
         return symbolic.sym_call(self.function, *args, **kwargs)
+
 
 
 def order_series_by(series, order_series):
