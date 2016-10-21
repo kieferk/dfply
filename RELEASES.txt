@@ -1,3 +1,21 @@
+v0.2.0
+This release now introduces the @make_symbolic decorator, which can wrap
+functions to allow them to evaluate later. This is particularly (and perhaps
+only) useful when you embed functions as arguments to other functions. For
+example the summary and window functions.
+
+The code for the symbolic handling decorators has been reworked. They now
+inherit from a common class since they shared patterns in their code.
+
+- @make_symbolic decorator
+- README updates
+- desc() and order_series_by() functions
+- re-imagining of the code for @symbolic_evaluation, @symbolic_reference
+  (the functionality remains unchanged)
+- window and summary functions, along with their tests, have been moved around
+  to other files.
+  
+
 v0.1.10
 - `separate` and `unite` functions added.
 - Summary functions added for series operations.

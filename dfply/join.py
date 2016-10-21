@@ -1,5 +1,8 @@
 from .base import *
 
+# ------------------------------------------------------------------------------
+# SQL-style joins
+# ------------------------------------------------------------------------------
 
 def get_join_parameters(join_kwargs):
     by = join_kwargs.get('by', None)
@@ -84,6 +87,10 @@ def anti_join(df, other, **kwargs):
                       indicator=True).query('_merge=="left_only"')[df.columns.values.tolist()]
     return joined
 
+
+# ------------------------------------------------------------------------------
+# Binding
+# ------------------------------------------------------------------------------
 
 @pipe
 def bind_rows(df, other, join='outer', ignore_index=False):
