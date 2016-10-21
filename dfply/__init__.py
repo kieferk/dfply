@@ -9,3 +9,5 @@ from dfply.subset import *
 from dfply.summarize import *
 from dfply.transform import *
 from dfply.data import *
+from dfply.summary_functions import *
+from dfply.window_functions import *

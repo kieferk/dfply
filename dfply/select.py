@@ -1,21 +1,4 @@
 from .base import *
-import warnings
-
-
-# ==============================================================================
-#
-# SELECTORS
-#
-# These functions are for subsetting along columns (axis=1).
-#
-# NOTE: Currently selection removes groupings as indicated in the `._grouped_by`
-# attribute attached by the `groupby()` function. I'm still not sure whether
-# I like this or not, but a select operation on groups prior to an aggregation
-# function is atypical from the start, so I'm not sure if there is a "best
-# practice" here.
-#
-# ==============================================================================
-
 
 # ------------------------------------------------------------------------------
 # Select and drop operators

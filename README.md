@@ -6,22 +6,31 @@ The dfply package makes it possible to do R's dplyr-style data manipulation with
 in python on pandas DataFrames.
 
 This is an alternative to [pandas-ply](https://github.com/coursera/pandas-ply)
-and [dplython](https://github.com/dodger487/dplython). It is heavily inspired by
-both of them, and in fact the code for symbolic representation of pandas DataFrames
-and series (e.g. `X.variable`) is imported from pandas-ply.
+and [dplython](https://github.com/dodger487/dplython), which both engineer dplyr
+syntax and functionality in python. The dfply code for symbolic representation
+of pandas DataFrames and series (e.g. `X.variable`) is imported from pandas-ply.
 
-The syntax and functionality of the package will in most cases be identical
-to dplyr and dplython. dfply uses a decorator-based structure for piping and categorizing
-data manipulation functions. The goal of the decorator architecture is to make dfply concise and easily
-extensible. There is a more in-depth overview of the decorators and how dfply can be
+dfply uses a decorator-based architecture for the piping functionality and
+to "categorize" the types of data manipulation functions. The goal of this  
+architecture is to make dfply concise and easily extensible, simply by chaining
+together different decorators that each have a distinct effect on the wrapped
+function. There is a more in-depth overview of the decorators and how dfply can be
 customized below.
 
-Dfply is intended to mimic the functionality of dplyr. The syntax, while most often
-the same, varies in cases where it makes more sense to do it differently in python.
+Dfply is intended to (at least) mimic the functionality of dplyr. The syntax
+is the same for the most part, but may vary in some cases.
+
+Most of the core functionality of dplyr is complete, and the remainder is
+actively being added in. Going forward I expect functionality that is not
+directly part of dplyr to be incorporated into dfply as well. This is not
+intended to be a direct port of dplyr, but instead a port of the _ease,
+convenience and readability_ the dplyr package provides for data manipulation
+tasks.
 
 
 **Expect frequent updates to the package version as features are added and
-any bugs are fixed.**
+any bugs are fixed. That being said, the current version appears to be
+stable.**
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -77,7 +86,7 @@ any bugs are fixed.**
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Overview
+## Overview of functions
 
 > (A notebook showcasing most of the working functions in dfply [can be
 found here](https://github.com/kieferk/dfply/blob/master/examples/dfply-example-gallery.ipynb))
@@ -916,6 +925,354 @@ diamonds >> groupby(X.cut) >> summarize_each([np.mean, np.var], X.price, 4)
 ```
 
 
+## Embedded column functions
+
+**UNDER CONSTRUCTION**
+
+Like dplyr the dfply package provides functions to perform various operations
+on pandas Series. These are typically window functions and summarization
+functions, and wrap symbolic arguments in function calls.
+
+
+### Window functions
+
+Window functions perform operations on vectors of values that return a vector
+of the same length.
+
+#### `lead()` and `lag()`
+
+The `lead(series, n)` function pushes values in a vector forward, adding `NaN`
+values in the leading positions. Likewise, the `lag(series, n)` function
+pushes values backwards inserting `NaN` values in the last positions. Both
+are calls to pandas `Series.shift()` function under the hood.
+
+```python
+diamonds >> mutate(price_lead=lead(X.price, 2), price_lag=lag(X.price, 2)) >>
+            select(X.price, -2, -1) >>
+            head(6)
+
+   price  price_lag  price_lead
+0    326      327.0         NaN
+1    326      334.0         NaN
+2    327      335.0       326.0
+3    334      336.0       326.0
+4    335      336.0       327.0
+5    336      337.0       334.0
+```
+
+#### `between()`
+
+`between(series, a, b, inclusive=False)`
+
+```python
+diamonds >> select(X.price) >> mutate(price_btwn=between(X.price, 330, 340)) >> head(6)
+
+   price price_btwn
+0    326      False
+1    326      False
+2    327      False
+3    334       True
+4    335       True
+5    336       True
+```
+
+#### `dense_rank()`
+
+`dense_rank(series, ascending=True)`
+
+```python
+diamonds >> select(X.price) >> mutate(price_drank=dense_rank(X.price)) >> head(6)
+
+   price  price_drank
+0    326          1.0
+1    326          1.0
+2    327          2.0
+3    334          3.0
+4    335          4.0
+5    336          5.0
+```
+
+#### `min_rank()`
+
+`min_rank(series, ascending=True)`
+
+```python
+diamonds >> select(X.price) >> mutate(price_mrank=min_rank(X.price)) >> head(6)
+
+price  price_mrank
+0    326          1.0
+1    326          1.0
+2    327          3.0
+3    334          4.0
+4    335          5.0
+5    336          6.0
+```
+
+#### `cumsum()`
+
+`cumsum(series)`
+
+```python
+diamonds >> select(X.price) >> mutate(price_cumsum=cumsum(X.price)) >> head(6)
+
+   price  price_cumsum
+0    326           326
+1    326           652
+2    327           979
+3    334          1313
+4    335          1648
+5    336          1984
+```
+
+#### `cummean()`
+
+`cummean(series)`
+
+```python
+diamonds >> select(X.price) >> mutate(price_cummean=cummean(X.price)) >> head(6)
+
+   price  price_cummean
+0    326     326.000000
+1    326     326.000000
+2    327     326.333333
+3    334     328.250000
+4    335     329.600000
+5    336     330.666667
+```
+
+#### `cummax()`
+
+`cummax(series)`
+
+```python
+diamonds >> select(X.price) >> mutate(price_cummax=cummax(X.price)) >> head(6)
+
+   price  price_cummax
+0    326         326.0
+1    326         326.0
+2    327         327.0
+3    334         334.0
+4    335         335.0
+5    336         336.0
+```
+
+#### `cummin()`
+
+`cummin(series)`
+
+```python
+diamonds >> select(X.price) >> mutate(price_cummin=cummin(X.price)) >> head(6)
+
+   price  price_cummin
+0    326         326.0
+1    326         326.0
+2    327         326.0
+3    334         326.0
+4    335         326.0
+5    336         326.0
+```
+
+#### `cumprod()`
+
+`cumprod(series)`
+
+```python
+diamonds >> select(X.price) >> mutate(price_cumprod=cumprod(X.price)) >> head(6)
+
+   price     price_cumprod
+0    326               326
+1    326            106276
+2    327          34752252
+3    334       11607252168
+4    335     3888429476280
+5    336  1306512304030080
+```
+
+
+### Summary functions
+
+#### `mean()`
+
+`mean(series)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_mean=mean(X.price))
+
+         cut   price_mean
+0       Fair  4358.757764
+1       Good  3928.864452
+2      Ideal  3457.541970
+3    Premium  4584.257704
+4  Very Good  3981.759891
+```
+
+#### `first()`
+
+`first(series, order_by=None)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_first=first(X.price))
+
+         cut  price_first
+0       Fair          337
+1       Good          327
+2      Ideal          326
+3    Premium          326
+4  Very Good          336
+```
+
+#### `last()`
+
+`last(series, order_by=None)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_last=last(X.price))
+
+         cut  price_last
+0       Fair        2747
+1       Good        2757
+2      Ideal        2757
+3    Premium        2757
+4  Very Good        2757
+```
+
+#### `nth()`
+
+`nth(series, n, order_by=None)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_penultimate=nth(X.price, -2))
+
+         cut  price_penultimate
+0       Fair               2745
+1       Good               2756
+2      Ideal               2757
+3    Premium               2757
+4  Very Good               2757
+```
+
+#### `n()`
+
+`n(series)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_n=n(X.price))
+
+         cut  price_n
+0       Fair     1610
+1       Good     4906
+2      Ideal    21551
+3    Premium    13791
+4  Very Good    12082
+```
+
+#### `n_distinct()`
+
+`n_distinct(series)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_ndistinct=n_distinct(X.price))
+
+         cut  price_ndistinct
+0       Fair             1267
+1       Good             3086
+2      Ideal             7281
+3    Premium             6014
+4  Very Good             5840
+```
+
+#### `IQR()`
+
+`IQR(series)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_iqr=IQR(X.price))
+
+         cut  price_iqr
+0       Fair    3155.25
+1       Good    3883.00
+2      Ideal    3800.50
+3    Premium    5250.00
+4  Very Good    4460.75
+```
+
+#### `colmin()`
+
+`colmin(series)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_min=colmin(X.price))
+
+         cut  price_min
+0       Fair        337
+1       Good        327
+2      Ideal        326
+3    Premium        326
+4  Very Good        336
+```
+
+#### `colmax()`
+
+`colmax(series)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_max=colmax(X.price))
+
+         cut  price_max
+0       Fair      18574
+1       Good      18788
+2      Ideal      18806
+3    Premium      18823
+4  Very Good      18818
+```
+
+#### `median()`
+
+`median(series)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_median=median(X.price))
+
+         cut  price_median
+0       Fair        3282.0
+1       Good        3050.5
+2      Ideal        1810.0
+3    Premium        3185.0
+4  Very Good        2648.0
+```
+
+#### `var()`
+
+`var(series)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_var=var(X.price))
+
+         cut     price_var
+0       Fair  1.267635e+07
+1       Good  1.355410e+07
+2      Ideal  1.450392e+07
+3    Premium  1.891558e+07
+4  Very Good  1.549101e+07
+```
+
+#### `sd()`
+
+`sd(series)`
+
+```python
+diamonds >> groupby(X.cut) >> summarize(price_sd=sd(X.price))
+
+         cut     price_sd
+0       Fair  3560.386612
+1       Good  3681.589584
+2      Ideal  3808.401172
+3    Premium  4349.204961
+4  Very Good  3935.862161
+```
+
+
+
 ## Decorators
 
 Under the hood, dfply functions work using a collection of different decorators.
@@ -1015,6 +1372,42 @@ with pipes, respect grouping, and evaluate symbolic DataFrames and Series
 correctly.
 
 
+### `@make_symbolic`
+
+Sometimes, like in the window and summary functions that operate on series,
+it is necessary to defer the evaluation of a function. For example, in the
+code below:
+
+```python
+diamonds >> summarize(price_third=nth(X.price, 3))
+```
+
+The `nth()` function would typically be evaluated before `summarize()` and the
+symbolic argument would not be evaluated at the right time.
+
+The `@make_symbolic` decorator can be placed above functions to convert them
+into symbolic functions that will wait to evaluate. Again, this is used
+primarily for functions that are embedded inside the function call within
+the piping syntax.
+
+The `nth()` code, for example, is below:
+
+```python
+@make_symbolic
+def nth(series, n, order_by=None):
+    if order_by is not None:
+        series = order_series_by(series, order_by)
+    try:
+        return series.iloc[n]
+    except:
+        return np.nan
+```
+
+Functions you write that you want to be able to embed as an argument
+can use the `@make_symbolic` to wait until they have access to the DataFrame
+to evaluate.
+
+
 ### Extending and mixing behavior with decorators
 
 One of the primary reasons that the dfply logic was built on these decorators
@@ -1042,15 +1435,17 @@ referring to columns into integer column positions for the decorated function.
 and `@column_indices_as_labels`.
 - `@positional_selection`: chains together `@pipe`, `@group_delegation`, `@symbolic_reference`,
 and `@column_indices_as_positions`.
+- `@make_symbolic`: turns functions into symbolic functions that "wait" for
+the piped DataFrame to evaluate.
 
 For many examples of these decorators and how they can be used together to achieve
 different types of behavior on piped DataFrames, please see the source code!
 
 ## Contributing
 
-By all means please feel free to comment or contribute to the package. If you
-submit an issue, pull request, or ask for something to be added I will do my
-best to respond promptly.
+By all means please feel free to comment or contribute to the package. The more
+people adding code the better. If you submit an issue, pull request, or ask for
+something to be added I will do my best to respond promptly.
 
 The TODO list (now located in the "Projects" section of the repo) has an
 ongoing list of things that still need to be resolved and features to be added.
