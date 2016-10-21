@@ -1,4 +1,2 @@
 # Include the license file
 include LICENSE.md
-
-global-include *.csv

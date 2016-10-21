@@ -1,7 +1,6 @@
 LICENSE.md
 MANIFEST.in
 setup.py
-data/diamonds.csv
 dfply/__init__.py
 dfply/base.py
 dfply/data.py
@@ -20,6 +19,7 @@ dfply.egg-info/SOURCES.txt
 dfply.egg-info/dependency_links.txt
 dfply.egg-info/requires.txt
 dfply.egg-info/top_level.txt
+dfply/data/__init__.py
 test/__init__.py
 test/test_base.py
 test/test_group.py
