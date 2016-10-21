@@ -8,8 +8,6 @@ def summarize(df, **kwargs):
 
 @dfpipe
 def summarize_each(df, functions, *args):
-    print functions
-    #print args
     columns, values = [], []
     for arg in args:
         if isinstance(arg, pd.Series):
