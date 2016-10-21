@@ -335,7 +335,7 @@ def _col_ind_to_label(columns, indexer):
         elif indexer >= len(columns):
             raise Exception(str(indexer)+' is greater than length of columns.')
         else:
-            return columns.tolist()[indexer]
+            return list(columns)[indexer]
     else:
         raise Exception("Label not of type str or int.")
 
