@@ -307,8 +307,8 @@ def _col_ind_to_position(columns, indexer):
             raise Exception("String label "+str(indexer)+' is not in columns.')
         return columns.index(indexer)
     elif isinstance(indexer, int):
-        if indexer < 0:
-            raise Exception("Int label "+str(indexer)+' is negative. Not currently allowed.')
+        #if indexer < 0:
+        #    raise Exception("Int label "+str(indexer)+' is negative. Not currently allowed.')
         return indexer
     else:
         raise Exception("Column indexer not of type str or int.")
@@ -330,12 +330,12 @@ def _col_ind_to_label(columns, indexer):
         return indexer
     elif isinstance(indexer, int):
         warnings.warn('Int labels will be inferred as column positions.')
-        if indexer < 0:
-            raise Exception(str(indexer)+' is negative. Not currently allowed.')
+        if indexer < -1*len(columns):
+            raise Exception(str(indexer)+' is negative and less than length of columns.')
         elif indexer >= len(columns):
             raise Exception(str(indexer)+' is greater than length of columns.')
         else:
-            return columns[indexer]
+            return columns.tolist()[indexer]
     else:
         raise Exception("Label not of type str or int.")
 
@@ -451,7 +451,6 @@ def dfpipe(f):
 # ------------------------------------------------------------------------------
 # Series manipulation functions
 # ------------------------------------------------------------------------------
-
 
 def order_series_by(series, order_series):
     """Orders one series according to another series, or a list of other
