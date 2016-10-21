@@ -27,6 +27,7 @@ class pipe(object):
 
     __name__ = "pipe"
 
+
     def __init__(self, function):
         self.function = function
 
@@ -107,6 +108,7 @@ class SymbolicHandler(object):
     __name__ = "SymbolicHandler"
 
     def __init__(self, function):
+        super(SymbolicHandler, self).__init__()
         self.function = function
 
 
@@ -138,6 +140,7 @@ class SymbolicHandler(object):
 class make_symbolic(SymbolicHandler):
 
     __name__ = "make_symbolic"
+    symbolic_arguments = False
 
     def __init__(self, function):
         super(make_symbolic, self).__init__(function)
@@ -148,13 +151,20 @@ class make_symbolic(SymbolicHandler):
             conv_arg = [self.recursive_action(subarg) for subarg in arg]
             return symbolic.sym_call(lambda *x: x, *conv_arg)
         else:
+            if isinstance(arg, symbolic.Expression):
+                self.symbolic_arguments = True
             return arg
 
 
     def call_wrapper(self, args, kwargs):
-        return symbolic.sym_call(self.function,
-                                 *self.recurse_args(args),
-                                 **self.recurse_kwargs(kwargs))
+        args = self.recurse_args(args)
+        kwargs = self.recurse_kwargs(kwargs)
+        if not self.symbolic_arguments:
+            return self.function(*args, **kwargs)
+        else:
+            return symbolic.sym_call(self.function,
+                                     *self.recurse_args(args),
+                                     **self.recurse_kwargs(kwargs))
 
 
 
@@ -205,7 +215,6 @@ class symbolic_reference(SymbolicHandler):
         self.df = args[0]
         return self.function(*[self.df]+self.recurse_args(args[1:]),
                              **self.recurse_kwargs(kwargs))
-
 
 
 
@@ -440,7 +449,7 @@ def dfpipe(f):
 
 
 # ------------------------------------------------------------------------------
-# Series functions
+# Series manipulation functions
 # ------------------------------------------------------------------------------
 
 
