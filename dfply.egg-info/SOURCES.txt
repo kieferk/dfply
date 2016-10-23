@@ -3,7 +3,6 @@ MANIFEST.in
 setup.py
 dfply/__init__.py
 dfply/base.py
-dfply/data.py
 dfply/group.py
 dfply/join.py
 dfply/reshape.py
