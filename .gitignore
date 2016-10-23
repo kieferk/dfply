@@ -12,3 +12,7 @@ __pycache__/
 # workbook test file
 test/feature_workbook.ipynb
 test/.ipynb_checkpoints/*
+
+# distribution
+dist
+build
