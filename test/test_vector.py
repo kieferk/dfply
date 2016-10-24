@@ -50,3 +50,24 @@ def test_coalesce():
     truth_df = df.assign(coal=[1,3,4,5,np.nan])
     d = df >> mutate(coal=coalesce(X.a, X.b, X.c, X.d))
     assert truth_df.equals(d)
+
+
+##==============================================================================
+## case_whens test
+##==============================================================================
+
+def test_case_when():
+    df = pd.DataFrame({
+        'num':np.arange(31)
+    })
+    df_truth = df.assign(strnum=['fizzbuzz' if (i % 15 == 0) else
+                                 'fizz' if (i % 3 == 0) else
+                                 'buzz' if (i % 5 == 0) else
+                                 str(i) for i in np.arange(31)])
+    d = df >> mutate(strnum=case_when([X.num % 15 == 0, 'fizzbuzz'],
+                                      [X.num % 3 == 0, 'fizz'],
+                                      [X.num % 5 == 0, 'buzz'],
+                                      [True, X.num.astype(str)]))
+    print(df_truth)
+    print(d)
+    assert df_truth.equals(d)

@@ -1,4 +1,5 @@
 from .base import *
+import collections
 
 # ------------------------------------------------------------------------------
 # series ordering
@@ -81,3 +82,33 @@ def coalesce(*series):
     min_nonna = np.argmin(pd.isnull(coalescer).values, axis=1)
     min_nonna = [coalescer.columns[i] for i in min_nonna]
     return coalescer.lookup(np.arange(coalescer.shape[0]), min_nonna)
+
+
+# ------------------------------------------------------------------------------
+# case_when
+# ------------------------------------------------------------------------------
+
+@make_symbolic
+def case_when(*conditions):
+    lengths = []
+    for logical, outcome in conditions:
+        if isinstance(logical, collections.Iterable):
+            lengths.append(len(logical))
+        if isinstance(outcome, collections.Iterable) and not isinstance(outcome, str):
+            lengths.append(len(outcome))
+    unique_lengths = np.unique(lengths)
+    assert len(unique_lengths) == 1
+    output_len = unique_lengths[0]
+
+    output = []
+    for logical, outcome in conditions:
+        if isinstance(logical, bool):
+            logical = np.repeat(logical, output_len)
+        if isinstance(logical, pd.Series):
+            logical = logical.values
+        if not isinstance(outcome, collections.Iterable) or isinstance(outcome, str):
+            outcome = pd.Series(np.repeat(outcome, output_len))
+        outcome[~logical] = np.nan
+        output.append(outcome)
+
+    return coalesce(*output)
