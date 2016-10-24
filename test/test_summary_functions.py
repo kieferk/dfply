@@ -1,5 +1,4 @@
 import pytest
-
 from dfply import *
 
 
@@ -94,7 +93,7 @@ def test_nth():
     assert t.equals(df_truth)
     # summarize with order_by
     t = df >> summarize(last=nth(X.x, -1, order_by=[desc(X.cut), desc(X.x)]))
-    #print t
+    #print(t)
     df_truth = pd.DataFrame({'last':[3.87]})
     #print df_truth
     assert df_truth.equals(t)

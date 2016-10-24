@@ -111,26 +111,22 @@ class SymbolicHandler(object):
         super(SymbolicHandler, self).__init__()
         self.function = function
 
-
     def recursive_action(self, arg):
         if isinstance(arg, (list, tuple)):
-            return [self.recursive_action(subarg) for subarg in arg]
+            arglist = [self.recursive_action(subarg) for subarg in arg]
+            return symbolic.sym_call(lambda *x: x, *arglist)
         else:
             return arg
-
 
     def recurse_args(self, args):
         return [self.recursive_action(arg) for arg in args]
 
-
     def recurse_kwargs(self, kwargs):
         return {k:self.recursive_action(v) for k,v in kwargs.items()}
 
-
     def call_wrapper(self, args, kwargs):
-        return self.function(*self.recurse_args(args),
-                             **self.recurse_kwargs(kwargs))
-
+        return symbolic.Call(self.function, args=self.recurse_args(args),
+                             kwargs=self.recurse_kwargs(kwargs))
 
     def __call__(self, *args, **kwargs):
         return self.call_wrapper(args, kwargs)
@@ -148,23 +144,22 @@ class make_symbolic(SymbolicHandler):
 
     def recursive_action(self, arg):
         if isinstance(arg, (list, tuple)):
-            conv_arg = [self.recursive_action(subarg) for subarg in arg]
-            return symbolic.sym_call(lambda *x: x, *conv_arg)
-        else:
-            if isinstance(arg, symbolic.Expression):
-                self.symbolic_arguments = True
-            return arg
+            arglist = [self.recursive_action(subarg) for subarg in arg]
+            return symbolic.sym_call(lambda *x: x, *arglist)
+        if isinstance(arg, symbolic.Expression):
+            self.symbolic_arguments = True
+        return arg
 
 
     def call_wrapper(self, args, kwargs):
-        args = self.recurse_args(args)
-        kwargs = self.recurse_kwargs(kwargs)
+        symbolic_function = symbolic.Call(self.function,
+                                          args=self.recurse_args(args),
+                                          kwargs=self.recurse_kwargs(kwargs))
         if not self.symbolic_arguments:
-            return self.function(*args, **kwargs)
+            return symbolic.eval_if_symbolic(symbolic_function, {})
         else:
-            return symbolic.sym_call(self.function,
-                                     *self.recurse_args(args),
-                                     **self.recurse_kwargs(kwargs))
+            self.symbolic_arguments = False
+            return symbolic_function
 
 
 
@@ -176,19 +171,11 @@ class symbolic_evaluation(SymbolicHandler):
         super(symbolic_evaluation, self).__init__(function)
 
 
-    def recursive_action(self, arg):
-        if isinstance(arg, (list, tuple)):
-            return [self.recursive_action(subarg) for subarg in arg]
-        elif callable(arg) and not isinstance(arg, symbolic.Expression):
-            return arg
-        else:
-            return symbolic.to_callable(arg)(self.df)
-
-
     def call_wrapper(self, args, kwargs):
-        self.df = args[0]
-        return self.function(*[self.df]+self.recurse_args(args[1:]),
-                             **self.recurse_kwargs(kwargs))
+        symbolic_function = symbolic.Call(self.function,
+                                          args=self.recurse_args(args),
+                                          kwargs=self.recurse_kwargs(kwargs))
+        return symbolic.to_callable(symbolic_function)(args[0])
 
 
 
@@ -201,20 +188,24 @@ class symbolic_reference(SymbolicHandler):
 
 
     def recursive_action(self, arg):
-        arg = symbolic.to_callable(arg)(self.df)
+        if hasattr(arg, '_eval'):
+            arg = symbolic.to_callable(arg)(self.df)
         if isinstance(arg, pd.Series):
             return arg.name
         elif isinstance(arg, pd.DataFrame):
-            return arg.columns.tolist()
+            return symbolic.sym_call(lambda *x: x, arg.columns.tolist())
         elif isinstance(arg, (list, tuple)):
-            return [self.recursive_action(subarg) for subarg in arg]
+            arglist = [self.recursive_action(subarg) for subarg in arg]
+            return symbolic.sym_call(lambda *x: x, *arglist)
         return arg
 
 
     def call_wrapper(self, args, kwargs):
         self.df = args[0]
-        return self.function(*[self.df]+self.recurse_args(args[1:]),
-                             **self.recurse_kwargs(kwargs))
+        symbolic_function = symbolic.Call(self.function,
+                                          args=[self.df]+self.recurse_args(args[1:]),
+                                          kwargs=self.recurse_kwargs(kwargs))
+        return symbolic.to_callable(symbolic_function)(self.df)
 
 
 
@@ -446,70 +437,3 @@ def dfpipe(f):
             symbolic_evaluation(f)
         )
     )
-
-
-# ------------------------------------------------------------------------------
-# Series manipulation functions
-# ------------------------------------------------------------------------------
-
-def order_series_by(series, order_series):
-    """Orders one series according to another series, or a list of other
-    series. If a list of other series are specified, ordering is done hierarchically
-    like when a list of columns is supplied to `.sort_values()`.
-
-    Args:
-        series (:obj:`pandas.Series`): the pandas Series object to be reordered.
-        order_series: either a pandas Series object or a list of pandas Series
-            objects. These will be sorted using `.sort_values()` with
-            `ascending=True`, and the new order will be used to reorder the
-            Series supplied in the first argument.
-
-    Returns:
-        reordered `pandas.Series` object
-
-    """
-
-    if isinstance(order_series, (list, tuple)):
-        sorter = pd.concat(order_series, axis=1)
-        sorter_columns = ['_sorter'+str(i) for i in range(len(order_series))]
-        sorter.columns = sorter_columns
-        sorter['series'] = series.values
-        sorted_series = sorter.sort_values(sorter_columns)['series']
-        return sorted_series
-    else:
-        sorted_series = pd.DataFrame({
-            'series':series.values,
-            'order':order_series.values
-        }).sort_values('order', ascending=True)['series']
-        return sorted_series
-
-
-def desc(series):
-    """Mimics the functionality of the R desc function. Essentially inverts a
-    series object to make ascending sort act like descending sort.
-
-    Example:
-
-    First group by cut, then find the first value of price when ordering by
-    price ascending, and ordering by price descending using the `desc` function.
-
-    diamonds >> group_by(X.cut) >> summarize(carat_low=first(X.price, order_by=X.price),
-                                             carat_high=first(X.price, order_by=desc(X.price)))
-
-             cut  carat_high  carat_low
-    0       Fair       18574        337
-    1       Good       18788        327
-    2      Ideal       18806        326
-    3    Premium       18823        326
-    4  Very Good       18818        336
-
-    Args:
-        series (:obj:`pandas.Series`): pandas series to be inverted prior to
-            ordering/sorting.
-
-    Returns:
-        inverted `pandas.Series`. The returned series will be numeric (integers),
-            regardless of the type of the original series.
-
-    """
-    return series.rank(method='min', ascending=False)

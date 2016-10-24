@@ -1,4 +1,5 @@
 from .base import *
+from .vector import *
 
 # ------------------------------------------------------------------------------
 # Series summary functions
