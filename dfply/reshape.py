@@ -6,11 +6,7 @@ import re
 # Sorting
 # ------------------------------------------------------------------------------
 
-@pipe
-@group_delegation
-@symbolic_reference
-@flatten_arguments
-@column_indices_as_labels
+@dfpipe
 def arrange(df, *args, **kwargs):
     """Calls `pandas.DataFrame.sort_values` to sort a DataFrame according to
     criteria.
@@ -18,10 +14,20 @@ def arrange(df, *args, **kwargs):
     See:
     http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_values.html
 
+    For a list of specific keyword arguments for sort_values (which will be
+    the same in arrange).
+
     Returns:
         Sorted DataFrame.
     """
-    return df.sort_values(list(args), **kwargs)
+    series = [df[arg] if isinstance(arg, str) else
+              df.iloc[:, arg] if isinstance(arg, int) else
+              pd.Series(arg) for arg in args]
+
+    sorter = pd.concat(series, axis=1)
+    sorter.index = df.index
+    sorter = sorter.sort_values(sorter.columns.tolist(), **kwargs)
+    return df.loc[sorter.index, :]
 
 
 # ------------------------------------------------------------------------------

@@ -9,17 +9,22 @@ from dfply import *
 
 def arrange_apply_helperfunc(df):
     df = df.sort_values('depth', ascending=False)
-    df = df.head(2)
+    df = df.head(5)
     return df
 
 
 def test_arrange():
     df = diamonds.groupby('cut').apply(arrange_apply_helperfunc).reset_index(drop=True)
     d = (diamonds >> groupby('cut') >> arrange('depth', ascending=False) >>
-         head(2) >> ungroup()).reset_index(drop=True)
+         head(5) >> ungroup()).reset_index(drop=True)
+    assert df.equals(d)
 
-    print(df.head(5))
-    print(d.head(5))
+    d = (diamonds >> groupby('cut') >> arrange(X.depth, ascending=False) >>
+         head(5) >> ungroup()).reset_index(drop=True)
+    assert df.equals(d)
+
+    df = diamonds.sort_values(['cut','price'], ascending=False)
+    d = diamonds >> arrange(desc(X.cut), desc(X.price))
     assert df.equals(d)
 
 
