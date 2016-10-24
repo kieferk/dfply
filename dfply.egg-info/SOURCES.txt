@@ -3,7 +3,6 @@ MANIFEST.in
 setup.py
 dfply/__init__.py
 dfply/base.py
-dfply/data.py
 dfply/group.py
 dfply/join.py
 dfply/reshape.py
@@ -13,6 +12,7 @@ dfply/subset.py
 dfply/summarize.py
 dfply/summary_functions.py
 dfply/transform.py
+dfply/vector.py
 dfply/window_functions.py
 dfply.egg-info/PKG-INFO
 dfply.egg-info/SOURCES.txt
