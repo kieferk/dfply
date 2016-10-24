@@ -1,4 +1,5 @@
 from .base import *
+from .base import _arg_extractor
 import re
 
 
@@ -20,9 +21,11 @@ def arrange(df, *args, **kwargs):
     Returns:
         Sorted DataFrame.
     """
+    flat_args = _arg_extractor(args)
+
     series = [df[arg] if isinstance(arg, str) else
               df.iloc[:, arg] if isinstance(arg, int) else
-              pd.Series(arg) for arg in args]
+              pd.Series(arg) for arg in flat_args]
 
     sorter = pd.concat(series, axis=1)
     sorter.index = df.index
