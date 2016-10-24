@@ -12,6 +12,7 @@ dfply/subset.py
 dfply/summarize.py
 dfply/summary_functions.py
 dfply/transform.py
+dfply/vector.py
 dfply/window_functions.py
 dfply.egg-info/PKG-INFO
 dfply.egg-info/SOURCES.txt
@@ -29,4 +30,5 @@ test/test_subset.py
 test/test_summarize.py
 test/test_summary_functions.py
 test/test_transform.py
+test/test_vector.py
 test/test_window_functions.py

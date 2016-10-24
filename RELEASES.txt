@@ -1,3 +1,16 @@
+v0.2.1
+Fixed an issue with the way the decorators were structured, particularly
+the @make_symbolic, that would cause problems with returning Call objects
+that would not evaluate properly. Hopefully this is now resolved.
+
+The "coalesce" function was added from dplyr.
+
+Some code was moved from base.py to the new vector.py file. The vector.py
+file now contains functions that specifically perform operations on
+series or numpy arrays (such as coalesce, desc, etc.). Test files have been
+reorganized accordingly.
+
+
 v0.2.0
 This release now introduces the @make_symbolic decorator, which can wrap
 functions to allow them to evaluate later. This is particularly (and perhaps
@@ -14,7 +27,7 @@ inherit from a common class since they shared patterns in their code.
   (the functionality remains unchanged)
 - window and summary functions, along with their tests, have been moved around
   to other files.
-  
+
 
 v0.1.10
 - `separate` and `unite` functions added.

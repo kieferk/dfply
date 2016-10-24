@@ -16,3 +16,6 @@ test/.ipynb_checkpoints/*
 # distribution
 dist
 build
+
+# egg_info
+dfply.egg_info
