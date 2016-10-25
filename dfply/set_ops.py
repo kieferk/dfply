@@ -2,19 +2,14 @@ from .base import *
 import warnings
 import pandas as pd
 
-# ==============================================================================
-#
-# SET OPERATIONS
-#
-# These functions treat DataFrames like sets
-#
-# ==============================================================================
-
 
 def validate_set_ops(df, other):
-    # ensure that dataframes are valid for set operations:
-    #   columns must be the same name in the same order
-    #   indexes must be of the same dimension with the same names
+    """
+    Helper function to ensure that DataFrames are valid for set operations.
+    Columns must be the same name in the same order, and indices must be of the
+    same dimension with the same names.
+    """
+
     if df.columns.values.tolist() != other.columns.values.tolist():
         not_in_df = [col for col in other.columns if col not in df.columns]
         not_in_other = [col for col in df.columns if col not in other.columns]
@@ -38,6 +33,20 @@ def validate_set_ops(df, other):
 
 @pipe
 def union(df, other, index=False, keep='first'):
+    """
+    Returns rows that appear in either DataFrame.
+
+    Args:
+        df (pandas.DataFrame): data passed in through the pipe.
+        other (pandas.DataFrame): other DataFrame to use for set operation with
+            the first.
+
+    Kwargs:
+        index (bool): Boolean indicating whether to consider the pandas index
+            as part of the set operation (default `False`).
+        keep (str): Indicates which duplicate should be kept. Options are `'first'`
+            and `'last'`.
+    """
     validate_set_ops(df, other)
     stacked = df.append(other)
     if index:
@@ -58,6 +67,21 @@ def union(df, other, index=False, keep='first'):
 
 @pipe
 def intersect(df, other, index=False, keep='first'):
+    """
+    Returns rows that appear in both DataFrames.
+
+    Args:
+        df (pandas.DataFrame): data passed in through the pipe.
+        other (pandas.DataFrame): other DataFrame to use for set operation with
+            the first.
+
+    Kwargs:
+        index (bool): Boolean indicating whether to consider the pandas index
+            as part of the set operation (default `False`).
+        keep (str): Indicates which duplicate should be kept. Options are `'first'`
+            and `'last'`.
+    """
+
     validate_set_ops(df, other)
     if index:
         df_reset_index = df.reset_index()
@@ -88,6 +112,21 @@ def intersect(df, other, index=False, keep='first'):
 
 @pipe
 def set_diff(df, other, index=False, keep='first'):
+    """
+    Returns rows that appear in the first DataFrame but not the second.
+
+    Args:
+        df (pandas.DataFrame): data passed in through the pipe.
+        other (pandas.DataFrame): other DataFrame to use for set operation with
+            the first.
+
+    Kwargs:
+        index (bool): Boolean indicating whether to consider the pandas index
+            as part of the set operation (default `False`).
+        keep (str): Indicates which duplicate should be kept. Options are `'first'`
+            and `'last'`.
+    """
+
     validate_set_ops(df, other)
     if index:
         df_reset_index = df.reset_index()

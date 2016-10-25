@@ -104,12 +104,20 @@ class group_delegation(object):
 
 
 class SymbolicHandler(object):
+    """
+    Parent class for symbolic argument decorators.
+
+    Default behavior is to recursively turn the arguments and keyword
+    arguments of a decorated function into `symbolic.Call` objects that
+    can be evaluated against a pandas DataFrame as it comes down a pipe.
+    """
 
     __name__ = "SymbolicHandler"
 
     def __init__(self, function):
         super(SymbolicHandler, self).__init__()
         self.function = function
+
 
     def recursive_action(self, arg):
         if isinstance(arg, (list, tuple)):
@@ -118,15 +126,19 @@ class SymbolicHandler(object):
         else:
             return arg
 
+
     def recurse_args(self, args):
         return [self.recursive_action(arg) for arg in args]
+
 
     def recurse_kwargs(self, kwargs):
         return {k:self.recursive_action(v) for k,v in kwargs.items()}
 
+
     def call_wrapper(self, args, kwargs):
         return symbolic.Call(self.function, args=self.recurse_args(args),
                              kwargs=self.recurse_kwargs(kwargs))
+
 
     def __call__(self, *args, **kwargs):
         return self.call_wrapper(args, kwargs)
@@ -134,6 +146,21 @@ class SymbolicHandler(object):
 
 
 class make_symbolic(SymbolicHandler):
+    """
+    A decorator that turns a function into a "delayed" function to be evaluated
+    only when it has access to the pandas DataFrame proceeding through the
+    pipe.
+
+    This decorator is primarily used to decorate functions that operate on
+    Series (columns), either as an argument within a function call or inside
+    of another function.
+
+    The `desc` function, for example, is decorated by @make_symbolic so that
+    it will wait to evaluate at the appropriate time.
+
+    Example:
+        diamonds >> arrange(desc(X.price), desc(X.carat)) >> head(5)
+    """
 
     __name__ = "make_symbolic"
     symbolic_arguments = False
@@ -164,6 +191,10 @@ class make_symbolic(SymbolicHandler):
 
 
 class symbolic_evaluation(SymbolicHandler):
+    """
+    Decorates functions that may contain symbolic arguments or keyword
+    arguments, evaluating them against the pandas DataFrame in the pipe.
+    """
 
     __name__ = "symbolic_evaluation"
 
@@ -180,6 +211,13 @@ class symbolic_evaluation(SymbolicHandler):
 
 
 class symbolic_reference(SymbolicHandler):
+    """
+    Similar to `symbolic_evaluation`, but instead of evaluating pandas objects
+    in their entirety, extracts the labels/names of the objects.
+
+    This is for convenience and primarily used to decorate the selection and
+    dropping functions.
+    """
 
     __name__ = "symbolic_reference"
 
