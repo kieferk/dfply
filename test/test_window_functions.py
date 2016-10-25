@@ -124,3 +124,29 @@ def test_cumprod():
     # some tricky floating point stuff going on here
     diffs = df_cp.cp - df_truth.cp
     assert all(diffs < .0000001)
+
+
+def test_cumany():
+    df = pd.DataFrame({
+        'a':[False,False,True,True,False,True],
+        'b':['x','x','x','x','y','y']
+    })
+
+    d = df >> mutate(ca=cumany(X.a))
+    assert d.equals(df.assign(ca=[False,False,True,True,True,True]))
+
+    d = df >> groupby(X.b) >> mutate(ca=cumany(X.a))
+    assert d.equals(df.assign(ca=[False,False,True,True,False,True]))
+
+
+def test_cumall():
+    df = pd.DataFrame({
+        'a':[True,True,False,True,False,True],
+        'b':['x','x','x','y','y','y']
+    })
+
+    d = df >> mutate(ca=cumall(X.a))
+    assert d.equals(df.assign(ca=[True,True,False,False,False,False]))
+
+    d = df >> groupby(X.b) >> mutate(ca=cumall(X.a))
+    assert d.equals(df.assign(ca=[True,True,False,True,False,False]))

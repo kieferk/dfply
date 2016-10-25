@@ -131,6 +131,7 @@ def cummax(series):
     Args:
         series: column to compute cumulative maximum for.
     """
+
     maxes = series.expanding().max()
     return maxes
 
@@ -144,6 +145,7 @@ def cummin(series):
     Args:
         series: column to compute cumulative minimum for.
     """
+
     mins = series.expanding().min()
     return mins
 
@@ -157,5 +159,34 @@ def cumprod(series):
     Args:
         series: column to compute cumulative product for.
     """
+
     prods = series.cumprod()
     return prods
+
+
+@make_symbolic
+def cumany(series):
+    """
+    Calculates cumulative any of values. Equivalent to
+    `series.expanding().apply(np.any).astype(bool)`.
+
+    Args:
+        series: column to compute cumulative any for.
+    """
+
+    anys = series.expanding().apply(np.any).astype(bool)
+    return anys
+
+
+@make_symbolic
+def cumall(series):
+    """
+    Calculates cumulative all of values. Equivalent to
+    `series.expanding().apply(np.all).astype(bool)`.
+
+    Args:
+        series: column to compute cumulative all for.
+    """
+
+    alls = series.expanding().apply(np.all).astype(bool)
+    return alls
