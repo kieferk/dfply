@@ -1,3 +1,9 @@
+v0.2.2
+- Added docstrings to functions and classes.
+- Added the `case_when` function.
+- Fixed `arrange` to work with symbolic functions like `desc` in the function
+  call.
+
 v0.2.1
 Fixed an issue with the way the decorators were structured, particularly
 the @make_symbolic, that would cause problems with returning Call objects
