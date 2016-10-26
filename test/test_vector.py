@@ -71,3 +71,23 @@ def test_case_when():
     print(df_truth)
     print(d)
     assert df_truth.equals(d)
+
+
+##==============================================================================
+## if_else test
+##==============================================================================
+
+def test_if_else():
+    df = pd.DataFrame({
+        'a':[1,2,3,4,5,6,7,8,9]
+    })
+    b_truth = ['odd','even','odd','even','odd','even','odd','even','odd']
+    d = df >> mutate(b=if_else(X.a % 2 == 0, 'even', 'odd'))
+    assert d.equals(df.assign(b=b_truth))
+
+    df = pd.DataFrame({
+        'a':[0,0,0,1,1,1,2,2,2]
+    })
+    b_truth = [5,5,5,5,5,5,9,9,9]
+    d = df >> mutate(b=if_else(X.a < 2, [5,5,5,5,5,5,5,5,5], [9,9,9,9,9,9,9,9,9]))
+    assert d.equals(df.assign(b=b_truth))
