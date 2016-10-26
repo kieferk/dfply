@@ -91,3 +91,17 @@ def test_if_else():
     b_truth = [5,5,5,5,5,5,9,9,9]
     d = df >> mutate(b=if_else(X.a < 2, [5,5,5,5,5,5,5,5,5], [9,9,9,9,9,9,9,9,9]))
     assert d.equals(df.assign(b=b_truth))
+
+
+##==============================================================================
+## na_if test
+##==============================================================================
+
+def test_na_if():
+    df = pd.DataFrame({
+        'a':[1,2,3,4,5]
+    })
+    d = df >> mutate(b=na_if(X.a, 3), c=na_if(X.a,1,2,3))
+    d = d[['a','b','c']]
+    df_true = df.assign(b=[1,2,np.nan,4,5], c=[np.nan,np.nan,np.nan,4,5])
+    assert df_true.equals(d)

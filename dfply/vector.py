@@ -21,7 +21,6 @@ def order_series_by(series, order_series):
 
     Returns:
         reordered `pandas.Series` object
-
     """
 
     if isinstance(order_series, (list, tuple)):
@@ -67,8 +66,8 @@ def desc(series):
         2      Ideal       18806        326
         3    Premium       18823        326
         4  Very Good       18818        336
-
     """
+
     return series.rank(method='min', ascending=False)
 
 
@@ -102,8 +101,8 @@ def coalesce(*series):
         2       4
         3       5
         4  np.nan
-
     """
+
     series = [pd.Series(s) for s in series]
     coalescer = pd.concat(series, axis=1)
     min_nonna = np.argmin(pd.isnull(coalescer).values, axis=1)
@@ -164,8 +163,8 @@ def case_when(*conditions):
         13   13        13
         14   14        14
         15   15  fizzbuzz
-
     """
+
     lengths = []
     for logical, outcome in conditions:
         if isinstance(logical, collections.Iterable):
@@ -215,6 +214,7 @@ def if_else(condition, when_true, otherwise):
     Example:
     df = pd.DataFrame
     """
+
     if not isinstance(when_true, collections.Iterable) or isinstance(when_true, str):
         when_true = np.repeat(when_true, len(condition))
     if not isinstance(otherwise, collections.Iterable) or isinstance(otherwise, str):
@@ -224,3 +224,22 @@ def if_else(condition, when_true, otherwise):
     output = np.array([when_true[i] if c else otherwise[i]
                        for i,c in enumerate(condition)])
     return output
+
+
+# ------------------------------------------------------------------------------
+# na_if
+# ------------------------------------------------------------------------------
+
+@make_symbolic
+def na_if(series, *values):
+    """
+    If values in a series match a specified value, change them to `np.nan`.
+
+    Args:
+        series: Series or vector, often symbolic.
+        *values: Value(s) to convert to `np.nan` in the series.
+    """
+
+    series = pd.Series(series)
+    series[series.isin(values)] = np.nan
+    return series
