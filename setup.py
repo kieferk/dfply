@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'dfply',
-    version = '0.2.1',
+    version = '0.2.2',
     author = 'Kiefer Katovich',
     author_email = 'kiefer.katovich@gmail.com',
     keywords = 'pandas dplyr',
