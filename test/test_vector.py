@@ -50,3 +50,58 @@ def test_coalesce():
     truth_df = df.assign(coal=[1,3,4,5,np.nan])
     d = df >> mutate(coal=coalesce(X.a, X.b, X.c, X.d))
     assert truth_df.equals(d)
+
+
+##==============================================================================
+## case_when test
+##==============================================================================
+
+def test_case_when():
+    df = pd.DataFrame({
+        'num':np.arange(31)
+    })
+    df_truth = df.assign(strnum=['fizzbuzz' if (i % 15 == 0) else
+                                 'fizz' if (i % 3 == 0) else
+                                 'buzz' if (i % 5 == 0) else
+                                 str(i) for i in np.arange(31)])
+    d = df >> mutate(strnum=case_when([X.num % 15 == 0, 'fizzbuzz'],
+                                      [X.num % 3 == 0, 'fizz'],
+                                      [X.num % 5 == 0, 'buzz'],
+                                      [True, X.num.astype(str)]))
+    print(df_truth)
+    print(d)
+    assert df_truth.equals(d)
+
+
+##==============================================================================
+## if_else test
+##==============================================================================
+
+def test_if_else():
+    df = pd.DataFrame({
+        'a':[1,2,3,4,5,6,7,8,9]
+    })
+    b_truth = ['odd','even','odd','even','odd','even','odd','even','odd']
+    d = df >> mutate(b=if_else(X.a % 2 == 0, 'even', 'odd'))
+    assert d.equals(df.assign(b=b_truth))
+
+    df = pd.DataFrame({
+        'a':[0,0,0,1,1,1,2,2,2]
+    })
+    b_truth = [5,5,5,5,5,5,9,9,9]
+    d = df >> mutate(b=if_else(X.a < 2, [5,5,5,5,5,5,5,5,5], [9,9,9,9,9,9,9,9,9]))
+    assert d.equals(df.assign(b=b_truth))
+
+
+##==============================================================================
+## na_if test
+##==============================================================================
+
+def test_na_if():
+    df = pd.DataFrame({
+        'a':[1,2,3,4,5]
+    })
+    d = df >> mutate(b=na_if(X.a, 3), c=na_if(X.a,1,2,3))
+    d = d[['a','b','c']]
+    df_true = df.assign(b=[1,2,np.nan,4,5], c=[np.nan,np.nan,np.nan,4,5])
+    assert df_true.equals(d)

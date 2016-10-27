@@ -2,7 +2,8 @@ from .base import *
 
 @label_selection
 def groupby(df, *args):
-    """Groups a pandas DataFrame by assigning groups to the `._grouped_by`
+    """
+    Groups a pandas DataFrame by assigning groups to the `._grouped_by`
     attribute. The `@label_selection` decorator converts symbolic and
     positional arguments to string labels.
 
@@ -29,7 +30,8 @@ def groupby(df, *args):
 
 @pipe
 def ungroup(df):
-    """Removes any groupings from a DataFrame by setting the `._grouped_by`
+    """
+    Removes any groupings from a DataFrame by setting the `._grouped_by`
     attribute to `None`.
     """
     if getattr(df, "_grouped_by", None) is not None:

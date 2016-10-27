@@ -1,4 +1,5 @@
 from .base import *
+from .base import _arg_extractor
 import re
 
 
@@ -6,11 +7,7 @@ import re
 # Sorting
 # ------------------------------------------------------------------------------
 
-@pipe
-@group_delegation
-@symbolic_reference
-@flatten_arguments
-@column_indices_as_labels
+@dfpipe
 def arrange(df, *args, **kwargs):
     """Calls `pandas.DataFrame.sort_values` to sort a DataFrame according to
     criteria.
@@ -18,10 +15,28 @@ def arrange(df, *args, **kwargs):
     See:
     http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_values.html
 
-    Returns:
-        Sorted DataFrame.
+    For a list of specific keyword arguments for sort_values (which will be
+    the same in arrange).
+
+    Args:
+        *args: Symbolic, string, integer or lists of those types indicating
+            columns to sort the DataFrame by.
+
+    Kwargs:
+        **kwargs: Any keyword arguments will be passed through to the pandas
+            `DataFrame.sort_values` function.
     """
-    return df.sort_values(list(args), **kwargs)
+
+    flat_args = _arg_extractor(args)
+
+    series = [df[arg] if isinstance(arg, str) else
+              df.iloc[:, arg] if isinstance(arg, int) else
+              pd.Series(arg) for arg in flat_args]
+
+    sorter = pd.concat(series, axis=1)
+    sorter.index = df.index
+    sorter = sorter.sort_values(sorter.columns.tolist(), **kwargs)
+    return df.loc[sorter.index, :]
 
 
 # ------------------------------------------------------------------------------
@@ -36,12 +51,12 @@ def rename(df, **kwargs):
 
     Args:
         df (:obj:`pandas.DataFrame`): DataFrame passed in via `>>` pipe.
+
+    Kwargs:
         **kwargs: key:value pairs where keys are new names for columns and
             values are current names of columns.
-
-    Returns:
-        DataFrame with columns renamed.
     """
+
     return df.rename(columns={v:k for k,v in kwargs.items()})
 
 
@@ -51,6 +66,32 @@ def rename(df, **kwargs):
 
 @label_selection
 def gather(df, key, values, *args, **kwargs):
+    """
+    Melts the specified columns in your DataFrame into two key:value columns.
+
+    Args:
+        key (str): Name of identifier column.
+        values (str): Name of column that will contain values for the key.
+        *args (str, int, symbolic): Columns to "melt" into the new key and
+            value columns. If no args are specified, all columns are melted
+            into they key and value columns.
+
+    Kwargs:
+        add_id (bool): Boolean value indicating whether to add a `"_ID"`
+            column that will preserve information about the original rows
+            (useful for being able to re-widen the data later).
+
+    Example:
+        diamonds >> gather('variable', 'value', ['price', 'depth','x','y','z']) >> head(5)
+
+           carat      cut color clarity  table variable  value
+        0   0.23    Ideal     E     SI2   55.0    price  326.0
+        1   0.21  Premium     E     SI1   61.0    price  326.0
+        2   0.23     Good     E     VS1   65.0    price  327.0
+        3   0.29  Premium     I     VS2   58.0    price  334.0
+        4   0.31     Good     J     SI2   58.0    price  335.0
+    """
+
     if len(args) == 0:
         args = df.columns.tolist()
 
@@ -67,6 +108,10 @@ def gather(df, key, values, *args, **kwargs):
 # ------------------------------------------------------------------------------
 
 def convert_type(df, columns):
+    """
+    Helper function that attempts to convert columns into their appropriate
+    data type.
+    """
     # taken in part from the dplython package
     out_df = df.copy()
     for col in columns:
@@ -95,6 +140,36 @@ def convert_type(df, columns):
 
 @label_selection
 def spread(df, key, values, convert=False):
+    """
+    Transforms a "long" DataFrame into a "wide" format using a key and value
+    column.
+
+    If you have a mixed datatype column in your long-format DataFrame then the
+    default behavior is for the spread columns to be of type `object`, or
+    string. If you want to try to convert dtypes when spreading, you can set
+    the convert keyword argument in spread to True.
+
+    Args:
+        key (str, int, or symbolic): Label for the key column.
+        values (str, int, or symbolic): Label for the values column.
+
+    Kwargs:
+        convert (bool): Boolean indicating whether or not to try and convert
+            the spread columns to more appropriate data types.
+
+
+    Example:
+        widened = elongated >> spread(X.variable, X.value)
+        widened >> head(5)
+
+            _ID carat clarity color        cut depth price table     x     y     z
+        0     0  0.23     SI2     E      Ideal  61.5   326    55  3.95  3.98  2.43
+        1     1  0.21     SI1     E    Premium  59.8   326    61  3.89  3.84  2.31
+        2    10   0.3     SI1     J       Good    64   339    55  4.25  4.28  2.73
+        3   100  0.75     SI1     D  Very Good  63.2  2760    56   5.8  5.75  3.65
+        4  1000  0.75     SI1     D      Ideal  62.3  2898    55  5.83   5.8  3.62
+    """
+
     # Taken mostly from dplython package
     columns = df.columns.tolist()
     id_cols = [col for col in columns if not col in [key, values]]
@@ -133,6 +208,28 @@ def spread(df, key, values, convert=False):
 @symbolic_reference
 def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
              extra='drop', fill='right'):
+    """
+    Splits columns into multiple columns.
+
+    Args:
+        df (pandas.DataFrame): DataFrame passed in through the pipe.
+        column (str, symbolic): Label of column to split.
+        into (list): List of string names for new columns.
+
+    Kwargs:
+        sep (str or list): If a string, the regex string used to split the
+            column. If a list, a list of integer positions to split strings
+            on.
+        remove (bool): Boolean indicating whether to remove the original column.
+        convert (bool): Boolean indicating whether the new columns should be
+            converted to the appropriate type.
+        extra (str): either `'drop'`, where split pieces beyond the specified
+            new columns are dropped, or `'merge'`, where the final split piece
+            contains the remainder of the original column.
+        fill (str): either `'right'`, where `np.nan` values are filled in the
+            right-most columns for missing pieces, or `'left'` where `np.nan`
+            values are filled in the left-most columns.
+    """
 
     assert isinstance(into, (tuple, list))
 
@@ -180,6 +277,30 @@ def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
 
 @label_selection
 def unite(df, colname, *args, **kwargs):
+    """
+    Does the inverse of `separate`, joining columns together by a specified
+    separator.
+
+    Any columns that are not strings will be converted to strings.
+
+    Args:
+        df (pandas.DataFrame): DataFrame passed in through the pipe.
+        colname (str): the name of the new joined column.
+        *args: list of columns to be joined, which can be strings, symbolic, or
+            integer positions.
+
+    Kwargs:
+        sep (str): the string separator to join the columns with.
+        remove (bool): Boolean indicating whether or not to remove the
+            original columns.
+        na_action (str): can be one of `'maintain'` (the default),
+            '`ignore'`, or `'as_string'`. The default will make the new column
+            row a `NaN` value if any of the original column cells at that
+            row contained `NaN`. '`ignore'` will treat any `NaN` value as an
+            empty string during joining. `'as_string'` will convert any `NaN`
+            value to the string `'nan'` prior to joining.
+    """
+
     to_unite = list(args)
     sep = kwargs.get('sep', '_')
     remove = kwargs.get('remove', True)

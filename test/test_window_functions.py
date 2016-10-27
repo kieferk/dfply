@@ -124,3 +124,42 @@ def test_cumprod():
     # some tricky floating point stuff going on here
     diffs = df_cp.cp - df_truth.cp
     assert all(diffs < .0000001)
+
+
+def test_cumany():
+    df = pd.DataFrame({
+        'a':[False,False,True,True,False,True],
+        'b':['x','x','x','x','y','y']
+    })
+
+    d = df >> mutate(ca=cumany(X.a))
+    assert d.equals(df.assign(ca=[False,False,True,True,True,True]))
+
+    d = df >> groupby(X.b) >> mutate(ca=cumany(X.a))
+    assert d.equals(df.assign(ca=[False,False,True,True,False,True]))
+
+
+def test_cumall():
+    df = pd.DataFrame({
+        'a':[True,True,False,True,False,True],
+        'b':['x','x','x','y','y','y']
+    })
+
+    d = df >> mutate(ca=cumall(X.a))
+    assert d.equals(df.assign(ca=[True,True,False,False,False,False]))
+
+    d = df >> groupby(X.b) >> mutate(ca=cumall(X.a))
+    assert d.equals(df.assign(ca=[True,True,False,True,False,False]))
+
+
+def test_percent_rank():
+    df = diamonds.copy() >> head(5) >> select(X.cut, X.x)
+    df_pr = df >> mutate(pr=percent_rank(X.x))
+    df_truth = df.copy()
+    assert df_pr.equals(df_truth.assign(pr=[.25, 0.00, 0.50, 0.75, 1.00]))
+    df_pr = df >> mutate(pr=percent_rank(X.cut))
+    assert df_pr.equals(df_truth.assign(pr=[0.50, 0.75, 0.00, 0.75, 0.00]))
+    df_pr = df >> groupby(X.cut) >> mutate(pr=percent_rank(X.x))
+    assert df_pr.equals(df_truth.assign(pr=[0.0, 0.0, 0.0, 1.0, 1.0]))
+    df_pr = df >> mutate(pr=percent_rank(X.x, ascending=False))
+    assert df_pr.equals(df_truth.assign(pr=[0.75, 1.0, 0.50, 0.25, 0.00]))
