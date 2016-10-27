@@ -9,9 +9,10 @@ __pycache__/
 # Annoying Mac File
 .DC_Store
 
-# workbook test file
+# workbook test files
 test/feature_workbook.ipynb
 test/.ipynb_checkpoints/*
+test/worksheet.py
 
 # distribution
 dist
