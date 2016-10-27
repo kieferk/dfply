@@ -150,3 +150,20 @@ def test_cumall():
 
     d = df >> groupby(X.b) >> mutate(ca=cumall(X.a))
     assert d.equals(df.assign(ca=[True,True,False,True,False,False]))
+
+
+def test_percent_rank():
+    df = diamonds.copy() >> head(5) >> select(X.cut, X.x)
+    df_pr = df >> mutate(pr=percent_rank(X.x))
+    df_truth = df.copy()
+    df_truth['pr'] = pd.Series([.25, 0.00, 0.50, 0.75, 1.00])
+    assert df_pr.equals(df_truth)
+    df_pr = df >> mutate(pr=percent_rank(X.cut))
+    df_truth['pr'] = pd.Series([0.50, 0.75, 0.00, 0.75, 0.00])
+    assert df_pr.equals(df_truth)
+    df_pr = df >> groupby(X.cut) >> mutate(pr=percent_rank(X.x))
+    df_truth['pr'] = pd.Series([0.0, 0.0, 0.0, 1.0, 1.0])
+    assert df_pr.equals(df_truth)
+    df_pr = df >> mutate(pr=percent_rank(X.x, ascending=False))
+    df_truth['pr'] = pd.Series([0.75, 1.0, 0.50, 0.25, 0.00])
+    assert df_pr.equals(df_truth)
