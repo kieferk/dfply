@@ -30,12 +30,23 @@ class pipe(object):
 
     def __init__(self, function):
         self.function = function
+        self.chained_pipes = []
+
+
+    def __rshift__(self, other):
+        assert isinstance(other, pipe)
+        self.chained_pipes.append(other)
+        return self
 
 
     def __rrshift__(self, other):
         other_copy = other.copy()
         other_copy._grouped_by = getattr(other, '_grouped_by', None)
-        return self.function(other_copy)
+        result = self.function(other_copy)
+        if len(self.chained_pipes) > 0:
+            for p in self.chained_pipes:
+                result = p.__rrshift__(result)
+        return result
 
 
     def __call__(self, *args, **kwargs):
