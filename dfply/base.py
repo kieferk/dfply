@@ -43,9 +43,8 @@ class pipe(object):
         other_copy = other.copy()
         other_copy._grouped_by = getattr(other, '_grouped_by', None)
         result = self.function(other_copy)
-        if len(self.chained_pipes) > 0:
-            for p in self.chained_pipes:
-                result = p.__rrshift__(result)
+        for p in self.chained_pipes:
+            result = p.__rrshift__(result)
         return result
 
 
