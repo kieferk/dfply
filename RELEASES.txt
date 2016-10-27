@@ -6,6 +6,7 @@ v0.2.2
 - Added `cumany` and `cumall` window functions.
 - Added `if_else` function.
 - Added `na_if` function.
+- Added `percent_rank` function.
 
 
 v0.2.1
