@@ -190,3 +190,11 @@ def cumall(series):
 
     alls = series.expanding().apply(np.all).astype(bool)
     return alls
+
+
+@make_symbolic
+def percent_rank(series, ascending=True):
+    if series.size == 1:
+        return 0
+    percents = (series.rank(method='min', ascending=ascending) - 1) / (series.size - 1)
+    return percents

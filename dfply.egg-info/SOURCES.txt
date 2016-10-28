@@ -32,3 +32,4 @@ test/test_summary_functions.py
 test/test_transform.py
 test/test_vector.py
 test/test_window_functions.py
+test/worksheet.py
