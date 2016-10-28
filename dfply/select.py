@@ -1,19 +1,107 @@
 from .base import *
+from .base import _col_ind_to_position
+
 
 # ------------------------------------------------------------------------------
 # Select and drop operators
 # ------------------------------------------------------------------------------
 
-@positional_selection
-def select(df, *args):
-    """Selects specific columns.
+@selection_helper
+def starts_with(match, ignore_case=True):
+    if ignore_case:
+        matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
+                                       if c.lower().startswith(match.lower())])
+    else:
+        matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
+                                       if c.startswith(match)])
+    return matches
+    #return symbolic.sym_call(col_check, X)
 
-    Args:
-        *args: Can be integers, strings, symbolic series (`X.mycol`), or lists
-            of those. It can also handle pandas DataFrames, in which case the
-            columns as named in that DataFrame are selected by name from df.
-    """
+# def selection_helper(f):
+#     @wraps(f)
+#     def wrapped(*args, **kwargs):
+#         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
+#         columns = args[0].columns.tolist()
+#         matches = [[i,c] for i,c in enumerate(columns)]
+#
+#         str_to_list = lambda s: [s] if isinstance(s, str) else s
+#
+#         label_keep = lambda m, f, x: m if x is None else [[i,c] for i,c in m if f(c, x)]
+#         label_remove = lambda m, f, x: m if x is None else [[i,c] for i,c in m if not f(c, x)]
+#
+#         position_keep = lambda m, f, x: m if x is None else [[i,c] for i,c in m if f(i, x)]
+#         position_remove = lambda m, f, x: m if x is None else [[i,c] for i,c in m if not f(i, x)]
+#
+#         label_contains = lambda label, containing: any([(x in label) for x in containing])
+#         label_startswith = lambda label, substr: any([label.startswith(x) for x in substr])
+#         label_endswith = lambda label, substr: any([label.endswith(x) for x in substr])
+#
+#         position_between = lambda pos, window: (pos >= window[0]) and (pos <= window[1])
+#         position_from = lambda pos, start: (pos >= start)
+#         position_to = lambda pos, finish: (pos < finish)
+#         position_through = lambda pos, finish: (pos <= finish)
+#
+#         containing = str_to_list(kwargs.get('containing', None))
+#         matches = label_keep(matches, label_contains, containing)
+#
+#         not_containing = str_to_list(kwargs.get('not_containing', None))
+#         matches = label_remove(matches, label_contains, not_containing)
+#
+#         startingwith = str_to_list(kwargs.get('startingwith', None))
+#         matches = label_keep(matches, label_startswith, startingwith)
+#
+#         not_startingwith = str_to_list(kwargs.get('not_startingwith', None))
+#         matches = label_remove(matches, label_startswith, not_startingwith)
+#
+#         endingwith = str_to_list(kwargs.get('endingwith', None))
+#         matches = label_keep(matches, label_endswith, endingwith)
+#
+#         not_endingwith = str_to_list(kwargs.get('not_endingwith', None))
+#         matches = label_remove(matches, label_endswith, not_endingwith)
+#
+#         between = kwargs.get('between', None)
+#         matches = position_keep(matches, position_between, between)
+#
+#         not_between = kwargs.get('not_between', None)
+#         matches = position_remove(matches, position_between, not_between)
+#
+#         pos_from = kwargs.get('from', None)
+#         matches = position_keep(matches, position_from, pos_from)
+#
+#         not_pos_from = kwargs.get('not_from', None)
+#         matches = position_remove(matches, position_from, not_pos_from)
+#
+#         pos_to = kwargs.get('to', None)
+#         matches = position_keep(matches, position_to, pos_to)
+#
+#         not_pos_to = kwargs.get('not_to', None)
+#         matches = position_remove(matches, position_to, not_pos_to)
+#
+#         pos_through = kwargs.get('through', None)
+#         matches = position_keep(matches, position_through, pos_through)
+#
+#         not_pos_through = kwargs.get('not_through', None)
+#         matches = position_remove(matches, position_through, not_pos_through)
+#
+#         return f(*args, **kwargs)
+#     return wrapped
+
+
+@pipe
+@selection_helper
+def select(df, *args):
     return df[df.columns[list(args)]]
+
+# @positional_selection
+# def select(df, *args):
+#     """Selects specific columns.
+#
+#     Args:
+#         *args: Can be integers, strings, symbolic series (`X.mycol`), or lists
+#             of those. It can also handle pandas DataFrames, in which case the
+#             columns as named in that DataFrame are selected by name from df.
+#     """
+#     return df[df.columns[list(args)]]
 
 
 @positional_selection

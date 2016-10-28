@@ -139,7 +139,7 @@ class SymbolicHandler(object):
             return arg.name
         elif isinstance(arg, pd.DataFrame):
             return symbolic.sym_call(lambda *x: x, arg.columns.tolist())
-        elif isinstance(arg, (list, tuple)):
+        elif isinstance(arg, (list, tuple, pd.Index)):
             arglist = [self.argument_symbolic_reference(subarg) for subarg in arg]
             return symbolic.sym_call(lambda *x: x, *arglist)
         return arg
@@ -216,6 +216,56 @@ class make_symbolic(SymbolicHandler):
 
 
 
+class selection_helper(SymbolicHandler):
+
+    __name__ == "selection_helper"
+
+
+    def __init__(self, function):
+        super(selection_helper, self).__init__(function)
+
+
+    def arg_action(self, arg):
+        if self.df is not None:
+            return arg(self.df) if hasattr(arg, '_eval') else arg
+        else:
+            return self.argument_symbolic_eval(arg)
+
+
+    def kwarg_action(self, kwarg):
+        return self.argument_symbolic_eval(kwarg)
+
+
+    def index_joiner(self, first, second):
+        print first, second
+        first = np.atleast_1d(first)
+        second = np.atleast_1d(second)
+        second_positive = second[second > 0]
+        second_negative = second[second < 0]
+        merged = np.union1d(first, second_positive)
+        merged = np.setdiff1d(merged, -1*second_negative)
+        return merged
+
+
+    def call_action(self, args, kwargs):
+        if isinstance(args[0], pd.DataFrame):
+            self.df = args[0]
+            indices = reduce(self.index_joiner, self.recurse_args(args[1:]))
+            args = [args[0]]+[(args-1)]
+        else:
+            args = self.recurse_args(args)
+
+        symbolic_function = symbolic.Call(self.function,
+                                          args=args,
+                                          kwargs=self.recurse_kwargs(kwargs))
+
+        if self.df is not None:
+            return symbolic.to_callable(symbolic_function)(self.df)
+        else:
+            return symbolic_function
+
+
+
 class symbolic_evaluation(SymbolicHandler):
     """
     Decorates functions that may contain symbolic arguments or keyword
@@ -241,6 +291,7 @@ class symbolic_evaluation(SymbolicHandler):
                                           args=self.recurse_args(args),
                                           kwargs=self.recurse_kwargs(kwargs))
         return symbolic.to_callable(symbolic_function)(args[0])
+
 
 
 
