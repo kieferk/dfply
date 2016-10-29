@@ -15,6 +15,7 @@ def starts_with(match, ignore_case=True):
         matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
                                        if c.startswith(match)])
     return matches
+    #return symbolic.sym_call(matches, X)
     #return symbolic.sym_call(col_check, X)
 
 # def selection_helper(f):
@@ -88,7 +89,7 @@ def starts_with(match, ignore_case=True):
 
 
 @pipe
-@selection_helper
+@selection
 def select(df, *args):
     return df[df.columns[list(args)]]
 

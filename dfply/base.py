@@ -216,20 +216,38 @@ class make_symbolic(SymbolicHandler):
 
 
 
-class selection_helper(SymbolicHandler):
+class selection_helper(make_symbolic):
 
-    __name__ == "selection_helper"
-
+    __name__ = "selection_helper"
 
     def __init__(self, function):
         super(selection_helper, self).__init__(function)
 
 
+    def call_action(self, args, kwargs):
+        return symbolic.Call(self.function,
+                             args=self.recurse_args(args),
+                             kwargs=self.recurse_kwargs(kwargs))
+
+
+
+class selection(SymbolicHandler):
+
+    __name__ == "selection"
+
+
+    def __init__(self, function):
+        super(selection, self).__init__(function)
+
+
     def arg_action(self, arg):
-        if self.df is not None:
-            return arg(self.df) if hasattr(arg, '_eval') else arg
-        else:
-            return self.argument_symbolic_eval(arg)
+        while callable(arg):
+            arg = symbolic.to_callable(arg)(self.df)
+        if isinstance(arg, str):
+            arg = self.df.columns.tolist().index(arg)+1
+        if isinstance(arg, pd.Series):
+            arg = self.df.columns.tolist().index(arg.name)+1
+        return arg
 
 
     def kwarg_action(self, kwarg):
@@ -237,32 +255,33 @@ class selection_helper(SymbolicHandler):
 
 
     def index_joiner(self, first, second):
-        print first, second
-        first = np.atleast_1d(first)
-        second = np.atleast_1d(second)
-        second_positive = second[second > 0]
-        second_negative = second[second < 0]
-        merged = np.union1d(first, second_positive)
-        merged = np.setdiff1d(merged, -1*second_negative)
+        if isinstance(first, int):
+            first = [first]
+        if isinstance(second, int):
+            second = [second]
+        second_pos = [x for x in second if x > 0]
+        second_neg = [x for x in second if x < 0]
+        merged = list(first)+[x for x in second_pos if x not in first]
+        merged = np.array([x for x in merged if not -x in second_neg])
         return merged
 
 
+    def recurse_args(self, args):
+        args = [self.arg_action(arg) for arg in args]
+        if len(args) > 1:
+            args = reduce(self.index_joiner, args)-1
+        return [args]
+
+
     def call_action(self, args, kwargs):
-        if isinstance(args[0], pd.DataFrame):
-            self.df = args[0]
-            indices = reduce(self.index_joiner, self.recurse_args(args[1:]))
-            args = [args[0]]+[(args-1)]
-        else:
-            args = self.recurse_args(args)
+        assert isinstance(args[0], pd.DataFrame)
+        self.df = args[0]
 
         symbolic_function = symbolic.Call(self.function,
-                                          args=args,
+                                          args=[args[0]]+self.recurse_args(args[1:]),
                                           kwargs=self.recurse_kwargs(kwargs))
 
-        if self.df is not None:
-            return symbolic.to_callable(symbolic_function)(self.df)
-        else:
-            return symbolic_function
+        return symbolic.to_callable(symbolic_function)(self.df)
 
 
 
