@@ -6,15 +6,65 @@ from .base import _col_ind_to_position
 # Select and drop operators
 # ------------------------------------------------------------------------------
 
-@selection_helper
+class SelectionHelper(object):
+
+    select_function = None
+    drop_function = None
+
+    def __call__(self, *args, **kwargs):
+        return self.select_function
+
+    def __neg__(self):
+        return self.drop_function
+
+
+
+@make_symbolic
 def starts_with(match, ignore_case=True):
+    matches = Invertible()
     if ignore_case:
-        matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
-                                       if c.lower().startswith(match.lower())])
+        select = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
+                                      if c.lower().startswith(match.lower())])
+        drop = lambda df: np.array([(i+1)*-1 for i,c in enumerate(df.columns)
+                                    if c.lower().startswith(match.lower())])
+
     else:
-        matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
-                                       if c.startswith(match)])
+        select = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
+                                    if c.startswith(match)])
+        drop = lambda df: np.array([(i+1)*-1 for i,c in enumerate(df.columns)
+                                    if c.startswith(match)])
+
+    matches.select_function = select
+    matches.drop_function = drop
     return matches
+
+# class StartsWith(SelectionHelper):
+#
+#     __name__ = "StartsWith"
+#
+#     def __init__(self):
+#         super(StartsWith, self).__init__()
+#
+#     def select(self, match, ignore_case=True):
+#         if ignore_case:
+#             matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
+#                                            if c.lower().startswith(match.lower())])
+#         else:
+#             matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
+#                                            if c.startswith(match)])
+#         return matches
+#
+#     def drop(self, match, ignore_case=True):
+#         if ignore_case:
+#             matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
+#                                            if not c.lower().startswith(match.lower())])
+#         else:
+#             matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
+#                                            if not c.startswith(match)])
+#         return matches
+#
+# starts_with = StartsWith()
+
     #return symbolic.sym_call(matches, X)
     #return symbolic.sym_call(col_check, X)
 

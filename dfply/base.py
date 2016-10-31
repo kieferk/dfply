@@ -215,19 +215,67 @@ class make_symbolic(SymbolicHandler):
             return symbolic_function
 
 
+# class SelectionHelper(object):
+#
+#     __name__ = "SelectionHelper"
+#
+#     def __init__(self):
+#         super(SelectionHelper, self).__init__()
+#
+#     def argument_as_sym_call(self, arg):
+#         if isinstance(arg, (list, tuple)):
+#             arglist = [self.argument_symbolic_eval(subarg) for subarg in arg]
+#             return symbolic.sym_call(lambda *x: x, *arglist)
+#         else:
+#             return symbolic.sym_call(lambda x: x, arg)
+#
+#     def select(self, *args, **kwargs):
+#         raise NotImplementedError("Subclass must implement selection logic.")
+#
+#     def drop(self, *args, **kwargs):
+#         raise NotImplementedError("Subclass must implement drop logic.")
+#
+#     def __call__(self, *args, **kwargs):
+#         args = [self.argument_as_sym_call(arg) for arg in args]
+#         kwargs = {k:self.argument_as_sym_call(v) for k,v in kwargs.items()}
+#         return symbolic.Call(self.select, args=args, kwargs=kwargs)
+#
+#     # def __neg__(self):
 
-class selection_helper(make_symbolic):
-
-    __name__ = "selection_helper"
-
-    def __init__(self, function):
-        super(selection_helper, self).__init__(function)
 
 
-    def call_action(self, args, kwargs):
-        return symbolic.Call(self.function,
-                             args=self.recurse_args(args),
-                             kwargs=self.recurse_kwargs(kwargs))
+
+
+# class selection_helper(SymbolicHandler):
+#
+#     __name__ = "selection_helper"
+#
+#     def __init__(self, function):
+#         super(selection_helper, self).__init__(function)
+#
+#
+#     def argument_as_sym_call(self, arg):
+#         if isinstance(arg, (list, tuple)):
+#             arglist = [self.argument_symbolic_eval(subarg) for subarg in arg]
+#             return symbolic.sym_call(lambda *x: x, *arglist)
+#         else:
+#             return symbolic.sym_call(lambda x: x, arg)
+#
+#
+#     def arg_action(self, arg):
+#         return self.argument_as_sym_call(arg)
+#
+#
+#     def kwarg_action(self, kwarg):
+#         return self.argument_symbolic_eval(kwarg)
+#
+#
+#     def call_action(self, args, kwargs):
+#         symbolic_func = symbolic.Call(self.function,
+#                                       args=self.recurse_args(args),
+#                                       kwargs=self.recurse_kwargs(kwargs))
+#
+#         return symbolic_func
 
 
 
@@ -244,9 +292,10 @@ class selection(SymbolicHandler):
         while callable(arg):
             arg = symbolic.to_callable(arg)(self.df)
         if isinstance(arg, str):
-            arg = self.df.columns.tolist().index(arg)+1
+            arg = self.columns.tolist().index(arg)+1
         if isinstance(arg, pd.Series):
-            arg = self.df.columns.tolist().index(arg.name)+1
+            arg = self.columns.tolist().index(arg.name)+1
+        arg = np.atleast_1d(arg)
         return arg
 
 
@@ -255,10 +304,6 @@ class selection(SymbolicHandler):
 
 
     def index_joiner(self, first, second):
-        if isinstance(first, int):
-            first = [first]
-        if isinstance(second, int):
-            second = [second]
         second_pos = [x for x in second if x > 0]
         second_neg = [x for x in second if x < 0]
         merged = list(first)+[x for x in second_pos if x not in first]
@@ -276,6 +321,7 @@ class selection(SymbolicHandler):
     def call_action(self, args, kwargs):
         assert isinstance(args[0], pd.DataFrame)
         self.df = args[0]
+        self.columns = self.df.columns
 
         symbolic_function = symbolic.Call(self.function,
                                           args=[args[0]]+self.recurse_args(args[1:]),
