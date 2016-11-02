@@ -17,3 +17,10 @@ def test_pipe():
     assert diamonds.equals(d)
     d = diamonds >> blank_function() >> blank_function()
     assert diamonds.equals(d)
+
+
+def test_inplace_pipe():
+    df = diamonds[['price','carat']].head(5)
+    d = diamonds.copy()
+    d >>= select(X.price, X.carat) >> head(5)
+    assert df.equals(d)
