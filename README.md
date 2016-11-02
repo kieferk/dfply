@@ -37,7 +37,7 @@ stable.**
 
 
 - [Overview of functions](#overview-of-functions)
-  - [The `>>` pipe operator](#the--pipe-operator)
+  - [The `>>` and `>>=` pipe operators](#the--and--pipe-operators)
   - [The pandas-ply `X` DataFrame symbol](#the-pandas-ply-x-dataframe-symbol)
   - [Selecting and dropping](#selecting-and-dropping)
     - [`select*()` and `drop*()` functions](#select-and-drop-functions)
@@ -113,13 +113,10 @@ stable.**
 
 ## Overview of functions
 
-> (A notebook showcasing most of the working functions in dfply [can be
-found here](https://github.com/kieferk/dfply/blob/master/examples/dfply-example-gallery.ipynb))
-
-### The `>>` pipe operator
+### The `>>` and `>>=` pipe operators
 
 dfply works directly on pandas DataFrames, chaining operations on the data with
-the `>>` operator.
+the `>>` operator, or alternatively starting with `>>=` for inplace operations.
 
 ```python
 from dfply import *
@@ -145,6 +142,25 @@ lowprice
 8   0.22       Fair     E     VS2   65.1   61.0    337  3.87  3.78  2.49
 9   0.23  Very Good     H     VS1   59.4   61.0    338  4.00  4.05  2.39
 ```
+
+Inplace operations are done with the first pipe as `>>=` and subsequent pipes
+as `>>`.
+
+```python
+diamonds >>= head(10) >> tail(3)
+
+diamonds
+
+   carat        cut color clarity  depth  table  price     x     y     z
+7   0.26  Very Good     H     SI1   61.9   55.0    337  4.07  4.11  2.53
+8   0.22       Fair     E     VS2   65.1   61.0    337  3.87  3.78  2.49
+9   0.23  Very Good     H     VS1   59.4   61.0    338  4.00  4.05  2.39
+```
+
+When using the inplace pipe, the DataFrame is not required on the left hand
+side of the `>>=` pipe and the DataFrame variable is overwritten with the
+output of the operations.
+
 
 ### The pandas-ply `X` DataFrame symbol
 
