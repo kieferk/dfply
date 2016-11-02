@@ -1,3 +1,10 @@
+v0.2.3
+Inplace piping added using the `>>=` operator. The `pipe` decorator internals
+have been changed to make this possible through the addition of an `__rshift__`
+implementation and chaining pipes together until evaluated against a
+DataFrame.
+
+
 v0.2.2
 - Added docstrings to functions and classes.
 - Added the `case_when` function.

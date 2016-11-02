@@ -113,9 +113,6 @@ stable.**
 
 ## Overview of functions
 
-> (A notebook showcasing most of the working functions in dfply [can be
-found here](https://github.com/kieferk/dfply/blob/master/examples/dfply-example-gallery.ipynb))
-
 ### The `>>` and `>>=` pipe operators
 
 dfply works directly on pandas DataFrames, chaining operations on the data with
