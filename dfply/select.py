@@ -1,6 +1,5 @@
 from .base import *
-from .base import _col_ind_to_position
-
+import re
 
 # ------------------------------------------------------------------------------
 # Select and drop operators
@@ -8,140 +7,127 @@ from .base import _col_ind_to_position
 
 class SelectionHelper(object):
 
-    select_function = None
-    drop_function = None
+    decision_function = lambda ind, col, cols: True
+
+    def select_function(self, df):
+        return np.array([i for i,c in enumerate(df.columns)
+                         if self.decision_function(i, c, df.columns)])
+
+    def drop_function(self, df):
+        return np.array([~i for i,c in enumerate(df.columns)
+                         if self.decision_function(i, c, df.columns)])
 
     def __call__(self, *args, **kwargs):
         return self.select_function
 
-    def __neg__(self):
-        return self.drop_function
+    def __invert__(self):
+        return self.select_function
 
 
-
-@make_symbolic
-def starts_with(match, ignore_case=True):
-    matches = Invertible()
+@symbolic_function
+def starts_with(substr, ignore_case=True):
+    helper = SelectionHelper()
     if ignore_case:
-        select = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
-                                      if c.lower().startswith(match.lower())])
-        drop = lambda df: np.array([(i+1)*-1 for i,c in enumerate(df.columns)
-                                    if c.lower().startswith(match.lower())])
-
+        helper.decision_function = lambda ind, col, cols: col.lower().startswith(substr.lower())
     else:
-        select = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
-                                    if c.startswith(match)])
-        drop = lambda df: np.array([(i+1)*-1 for i,c in enumerate(df.columns)
-                                    if c.startswith(match)])
+        helper.decision_function = lambda ind, col, cols: col.startswith(substr)
+    return helper
 
-    matches.select_function = select
-    matches.drop_function = drop
-    return matches
 
-# class StartsWith(SelectionHelper):
-#
-#     __name__ = "StartsWith"
-#
-#     def __init__(self):
-#         super(StartsWith, self).__init__()
-#
-#     def select(self, match, ignore_case=True):
-#         if ignore_case:
-#             matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
-#                                            if c.lower().startswith(match.lower())])
-#         else:
-#             matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
-#                                            if c.startswith(match)])
-#         return matches
-#
-#     def drop(self, match, ignore_case=True):
-#         if ignore_case:
-#             matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
-#                                            if not c.lower().startswith(match.lower())])
-#         else:
-#             matches = lambda df: np.array([i+1 for i,c in enumerate(df.columns)
-#                                            if not c.startswith(match)])
-#         return matches
-#
-# starts_with = StartsWith()
+@symbolic_function
+def ends_with(substr, ignore_case=True):
+    helper = SelectionHelper()
+    if ignore_case:
+        helper.decision_function = lambda ind, col, cols: col.lower().endswith(substr.lower())
+    else:
+        helper.decision_function = lambda ind, col, cols: col.endswith(substr)
+    return helper
 
-    #return symbolic.sym_call(matches, X)
-    #return symbolic.sym_call(col_check, X)
 
-# def selection_helper(f):
-#     @wraps(f)
-#     def wrapped(*args, **kwargs):
-#         assert (len(args) > 0) and (isinstance(args[0], pd.DataFrame))
-#         columns = args[0].columns.tolist()
-#         matches = [[i,c] for i,c in enumerate(columns)]
-#
-#         str_to_list = lambda s: [s] if isinstance(s, str) else s
-#
-#         label_keep = lambda m, f, x: m if x is None else [[i,c] for i,c in m if f(c, x)]
-#         label_remove = lambda m, f, x: m if x is None else [[i,c] for i,c in m if not f(c, x)]
-#
-#         position_keep = lambda m, f, x: m if x is None else [[i,c] for i,c in m if f(i, x)]
-#         position_remove = lambda m, f, x: m if x is None else [[i,c] for i,c in m if not f(i, x)]
-#
-#         label_contains = lambda label, containing: any([(x in label) for x in containing])
-#         label_startswith = lambda label, substr: any([label.startswith(x) for x in substr])
-#         label_endswith = lambda label, substr: any([label.endswith(x) for x in substr])
-#
-#         position_between = lambda pos, window: (pos >= window[0]) and (pos <= window[1])
-#         position_from = lambda pos, start: (pos >= start)
-#         position_to = lambda pos, finish: (pos < finish)
-#         position_through = lambda pos, finish: (pos <= finish)
-#
-#         containing = str_to_list(kwargs.get('containing', None))
-#         matches = label_keep(matches, label_contains, containing)
-#
-#         not_containing = str_to_list(kwargs.get('not_containing', None))
-#         matches = label_remove(matches, label_contains, not_containing)
-#
-#         startingwith = str_to_list(kwargs.get('startingwith', None))
-#         matches = label_keep(matches, label_startswith, startingwith)
-#
-#         not_startingwith = str_to_list(kwargs.get('not_startingwith', None))
-#         matches = label_remove(matches, label_startswith, not_startingwith)
-#
-#         endingwith = str_to_list(kwargs.get('endingwith', None))
-#         matches = label_keep(matches, label_endswith, endingwith)
-#
-#         not_endingwith = str_to_list(kwargs.get('not_endingwith', None))
-#         matches = label_remove(matches, label_endswith, not_endingwith)
-#
-#         between = kwargs.get('between', None)
-#         matches = position_keep(matches, position_between, between)
-#
-#         not_between = kwargs.get('not_between', None)
-#         matches = position_remove(matches, position_between, not_between)
-#
-#         pos_from = kwargs.get('from', None)
-#         matches = position_keep(matches, position_from, pos_from)
-#
-#         not_pos_from = kwargs.get('not_from', None)
-#         matches = position_remove(matches, position_from, not_pos_from)
-#
-#         pos_to = kwargs.get('to', None)
-#         matches = position_keep(matches, position_to, pos_to)
-#
-#         not_pos_to = kwargs.get('not_to', None)
-#         matches = position_remove(matches, position_to, not_pos_to)
-#
-#         pos_through = kwargs.get('through', None)
-#         matches = position_keep(matches, position_through, pos_through)
-#
-#         not_pos_through = kwargs.get('not_through', None)
-#         matches = position_remove(matches, position_through, not_pos_through)
-#
-#         return f(*args, **kwargs)
-#     return wrapped
+@symbolic_function
+def contains(substr, ignore_case=True):
+    helper = SelectionHelper()
+    if ignore_case:
+        helper.decision_function = lambda ind, col, cols: substr.lower() in col.lower()
+    else:
+        helper.decision_function = lambda ind, col, cols: substr in col
+    return helper
+
+
+@symbolic_function
+def matches(pattern):
+    pattern = re.compile(pattern)
+    helper = SelectionHelper()
+    helper.decision_function = lambda ind, col, cols: pattern.search(col) is not None
+    return helper
+
+
+@symbolic_function
+def columns_from(column):
+    helper = SelectionHelper()
+    if isinstance(column, int):
+        helper.decision_function = lambda ind, col, cols: ind >= column
+    elif isinstance(column, (pd.Series, symbolic.Expression)):
+        helper.decision_function = lambda ind, col, cols: ind >= list(cols).index(column.name)
+    elif isinstance(column, str):
+        helper.decision_function = lambda ind, col, cols: ind >= list(cols).index(column)
+    return helper
+
+
+@symbolic_function
+def columns_to(column):
+    helper = SelectionHelper()
+    if isinstance(column, int):
+        helper.decision_function = lambda ind, col, cols: ind < column
+    elif isinstance(column, (pd.Series, symbolic.Expression)):
+        helper.decision_function = lambda ind, col, cols: ind < list(cols).index(column.name)
+    elif isinstance(column, str):
+        helper.decision_function = lambda ind, col, cols: ind < list(cols).index(column)
+    return helper
+
+
+@symbolic_function
+def columns_through(column):
+    helper = SelectionHelper()
+    if isinstance(column, int):
+        helper.decision_function = lambda ind, col, cols: ind <= column
+    elif isinstance(column, (pd.Series, symbolic.Expression)):
+        helper.decision_function = lambda ind, col, cols: ind <= list(cols).index(column.name)
+    elif isinstance(column, str):
+        helper.decision_function = lambda ind, col, cols: ind <= list(cols).index(column)
+    return helper
+
+
+@symbolic_function
+def columns_between(start_col, end_col, inclusive=True):
+    helper = SelectionHelper()
+    try:
+        start_col = start_col.name
+    except:
+        pass
+    try:
+        end_col = end_col.name
+    except:
+        pass
+    indexer = lambda col, cols: col if isinstance(col, int) else list(cols).index(col)
+    if inclusive:
+        f = lambda ind, col, cols: ind >= indexer(start_col, cols) and ind <= indexer(end_col, cols)
+    else:
+        f = lambda ind, col, cols: ind > indexer(start_col, cols) and ind < indexer(end_col, cols)
+    helper.decision_function = f
+    return helper
 
 
 @pipe
 @selection
 def select(df, *args):
     return df[df.columns[list(args)]]
+
+
+@pipe
+@selection
+def drop(df, *args):
+    return df.drop(df.columns[list(args)], axis=1)
 
 # @positional_selection
 # def select(df, *args):
@@ -155,17 +141,17 @@ def select(df, *args):
 #     return df[df.columns[list(args)]]
 
 
-@positional_selection
-def drop(df, *args):
-    """Drops specific columns.
-
-    Args:
-        *args: Can be integers, strings, symbolic series (`X.mycol`), or lists
-            of those. It can also handle pandas DataFrames, in which case the
-            columns as named in that DataFrame are dropped by name from df.
-    """
-    columns = [col for i, col in enumerate(df.columns) if not i in args]
-    return df[columns]
+# @positional_selection
+# def drop(df, *args):
+#     """Drops specific columns.
+#
+#     Args:
+#         *args: Can be integers, strings, symbolic series (`X.mycol`), or lists
+#             of those. It can also handle pandas DataFrames, in which case the
+#             columns as named in that DataFrame are dropped by name from df.
+#     """
+#     columns = [col for i, col in enumerate(df.columns) if not i in args]
+#     return df[columns]
 
 
 @label_selection

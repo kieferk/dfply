@@ -1,7 +1,11 @@
 from __future__ import absolute_import
 
-from pandas_ply import symbolic
-from pandas_ply.symbolic import X
+#from pandas_ply import symbolic
+from . import symbolic
+
+#from pandas_ply.symbolic import X
+from .symbolic import X
+
 from six.moves import reduce
 from six import wraps
 
@@ -10,8 +14,6 @@ import numpy as np
 import warnings
 
 
-# Initialize the global X symbol
-X(0)
 
 class pipe(object):
     """Generic pipe decorator class that allows DataFrames to be passed
@@ -154,11 +156,11 @@ class SymbolicHandler(object):
 
 
     def arg_action(self, arg):
-        raise NotImplementedError("Subclass must implement actions for args.")
+        return self.argument_symbolic_eval(arg)
 
 
     def kwarg_action(self, kwarg):
-        raise NotImplementedError("Subclass must implement actions for kwargs.")
+        return self.argument_symbolic_eval(kwarg)
 
 
     def call_action(self, args, kwargs):
@@ -196,14 +198,6 @@ class make_symbolic(SymbolicHandler):
         super(make_symbolic, self).__init__(function)
 
 
-    def arg_action(self, arg):
-        return self.argument_symbolic_eval(arg)
-
-
-    def kwarg_action(self, kwarg):
-        return self.argument_symbolic_eval(kwarg)
-
-
     def call_action(self, args, kwargs):
         symbolic_function = symbolic.Call(self.function,
                                           args=self.recurse_args(args),
@@ -215,107 +209,104 @@ class make_symbolic(SymbolicHandler):
             return symbolic_function
 
 
-# class SelectionHelper(object):
-#
-#     __name__ = "SelectionHelper"
-#
-#     def __init__(self):
-#         super(SelectionHelper, self).__init__()
-#
-#     def argument_as_sym_call(self, arg):
-#         if isinstance(arg, (list, tuple)):
-#             arglist = [self.argument_symbolic_eval(subarg) for subarg in arg]
-#             return symbolic.sym_call(lambda *x: x, *arglist)
-#         else:
-#             return symbolic.sym_call(lambda x: x, arg)
-#
-#     def select(self, *args, **kwargs):
-#         raise NotImplementedError("Subclass must implement selection logic.")
-#
-#     def drop(self, *args, **kwargs):
-#         raise NotImplementedError("Subclass must implement drop logic.")
-#
-#     def __call__(self, *args, **kwargs):
-#         args = [self.argument_as_sym_call(arg) for arg in args]
-#         kwargs = {k:self.argument_as_sym_call(v) for k,v in kwargs.items()}
-#         return symbolic.Call(self.select, args=args, kwargs=kwargs)
-#
-#     # def __neg__(self):
 
+class symbolic_function(SymbolicHandler):
 
+    __name__ = "symbolic_function"
 
+    def __init__(self, function):
+        super(symbolic_function, self).__init__(function)
 
-
-# class selection_helper(SymbolicHandler):
-#
-#     __name__ = "selection_helper"
-#
-#     def __init__(self, function):
-#         super(selection_helper, self).__init__(function)
-#
-#
-#     def argument_as_sym_call(self, arg):
-#         if isinstance(arg, (list, tuple)):
-#             arglist = [self.argument_symbolic_eval(subarg) for subarg in arg]
-#             return symbolic.sym_call(lambda *x: x, *arglist)
-#         else:
-#             return symbolic.sym_call(lambda x: x, arg)
-#
-#
-#     def arg_action(self, arg):
-#         return self.argument_as_sym_call(arg)
-#
-#
-#     def kwarg_action(self, kwarg):
-#         return self.argument_symbolic_eval(kwarg)
-#
-#
-#     def call_action(self, args, kwargs):
-#         symbolic_func = symbolic.Call(self.function,
-#                                       args=self.recurse_args(args),
-#                                       kwargs=self.recurse_kwargs(kwargs))
-#
-#         return symbolic_func
+    def call_action(self, args, kwargs):
+        return symbolic.Call(self.function,
+                             args=self.recurse_args(args),
+                             kwargs=self.recurse_kwargs(kwargs))
 
 
 
 class selection(SymbolicHandler):
 
     __name__ == "selection"
-
+    columns = None
+    column_order = []
 
     def __init__(self, function):
         super(selection, self).__init__(function)
 
 
-    def arg_action(self, arg):
+    def logical_selection_join(self, first, second):
+        first, second = np.array(first), np.array(second)
+        first[~np.isnan(second)] = second[~np.isnan(second)]
+        return first
+
+
+    def arg_action(self, arg, assignment=1):
+        selection = np.repeat(np.nan, len(self.columns))
+
+        if isinstance(arg, symbolic.Expression):
+            inversions = repr(arg).count("__invert__")
+            if (inversions % 2) != 0:
+                assignment = int(not assignment)
+
         while callable(arg):
-            arg = symbolic.to_callable(arg)(self.df)
-        if isinstance(arg, str):
-            arg = self.columns.tolist().index(arg)+1
-        if isinstance(arg, pd.Series):
-            arg = self.columns.tolist().index(arg.name)+1
-        arg = np.atleast_1d(arg)
-        return arg
+            override = {'__invert__':lambda x: symbolic.to_callable(x)}
+            arg = symbolic.to_callable(arg, override_attr=override)
+            arg = arg(self.df)
+
+        if isinstance(arg, (list, tuple)):
+            selection = [self.arg_action(arg_, assignment=assignment) for arg_ in arg]
+            if len(arg) > 1:
+                selection = reduce(self.logical_selection_join, selection)
+            else:
+                selection = selection[0]
+
+        elif isinstance(arg, np.ndarray):
+            if arg.dtype == int:
+                selection[arg[arg >= 0]] = assignment
+                selection[~arg[arg < 0]] = int(not assignment)
+            elif arg.dtype == bool:
+                assert len(arg) == len(selection)
+                selection = arg
+            else:
+                selection = [self.arg_action(arg_, assignment=assignment) for arg_ in arg]
+                if len(arg) > 1:
+                    selection = reduce(self.logical_selection_join, selection)
+                else:
+                    selection = selection[0]
+
+        elif isinstance(arg, str):
+            selection[self.columns.tolist().index(arg)] = assignment
+
+        elif isinstance(arg, pd.Series):
+            selection[self.columns.tolist().index(arg.name)] = assignment
+
+        elif isinstance(arg, pd.Index):
+            selection[[i for i,c in enumerate(self.columns) if c in arg]] = assignment
+
+        elif isinstance(arg, int):
+            if arg >= 0:
+                selection[arg] = assignment
+            else:
+                selection[~arg] = int(not assignment)
+
+        return selection
 
 
     def kwarg_action(self, kwarg):
         return self.argument_symbolic_eval(kwarg)
 
 
-    def index_joiner(self, first, second):
-        second_pos = [x for x in second if x > 0]
-        second_neg = [x for x in second if x < 0]
-        merged = list(first)+[x for x in second_pos if x not in first]
-        merged = np.array([x for x in merged if not -x in second_neg])
-        return merged
-
-
     def recurse_args(self, args):
-        args = [self.arg_action(arg) for arg in args]
-        if len(args) > 1:
-            args = reduce(self.index_joiner, args)-1
-        return [args]
+        selection = [self.arg_action(arg) for arg in args]
+        any_positive = any([np.nansum(vec) > 0 for vec in selection])
+        if not any_positive:
+            selection = [np.ones(len(self.columns))]+selection
+        if len(selection) > 1:
+            selection = reduce(self.logical_selection_join, selection)
+        else:
+            selection = selection[0]
+        selection[np.isnan(selection)] = 0
+        return [np.where(selection)[0]]
 
 
     def call_action(self, args, kwargs):
