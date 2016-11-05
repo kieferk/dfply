@@ -54,3 +54,17 @@ def mask(df, *args):
             raise Exception("Arguments must be boolean.")
         mask = mask & arg
     return df[mask.values]
+
+
+@dfpipe
+def top_n(df, *args, n=None, ascending=True):
+    if not n:
+        raise ValueError('n must be specified')
+    if not args:
+        col = df.columns[-1]
+    else:
+        col = args[0]._name
+    index = df[[col]].copy()
+    index['ranks'] = index[col].rank(ascending=ascending)
+    index = index[index['ranks'] >= index['ranks'].nlargest(n).min()]
+    return df.reindex(index.index)
