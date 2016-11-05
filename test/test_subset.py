@@ -95,4 +95,8 @@ def test_top_n():
     df4 = diamonds[diamonds.cut == 'Very Good']
     assert test4.equals(df4)
     test5 = diamonds >> groupby(X.cut) >> top_n(n=2)
-    df5 = diamonds.sort_values('z', ascending=False).groupby('cut').head(2).sort_values('cut')
+    df5 = diamonds.ix[[27415, 27630, 23539, 27517, 27518, 24297, 24328, 24067, 25999, 26444, 48410]]
+    assert test5.equals(df5)
+    test6 = diamonds >> top_n(X.x, ascending=False, n=5)
+    df6 = diamonds.sort_values('x', ascending=True).head(8).sort_index()
+    assert test6.equals(df6)
