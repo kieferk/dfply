@@ -57,13 +57,13 @@ def mask(df, *args):
 
 
 @dfpipe
-def top_n(df, *args, n=None, ascending=True):
+def top_n(df, n=None, ascending=True, col=None):
     if not n:
         raise ValueError('n must be specified')
-    if not args:
+    if not isinstance(col, pd.Series):
         col = df.columns[-1]
     else:
-        col = args[0]._name
+        col = col._name
     index = df[[col]].copy()
     index['ranks'] = index[col].rank(ascending=ascending)
     index = index[index['ranks'] >= index['ranks'].nlargest(n).min()]
