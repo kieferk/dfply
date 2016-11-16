@@ -276,7 +276,7 @@ class selection(SymbolicHandler):
             selection = [self.arg_action(arg_, assignment=assignment) for arg_ in arg]
             if len(arg) > 1:
                 selection = reduce(self.logical_selection_join, selection)
-            else:
+            elif len(arg) > 0:
                 selection = selection[0]
         return selection
 
@@ -323,6 +323,8 @@ class selection(SymbolicHandler):
         elif isinstance(arg, int):
             selection = self._selection_from_int(arg, assignment, selection)
 
+        if len(selection) == 0:
+            return np.zeros(len(self.columns))
         return selection
 
 
@@ -333,6 +335,9 @@ class selection(SymbolicHandler):
     def recurse_args(self, args):
         selection = [self.arg_action(arg) for arg in args]
         any_positive = any([np.nansum(vec) > 0 for vec in selection])
+        #any_negative = any([np.nansum(vec) < 0 for vec in selection])
+        #if not any_positive and not any_negative:
+        #    selection = [np.zeros(len(self.columns))]
         if not any_positive:
             selection = [np.ones(len(self.columns))]+selection
         if len(selection) > 1:
