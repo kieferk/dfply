@@ -7,100 +7,101 @@ import re
 
 class SelectionHelper(object):
 
-    decision_function = lambda ind, col, cols: True
+    __name__ = 'SelectionHelper'
 
-    def select_function(self, df):
-        return np.array([i for i,c in enumerate(df.columns)
-                         if self.decision_function(i, c, df.columns)])
-
-    def drop_function(self, df):
-        return np.array([~i for i,c in enumerate(df.columns)
-                         if self.decision_function(i, c, df.columns)])
+    def __init__(self, function):
+        self.select_function = function
 
     def __call__(self, *args, **kwargs):
         return self.select_function
 
-    def __invert__(self):
-        return self.select_function
 
 
 @symbolic_function
 def starts_with(substr, ignore_case=True):
-    helper = SelectionHelper()
     if ignore_case:
-        helper.decision_function = lambda ind, col, cols: col.lower().startswith(substr.lower())
+        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                                 if c.lower().startswith(substr.lower())])
     else:
-        helper.decision_function = lambda ind, col, cols: col.startswith(substr)
-    return helper
+        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                                 if c.startswith(substr)])
+    return SelectionHelper(f)
 
 
 @symbolic_function
 def ends_with(substr, ignore_case=True):
-    helper = SelectionHelper()
     if ignore_case:
-        helper.decision_function = lambda ind, col, cols: col.lower().endswith(substr.lower())
+        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                                 if c.lower().endswith(substr.lower())])
     else:
-        helper.decision_function = lambda ind, col, cols: col.endswith(substr)
-    return helper
+        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                                 if c.endswith(substr)])
+    return SelectionHelper(f)
 
 
 @symbolic_function
 def contains(substr, ignore_case=True):
-    helper = SelectionHelper()
     if ignore_case:
-        helper.decision_function = lambda ind, col, cols: substr.lower() in col.lower()
+        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                                 if substr.lower() in c.lower()])
     else:
-        helper.decision_function = lambda ind, col, cols: substr in col
-    return helper
+        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                                 if substr in c])
+    return SelectionHelper(f)
 
 
 @symbolic_function
 def matches(pattern):
     pattern = re.compile(pattern)
-    helper = SelectionHelper()
-    helper.decision_function = lambda ind, col, cols: pattern.search(col) is not None
-    return helper
+    f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                             if pattern.search(c) is not None])
+    return SelectionHelper(f)
 
 
 @symbolic_function
 def columns_from(column):
-    helper = SelectionHelper()
     if isinstance(column, int):
-        helper.decision_function = lambda ind, col, cols: ind >= column
+        decision_func = lambda ind, cols: ind >= column
     elif isinstance(column, (pd.Series, symbolic.Expression)):
-        helper.decision_function = lambda ind, col, cols: ind >= list(cols).index(column.name)
+        decision_func = lambda ind, cols: ind >= list(cols).index(column.name)
     elif isinstance(column, str):
-        helper.decision_function = lambda ind, col, cols: ind >= list(cols).index(column)
-    return helper
+        decision_func = lambda ind, cols: ind >= list(cols).index(column)
+
+    f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                             if decision_func(i, df.columns)])
+    return SelectionHelper(f)
 
 
 @symbolic_function
 def columns_to(column):
-    helper = SelectionHelper()
     if isinstance(column, int):
-        helper.decision_function = lambda ind, col, cols: ind < column
+        decision_func = lambda ind, cols: ind < column
     elif isinstance(column, (pd.Series, symbolic.Expression)):
-        helper.decision_function = lambda ind, col, cols: ind < list(cols).index(column.name)
+        decision_func = lambda ind, cols: ind < list(cols).index(column.name)
     elif isinstance(column, str):
-        helper.decision_function = lambda ind, col, cols: ind < list(cols).index(column)
-    return helper
+        decision_func = lambda ind, cols: ind < list(cols).index(column)
+
+    f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                             if decision_func(i, df.columns)])
+    return SelectionHelper(f)
 
 
 @symbolic_function
 def columns_through(column):
-    helper = SelectionHelper()
     if isinstance(column, int):
-        helper.decision_function = lambda ind, col, cols: ind <= column
+        decision_func = lambda ind, cols: ind <= column
     elif isinstance(column, (pd.Series, symbolic.Expression)):
-        helper.decision_function = lambda ind, col, cols: ind <= list(cols).index(column.name)
+        decision_func = lambda ind, cols: ind <= list(cols).index(column.name)
     elif isinstance(column, str):
-        helper.decision_function = lambda ind, col, cols: ind <= list(cols).index(column)
-    return helper
+        decision_func = lambda ind, cols: ind <= list(cols).index(column)
+
+    f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                             if decision_func(i, df.columns)])
+    return SelectionHelper(f)
 
 
 @symbolic_function
 def columns_between(start_col, end_col, inclusive=True):
-    helper = SelectionHelper()
     try:
         start_col = start_col.name
     except:
@@ -109,13 +110,17 @@ def columns_between(start_col, end_col, inclusive=True):
         end_col = end_col.name
     except:
         pass
+
     indexer = lambda col, cols: col if isinstance(col, int) else list(cols).index(col)
     if inclusive:
-        f = lambda ind, col, cols: ind >= indexer(start_col, cols) and ind <= indexer(end_col, cols)
+        decision_func = lambda ind, cols: ind >= indexer(start_col, cols) and ind <= indexer(end_col, cols)
     else:
-        f = lambda ind, col, cols: ind > indexer(start_col, cols) and ind < indexer(end_col, cols)
-    helper.decision_function = f
-    return helper
+        decision_func = lambda ind, cols: ind > indexer(start_col, cols) and ind < indexer(end_col, cols)
+
+    f = lambda df: np.array([i for i,c in enumerate(df.columns)
+                             if decision_func(i, df.columns)])
+
+    return SelectionHelper(f)
 
 
 @pipe
