@@ -256,7 +256,7 @@ class selection(SymbolicHandler):
         return arg
 
 
-    def _selection_from_list(self, arg, assignment):
+    def _selection_from_list(self, arg, assignment, selection):
         selection = [self.arg_action(arg_, assignment=assignment) for arg_ in arg]
         if len(arg) > 1:
             selection = reduce(self.logical_selection_join, selection)
@@ -265,9 +265,7 @@ class selection(SymbolicHandler):
         return selection
 
 
-    def _selection_from_array(self, arg, assignment):
-        selection = np.repeat(np.nan, len(self.columns))
-
+    def _selection_from_array(self, arg, assignment, selection):
         if arg.dtype == int:
             selection[arg[arg >= 0]] = assignment
             selection[~arg[arg < 0]] = int(not assignment)
@@ -283,25 +281,21 @@ class selection(SymbolicHandler):
         return selection
 
 
-    def _selection_from_str(self, arg, assignment):
-        selection = np.repeat(np.nan, len(self.columns))
+    def _selection_from_str(self, arg, assignment, selection):
         selection[self.columns.tolist().index(arg)] = assignment
         return selection
 
 
-    def _selection_from_series(self, arg, assignment):
-        selection = np.repeat(np.nan, len(self.columns))
+    def _selection_from_series(self, arg, assignment, selection):
         selection[self.columns.tolist().index(arg.name)] = assignment
         return selection
 
-    def _selection_from_index(self, arg, assignment):
-        selection = np.repeat(np.nan, len(self.columns))
+    def _selection_from_index(self, arg, assignment, selection):
         selection[[i for i,c in enumerate(self.columns) if c in arg]] = assignment
         return selection
 
 
-    def _selection_from_int(self, arg, assignment):
-        selection = np.repeat(np.nan, len(self.columns))
+    def _selection_from_int(self, arg, assignment, selection):
         if arg >= 0:
             selection[arg] = assignment
         else:
@@ -310,22 +304,24 @@ class selection(SymbolicHandler):
 
 
     def arg_action(self, arg, assignment=1):
-
+        selection = np.repeat(np.nan, len(self.columns))
         assignment = self._count_inversions(arg, assignment)
         arg = self._override_invert_eval(arg)
 
         if isinstance(arg, (list, tuple)):
-            selection = self._selection_from_list(arg, assignment)
+            selection = self._selection_from_list(arg, assignment, selection)
         elif isinstance(arg, np.ndarray):
-            selection = self._selection_from_array(arg, assignment)
+            selection = self._selection_from_array(arg, assignment, selection)
         elif isinstance(arg, str):
-            selection = self._selection_from_str(arg, assignment)
+            selection = self._selection_from_str(arg, assignment, selection)
         elif isinstance(arg, pd.Series):
-            selection = self._selection_from_series(arg, assignment)
-        elif isinstance(arg, pd.Index):
-            selection = self._selection_from_index(arg, assignment)
+            selection = self._selection_from_series(arg, assignment, selection)
+        elif isinstance(arg, (pd.DataFrame, pd.Index)):
+            if isinstance(arg, pd.DataFrame):
+                arg = arg.columns
+            selection = self._selection_from_index(arg, assignment, selection)
         elif isinstance(arg, int):
-            selection = self._selection_from_int(arg, assignment)
+            selection = self._selection_from_int(arg, assignment, selection)
 
         return selection
 

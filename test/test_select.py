@@ -17,10 +17,8 @@ def test_select():
     assert df.equals(diamonds >> select(0, 1, 'price'))
     assert df.equals(diamonds >> select([0, X.cut], X.price))
     assert df.equals(diamonds >> select(X.carat, X['cut'], X.price))
+    assert df.equals(diamonds >> select(X[['carat','cut','price']].columns))
     assert df.equals(diamonds >> select(X[['carat','cut','price']]))
-    assert df.equals(diamonds >> select(X[['carat','cut']], X.price))
-    assert df.equals(diamonds >> select(X.iloc[:,[0,1,6]]))
-    assert df.equals(diamonds >> select([X.loc[:, ['carat','cut','price']]]))
 
 
 def test_drop():
@@ -30,10 +28,8 @@ def test_drop():
     assert df.equals(diamonds >> drop(0, 1, 'price'))
     assert df.equals(diamonds >> drop([0, X.cut], X.price))
     assert df.equals(diamonds >> drop(X.carat, X['cut'], X.price))
+    assert df.equals(diamonds >> drop(X[['carat','cut','price']].columns))
     assert df.equals(diamonds >> drop(X[['carat','cut','price']]))
-    assert df.equals(diamonds >> drop(X[['carat','cut']], X.price))
-    assert df.equals(diamonds >> drop(X.iloc[:,[0,1,6]]))
-    assert df.equals(diamonds >> drop([X.loc[:, ['carat','cut','price']]]))
 
 
 def test_select_containing():
