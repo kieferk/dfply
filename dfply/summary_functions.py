@@ -5,7 +5,8 @@ from .vector import *
 # Series summary functions
 # ------------------------------------------------------------------------------
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def mean(series):
     """
     Returns the mean of a series.
@@ -18,7 +19,8 @@ def mean(series):
     return mean_s
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def first(series, order_by=None):
     """
     Returns the first value of a series.
@@ -37,7 +39,8 @@ def first(series, order_by=None):
     return first_s
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def last(series, order_by=None):
     """
     Returns the last value of a series.
@@ -56,7 +59,8 @@ def last(series, order_by=None):
     return last_s
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def nth(series, n, order_by=None):
     """
     Returns the nth value of a series.
@@ -78,7 +82,8 @@ def nth(series, n, order_by=None):
         return np.nan
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def n(series):
     """
     Returns the length of a series.
@@ -91,7 +96,8 @@ def n(series):
     return n_s
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def n_distinct(series):
     """
     Returns the number of distinct values in a series.
@@ -104,7 +110,8 @@ def n_distinct(series):
     return n_distinct_s
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def IQR(series):
     """
     Returns the inter-quartile range (IQR) of a series.
@@ -119,7 +126,8 @@ def IQR(series):
     return iqr_s
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def colmin(series):
     """
     Returns the minimum value of a series.
@@ -132,7 +140,8 @@ def colmin(series):
     return min_s
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def colmax(series):
     """
     Returns the maximum value of a series.
@@ -145,7 +154,8 @@ def colmax(series):
     return max_s
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def median(series):
     """
     Returns the median value of a series.
@@ -158,7 +168,8 @@ def median(series):
     return median_s
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def var(series):
     """
     Returns the variance of values in a series.
@@ -171,7 +182,8 @@ def var(series):
     return var_s
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def sd(series):
     """
     Returns the standard deviation of values in a series.

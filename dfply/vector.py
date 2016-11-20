@@ -5,7 +5,8 @@ import collections
 # series ordering
 # ------------------------------------------------------------------------------
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def order_series_by(series, order_series):
     """
     Orders one series according to another series, or a list of other
@@ -38,7 +39,8 @@ def order_series_by(series, order_series):
         return sorted_series
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def desc(series):
     """
     Mimics the functionality of the R desc function. Essentially inverts a
@@ -76,7 +78,8 @@ def desc(series):
 # coalesce
 # ------------------------------------------------------------------------------
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def coalesce(*series):
     """
     Takes the first non-NaN value in order across the specified series,
@@ -114,7 +117,8 @@ def coalesce(*series):
 # case_when
 # ------------------------------------------------------------------------------
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def case_when(*conditions):
     """
     Functions as a switch statement, creating a new series out of logical
@@ -193,7 +197,8 @@ def case_when(*conditions):
 # if_else
 # ------------------------------------------------------------------------------
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def if_else(condition, when_true, otherwise):
     """
     Wraps creation of a series based on if-else conditional logic into a function
@@ -230,7 +235,8 @@ def if_else(condition, when_true, otherwise):
 # na_if
 # ------------------------------------------------------------------------------
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def na_if(series, *values):
     """
     If values in a series match a specified value, change them to `np.nan`.

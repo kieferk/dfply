@@ -26,20 +26,21 @@ def sample(df, *args, **kwargs):
     return df.sample(*args, **kwargs)
 
 
-@pipe
-@group_delegation
-@symbolic_reference
+#@pipe
+#@group_delegation
+#@symbolic_reference
+@dfpipe(reference_args=True)
 def distinct(df, *args, **kwargs):
     return df.drop_duplicates(list(args), **kwargs)
 
 
-@dfpipe
-@join_index_arguments
-def row_slice(df, indices):
-    if indices.dtype == bool:
-        return df.loc[indices, :]
-    else:
-        return df.iloc[indices, :]
+# @dfpipe
+# @join_index_arguments
+# def row_slice(df, indices):
+#     if indices.dtype == bool:
+#         return df.loc[indices, :]
+#     else:
+#         return df.iloc[indices, :]
 
 
 # ------------------------------------------------------------------------------

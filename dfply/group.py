@@ -1,6 +1,9 @@
 from .base import *
 
-@label_selection
+#@label_selection
+#@pipe
+#@selection
+@dfpipe(selector=True)
 def groupby(df, *args):
     """
     Groups a pandas DataFrame by assigning groups to the `._grouped_by`
@@ -16,7 +19,7 @@ def groupby(df, *args):
     Returns:
         Grouped DataFrame.
     """
-    group_by = args
+    group_by = list(df.columns.values[args])
     existing_groups = getattr(df, "_grouped_by", None)
 
     if existing_groups is not None:
@@ -28,7 +31,8 @@ def groupby(df, *args):
     return df
 
 
-@pipe
+#@pipe
+@dfpipe(handle_grouping=False, handle_symbolic=False)
 def ungroup(df):
     """
     Removes any groupings from a DataFrame by setting the `._grouped_by`

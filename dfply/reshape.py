@@ -7,6 +7,7 @@ import re
 # Sorting
 # ------------------------------------------------------------------------------
 
+#@dfpipe
 @dfpipe
 def arrange(df, *args, **kwargs):
     """Calls `pandas.DataFrame.sort_values` to sort a DataFrame according to
@@ -43,8 +44,9 @@ def arrange(df, *args, **kwargs):
 # Renaming
 # ------------------------------------------------------------------------------
 
-@pipe
-@symbolic_reference
+#@pipe
+#@symbolic_reference
+@dfpipe(reference_kwargs=True)
 def rename(df, **kwargs):
     """Renames columns, where keyword argument values are the current names
     of columns and keys are the new names.
@@ -64,7 +66,8 @@ def rename(df, **kwargs):
 # Elongate
 # ------------------------------------------------------------------------------
 
-@label_selection
+#@label_selection
+@dfpipe(selector=True, positional_selectors=False)
 def gather(df, key, values, *args, **kwargs):
     """
     Melts the specified columns in your DataFrame into two key:value columns.
@@ -138,7 +141,8 @@ def convert_type(df, columns):
 
 
 
-@label_selection
+#@label_selection
+@dfpipe(selector=True, positional_selectors=False)
 def spread(df, key, values, convert=False):
     """
     Transforms a "long" DataFrame into a "wide" format using a key and value
@@ -204,8 +208,9 @@ def spread(df, key, values, convert=False):
 # Separate columns
 # ------------------------------------------------------------------------------
 
-@pipe
-@symbolic_reference
+#@pipe
+#@symbolic_reference
+@dfpipe(reference_args=True)
 def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
              extra='drop', fill='right'):
     """
@@ -275,7 +280,8 @@ def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
 # Unite columns
 # ------------------------------------------------------------------------------
 
-@label_selection
+#@label_selection
+@dfpipe(reference_args=True)
 def unite(df, colname, *args, **kwargs):
     """
     Does the inverse of `separate`, joining columns together by a specified

@@ -4,7 +4,8 @@ from .base import *
 # Window functions
 # ------------------------------------------------------------------------------
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def lead(series, i=1):
     """
     Returns a series shifted forward by a value. `NaN` values will be filled
@@ -21,7 +22,8 @@ def lead(series, i=1):
     return shifted
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def lag(series, i=1):
     """
     Returns a series shifted backwards by a value. `NaN` values will be filled
@@ -38,7 +40,8 @@ def lag(series, i=1):
     return shifted
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def between(series, a, b, inclusive=False):
     """
     Returns a boolean series specifying whether rows of the input series
@@ -63,7 +66,8 @@ def between(series, a, b, inclusive=False):
     return met_condition
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def dense_rank(series, ascending=True):
     """
     Equivalent to `series.rank(method='dense', ascending=ascending)`.
@@ -79,7 +83,8 @@ def dense_rank(series, ascending=True):
     return ranks
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def min_rank(series, ascending=True):
     """
     Equivalent to `series.rank(method='min', ascending=ascending)`.
@@ -95,7 +100,8 @@ def min_rank(series, ascending=True):
     return ranks
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def cumsum(series):
     """
     Calculates cumulative sum of values. Equivalent to `series.cumsum()`.
@@ -108,7 +114,8 @@ def cumsum(series):
     return sums
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def cummean(series):
     """
     Calculates cumulative mean of values. Equivalent to
@@ -122,7 +129,8 @@ def cummean(series):
     return means
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def cummax(series):
     """
     Calculates cumulative maximum of values. Equivalent to
@@ -136,7 +144,8 @@ def cummax(series):
     return maxes
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def cummin(series):
     """
     Calculates cumulative minimum of values. Equivalent to
@@ -150,7 +159,8 @@ def cummin(series):
     return mins
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def cumprod(series):
     """
     Calculates cumulative product of values. Equivalent to
@@ -164,7 +174,8 @@ def cumprod(series):
     return prods
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def cumany(series):
     """
     Calculates cumulative any of values. Equivalent to
@@ -178,7 +189,8 @@ def cumany(series):
     return anys
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def cumall(series):
     """
     Calculates cumulative all of values. Equivalent to
@@ -192,7 +204,8 @@ def cumall(series):
     return alls
 
 
-@make_symbolic
+#@make_symbolic
+@helper_function
 def percent_rank(series, ascending=True):
     if series.size == 1:
         return 0
