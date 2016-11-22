@@ -24,7 +24,7 @@ def get_join_parameters(join_kwargs):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def inner_join(df, other, **kwargs):
     """
     Joins on values present in both DataFrames.
@@ -55,7 +55,7 @@ def inner_join(df, other, **kwargs):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def full_join(df, other, **kwargs):
     """
     Joins on values present in either DataFrame. (Alternate to `outer_join`)
@@ -88,7 +88,7 @@ def full_join(df, other, **kwargs):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def outer_join(df, other, **kwargs):
     """
     Joins on values present in either DataFrame. (Alternate to `full_join`)
@@ -121,7 +121,7 @@ def outer_join(df, other, **kwargs):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def left_join(df, other, **kwargs):
     """
     Joins on values present in in the left DataFrame.
@@ -153,7 +153,7 @@ def left_join(df, other, **kwargs):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def right_join(df, other, **kwargs):
     """
     Joins on values present in in the right DataFrame.
@@ -185,7 +185,7 @@ def right_join(df, other, **kwargs):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def semi_join(df, other, **kwargs):
     """
     Returns all of the rows in the left DataFrame that have a match
@@ -222,7 +222,7 @@ def semi_join(df, other, **kwargs):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def anti_join(df, other, **kwargs):
     """
     Returns all of the rows in the left DataFrame that do not have a
@@ -262,7 +262,7 @@ def anti_join(df, other, **kwargs):
 # ------------------------------------------------------------------------------
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def bind_rows(df, other, join='outer', ignore_index=False):
     """
     Binds DataFrames "vertically", stacking them together. This is equivalent
@@ -285,7 +285,7 @@ def bind_rows(df, other, join='outer', ignore_index=False):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def bind_cols(df, other, join='outer', ignore_index=False):
     """
     Binds DataFrames "horizontally". This is equivalent to `pd.concat` with

@@ -1,5 +1,5 @@
 from .base import *
-from .base import _arg_extractor
+#from .base import _arg_extractor
 import re
 
 
@@ -8,7 +8,7 @@ import re
 # ------------------------------------------------------------------------------
 
 #@dfpipe
-@dfpipe
+@dfpipe(flatten_args=True)
 def arrange(df, *args, **kwargs):
     """Calls `pandas.DataFrame.sort_values` to sort a DataFrame according to
     criteria.
@@ -28,11 +28,11 @@ def arrange(df, *args, **kwargs):
             `DataFrame.sort_values` function.
     """
 
-    flat_args = _arg_extractor(args)
+    #flat_args = _arg_extractor(args)
 
     series = [df[arg] if isinstance(arg, str) else
               df.iloc[:, arg] if isinstance(arg, int) else
-              pd.Series(arg) for arg in flat_args]
+              pd.Series(arg) for arg in args]
 
     sorter = pd.concat(series, axis=1)
     sorter.index = df.index
@@ -46,7 +46,7 @@ def arrange(df, *args, **kwargs):
 
 #@pipe
 #@symbolic_reference
-@dfpipe(reference_kwargs=True)
+@dfpipe(kwargs_as_labels=True)
 def rename(df, **kwargs):
     """Renames columns, where keyword argument values are the current names
     of columns and keys are the new names.
@@ -58,7 +58,6 @@ def rename(df, **kwargs):
         **kwargs: key:value pairs where keys are new names for columns and
             values are current names of columns.
     """
-
     return df.rename(columns={v:k for k,v in kwargs.items()})
 
 
@@ -67,7 +66,7 @@ def rename(df, **kwargs):
 # ------------------------------------------------------------------------------
 
 #@label_selection
-@dfpipe(selector=True, positional_selectors=False)
+@dfpipe(args_as_labels=True, flatten_args=True)
 def gather(df, key, values, *args, **kwargs):
     """
     Melts the specified columns in your DataFrame into two key:value columns.
@@ -142,7 +141,7 @@ def convert_type(df, columns):
 
 
 #@label_selection
-@dfpipe(selector=True, positional_selectors=False)
+@dfpipe(args_as_labels=True)
 def spread(df, key, values, convert=False):
     """
     Transforms a "long" DataFrame into a "wide" format using a key and value
@@ -210,7 +209,7 @@ def spread(df, key, values, convert=False):
 
 #@pipe
 #@symbolic_reference
-@dfpipe(reference_args=True)
+@dfpipe(args_as_labels=True)
 def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
              extra='drop', fill='right'):
     """
@@ -281,7 +280,7 @@ def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
 # ------------------------------------------------------------------------------
 
 #@label_selection
-@dfpipe(reference_args=True)
+@dfpipe(args_as_labels=True, flatten_arguments=True)
 def unite(df, colname, *args, **kwargs):
     """
     Does the inverse of `separate`, joining columns together by a specified

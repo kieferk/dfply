@@ -1,5 +1,5 @@
 from .base import *
-from .base import _arg_extractor
+#from .base import _arg_extractor
 
 @dfpipe
 def mutate(df, **kwargs):
@@ -31,7 +31,7 @@ def mutate(df, **kwargs):
 
 #@dfpipe
 #@flatten_arguments
-@dfpipe(selector=True)
+@dfpipe(selector=True, flatten_arguments=True)
 def transmute(df, *keep_columns, **kwargs):
     """
     Creates columns and then returns those new columns and optionally specified

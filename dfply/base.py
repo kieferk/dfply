@@ -107,6 +107,12 @@ class group_delegation(object):
             return self.function(*args, **kwargs)
 
 
+def function_map(function_list, x):
+    if len(function_list) > 0:
+        return reduce(lambda x, f: f(x), [x]+list(function_list))
+    else:
+        return x
+
 
 def helper_function(f=None, **opt):
     if f is None:
@@ -114,45 +120,31 @@ def helper_function(f=None, **opt):
 
     if opt.get('delay_evaluation', False):
         handler = SymbolicHandler(embedded_function=True,
-                                  delay_embedded_function=True)
+                                  delay_evaluation=True)
     else:
         handler = SymbolicHandler(embedded_function=True,
-                                  delay_embedded_function=False)
+                                  delay_evaluation=False)
     return handler(f)
 
 
-def dfpipe(f=None, **opt):
+
+def dfpipe(f=None, **kwargs):
     if f is None:
-        return partial(dfpipe, **opt)
+        return partial(dfpipe, **kwargs)
 
-    is_grouper = opt.get('handle_grouping', True)
-    is_symbolic_handler = opt.get('handle_symbolic', True)
-    is_selector = opt.get('selector', False)
-    is_positional_selectors = opt.get('positional_selectors', True)
-    is_arg_ref = opt.get('reference_args', False)
-    is_kwarg_ref = opt.get('reference_kwargs', False)
+    ignore_grouping = kwargs.get('ignore_grouping', False)
+    ignore_symbolic = kwargs.get('ignore_symbolic', False)
+
+    decorators = [pipe]
+    if not ignore_grouping: decorators.append(group_delegation)
+    if not ignore_symbolic:
+        handler = SymbolicHandler(**kwargs)
+        decorators.append(handler)
+
+    decorators = decorators[::-1]
+    return function_map(decorators, f)
 
 
-    if is_grouper and not is_selector:
-        groupdec = group_delegation
-    else:
-        groupdec = lambda f_: f_
-
-    if is_symbolic_handler:
-        handler = SymbolicHandler(embedded_function=False,
-                                  delay_embedded_function=False,
-                                  selector=is_selector,
-                                  positional_selectors=is_positional_selectors,
-                                  arg_references=is_arg_ref,
-                                  kwarg_references=is_kwarg_ref)
-    else:
-        handler = lambda f_: f_
-
-    return pipe(
-        groupdec(
-            handler(f)
-            )
-        )
 
 
 
@@ -168,8 +160,11 @@ class SymbolicHandler(object):
     __name__ = "SymbolicHandler"
     args_have_symbolic = False
     attempt_embedded_eval = True
-    df = None
+    df = {}
     columns = []
+
+    arg_processors = []
+    kwarg_processors = []
     invert_override = {'__invert__':lambda x: symbolic.to_callable(x)}
 
     def __init__(self, *args, **kwargs):
@@ -188,37 +183,68 @@ class SymbolicHandler(object):
         # same structure as in Decorum:
         # https://github.com/zeekay/decorum/blob/master/decorum/decorum.py
         self.assigned = functools.WRAPPER_ASSIGNMENTS
+        self.arg_processors = [self.recurse_args]
+        self.kwarg_processors = [self.recurse_kwargs]
 
-        is_embedded_function = kwargs.get('embedded_function', False)
-        is_delayed = kwargs.get('delay_embedded_function', False)
-        is_selector = kwargs.get('selector', False)
-        is_positional_selectors = kwargs.get('positional_selectors', True)
-        is_arg_ref = kwargs.get('arg_references', False)
-        is_kwarg_ref = kwargs.get('kwarg_references', False)
+        embedded_function = kwargs.get('embedded_function', False)
+        delayed_evaluation = kwargs.get('delay_evaluation', False)
+        flatten_args = kwargs.get('flatten_args', False)
+        selector = kwargs.get('selector', False)
+        args_as_labels = kwargs.get('args_as_labels', False)
+        kwargs_as_labels = kwargs.get('kwargs_as_labels', False)
+        args_as_positional = kwargs.get('args_as_positional', False)
+        kwargs_as_positional = kwargs.get('kwargs_as_positional', False)
+        join_index_args = kwargs.get('join_index_args', False)
 
-        if is_embedded_function:
-            self.call = self.call_embedded_function
-            self.attempt_embedded_eval = not is_delayed
+        if ((args_as_labels and args_as_positional) or
+            (kwargs_as_labels and kwargs_as_positional)):
+            raise Exception('Cannot specify conversion to both labels and positional.')
+
+        if embedded_function and not delayed_evaluation:
+            self.function_action = self.eval_function_no_context
+        elif embedded_function and delayed_evaluation:
+            pass
+
+        #if flatten_args:
+        #    self.arg_processors.append(self.flatten_arguments)
+
         else:
-            self.call = self.call_evaluate
+            self.function_action = self.eval_function_data_context
+            self.call_init = self.call_init_data
 
-        if is_arg_ref:
-            self.arg_action = self.reference_arg_action
-        else:
-            self.arg_action = self.eval_arg_action
+            to_label = partial(_try_except, f_try=lambda x: list(self.columns)[x])
+            to_position = partial(_try_except, f_try=lambda x: list(self.columns).index(x))
 
-        if is_kwarg_ref:
-            self.kwarg_action = self.reference_kwarg_action
-        else:
-            self.kwarg_action = self.eval_kwarg_action
+            if args_as_labels:
+                self.arg_action = partial(_argument_symbolic_reference,
+                                          switch_func=to_label)
+            elif args_as_positional:
+                self.arg_action = partial(_argument_symbolic_reference,
+                                          switch_func=to_position)
 
-        if is_selector:
-            self.arg_action = self.selector_arg_action
-            self.recurse_args = self.selector_recurse_args
-            if is_positional_selectors:
-                self.positional_to_label = lambda i_: i_
-            else:
-                self.positional_to_label = lambda i_: self.columns[i_]
+            if kwargs_as_labels:
+                self.kwarg_action = partial(_argument_symbolic_reference,
+                                            switch_func=to_label)
+            elif kwargs_as_positional:
+                self.kwarg_action = partial(_argument_symbolic_reference,
+                                            switch_func=to_position)
+
+            if selector:
+                self.arg_action = self.selector_arg_action
+                self.arg_processors.append(self.selection_to_inds)
+                if args_as_labels:
+                    self.arg_processors.append(lambda x: [to_label(y) for y in x])
+                if args_as_positional:
+                    self.arg_processors.append(lambda x: [to_position(y) for y in x])
+
+
+            if flatten_args:
+                self.arg_processors.append(self.flatten_arguments)
+
+            if join_index_args:
+                self.arg_processors.append(self.join_indices)
+
+            self.arg_processors.append(self.prepend_data)
 
         return self
 
@@ -236,35 +262,14 @@ class SymbolicHandler(object):
             return self.wraps(args[0])
 
 
-    def positional_to_label(self, index):
-        if self.positional_to_label:
-            return self.columns[index]
-        else:
-            return index
+    def arg_action(self, arg):
+        return self.argument_symbolic_eval(arg)
 
+    def kwarg_action(self, kwarg):
+        return self.argument_symbolic_eval(kwarg)
 
-    def argument_symbolic_eval(self, arg):
-        if isinstance(arg, (list, tuple)):
-            arglist = [self.argument_symbolic_eval(subarg) for subarg in arg]
-            return symbolic.sym_call(lambda *x: x, *arglist)
-        else:
-            if isinstance(arg, symbolic.Expression):
-                self.args_have_symbolic = True
-            return arg
-
-
-    def argument_symbolic_reference(self, arg):
-        if hasattr(arg, '_eval'):
-            arg = symbolic.to_callable(arg)(self.df)
-        if isinstance(arg, pd.Series):
-            return arg.name
-        elif isinstance(arg, pd.DataFrame):
-            return symbolic.sym_call(lambda *x: x, arg.columns.tolist())
-        elif isinstance(arg, (list, tuple, pd.Index)):
-            arglist = [self.argument_symbolic_reference(subarg) for subarg in arg]
-            return symbolic.sym_call(lambda *x: x, *arglist)
-        return arg
-
+    def function_action(self, function):
+        return function
 
     def recurse_args(self, args):
         return [self.arg_action(arg) for arg in args]
@@ -272,19 +277,31 @@ class SymbolicHandler(object):
     def recurse_kwargs(self, kwargs):
         return {k:self.kwarg_action(v) for k,v in kwargs.items()}
 
-
-    def eval_arg_action(self, arg):
-        return self.argument_symbolic_eval(arg)
-
-    def eval_kwarg_action(self, kwarg):
-        return self.argument_symbolic_eval(kwarg)
+    def call_init(self, *args, **kwargs):
+        return args, kwargs
 
 
-    def reference_arg_action(self, arg):
-        return self.argument_symbolic_reference(arg)
+    def argument_symbolic_eval(self, arg):
+        if isinstance(arg, (list, tuple)):
+            arglist = [self.general_symbolic_eval(subarg) for subarg in arg]
+            return symbolic.sym_call(lambda *x: x, *arglist)
+        else:
+            if isinstance(arg, symbolic.Expression):
+                self.args_have_symbolic = True
+            return arg
 
-    def reference_kwarg_action(self, kwarg):
-        return self.argument_symbolic_reference(kwarg)
+    def argument_symbolic_reference(self, arg, switch_func=lambda x: x):
+        if hasattr(arg, '_eval'):
+            arg = symbolic.to_callable(arg)(self.df)
+        if isinstance(arg, pd.Series):
+            arg = switch_func(arg.name)
+        elif isinstance(arg, pd.DataFrame):
+            return symbolic.sym_call(lambda *x: x, arg.columns.tolist())
+        elif isinstance(arg, (list, tuple, pd.Index)):
+            arglist = [self.argument_symbolic_reference(subarg, switch_func=switch_func)
+                       for subarg in arg]
+            return symbolic.sym_call(lambda *x: x, *arglist)
+        return switch_func(arg)
 
 
     # SELECTOR LOGIC FUNCTIONS:
@@ -343,6 +360,7 @@ class SymbolicHandler(object):
         selection[self.columns.tolist().index(arg.name)] = assignment
         return selection
 
+
     def _selection_from_index(self, arg, assignment, selection):
         selection[[i for i,c in enumerate(self.columns) if c in arg]] = assignment
         return selection
@@ -377,12 +395,11 @@ class SymbolicHandler(object):
             selection = self._selection_from_int(arg, assignment, selection)
 
         if len(selection) == 0:
-            return np.zeros(len(self._columns))
+            return np.zeros(len(self.columns))
         return selection
 
 
-    def selector_recurse_args(self, args):
-        selection = [self.selector_arg_action(arg) for arg in args]
+    def selection_to_inds(self, selection):
         any_positive = any([np.nansum(vec) > 0 for vec in selection])
         if not any_positive:
             selection = [np.ones(len(self.columns))]+selection
@@ -391,34 +408,102 @@ class SymbolicHandler(object):
         else:
             selection = selection[0]
         selection[np.isnan(selection)] = 0
-        return [[self.positional_to_label(i) for i in np.where(selection)[0]]]
+        #return [np.where(selection)[0]]
+        return np.where(selection)[0]
 
 
-    ## CALL FUNCIONS:
+    def flatten_arguments(self, args):
+        flat = []
+        for arg in args:
+            #if hasattr(arg, '_eval'):
+            #    arg = symbolic.to_callable(arg)(self.df)
+            if isinstance(arg, (list, tuple, pd.Index)):
+                flat.extend(self.flatten_arguments(arg))
+            else:
+                flat.append(arg)
+        return flat
 
-    def call_embedded_function(self, *args, **kwargs):
-        symbolic_function = symbolic.Call(self.function,
-                                          args=self.recurse_args(args),
-                                          kwargs=self.recurse_kwargs(kwargs))
 
-        if self.attempt_embedded_eval and not self.args_have_symbolic:
+    def join_indices(self, index_args):
+        if len(index_args) > 1:
+            args_ = reduce(lambda x, y: np.concatenate([np.atleast_1d(x),
+                                                        np.atleast_1d(y)]),
+                           index_args)
+            return [np.atleast_1d(args_)]
+        else:
+            return index_args
+
+
+
+    def column_label_to_position(self, indexer):
+        if isinstance(indexer, str):
+            if indexer not in self.columns:
+                raise Exception("String label "+str(indexer)+' is not in columns.')
+            return self.columns.index(indexer)
+        elif isinstance(indexer, int):
+            return indexer
+        else:
+            raise Exception("Column indexer not of type str or int.")
+
+
+    def column_position_to_label(self, indexer):
+        if isinstance(indexer, str):
+            return indexer
+        elif isinstance(indexer, int):
+            warnings.warn('Int labels will be inferred as column positions.')
+            if indexer < -1*len(self.columns):
+                raise Exception(str(indexer)+' is negative and less than length of columns.')
+            elif indexer >= len(self.columns):
+                raise Exception(str(indexer)+' is greater than length of columns.')
+            else:
+                return list(self.columns)[indexer]
+        else:
+            raise Exception("Label not of type str or int.")
+
+
+    def positional_to_label(self, indices):
+        if not isinstance(indices, dict):
+            return [self.column_position_to_label(index) for index in indices]
+        else:
+            return {k:self.column_position_to_label(v) for k,v in indices.items()}
+
+
+    def label_to_positional(self, indices):
+        if not isinstance(indices, dict):
+            return [self.column_label_to_position(index) for index in indices]
+        else:
+            return {k:self.column_label_to_position(v) for k,v in indices.items()}
+
+
+    def eval_function_no_context(self, symbolic_function):
+        if not self.args_have_symbolic:
             return symbolic.eval_if_symbolic(symbolic_function, {})
         else:
             return symbolic_function
 
-
-    def call_evaluate(self, *args, **kwargs):
-        assert isinstance(args[0], pd.DataFrame)
-        self.df = args[0]
-        self.columns = self.df.columns
-
-        symbolic_function = symbolic.Call(self.function,
-                                          args=[args[0]]+self.recurse_args(args[1:]),
-                                          kwargs=self.recurse_kwargs(kwargs))
+    def eval_function_data_context(self, symbolic_function):
         return symbolic.to_callable(symbolic_function)(self.df)
 
 
+    def call_init_data(self, *args, **kwargs):
+        assert isinstance(args[0], pd.DataFrame)
+        self.df = args[0]
+        self.columns = self.df.columns
+        return args[1:], kwargs
 
+
+    def prepend_data(self, args):
+        return [self.df]+list(args)
+
+
+    def call(self, *args, **kwargs):
+        args, kwargs = self.call_init(*args, **kwargs)
+        args = function_map(self.arg_processors, args)
+        kwargs = function_map(self.kwarg_processors, kwargs)
+
+        symbolic_function = symbolic.Call(self.function, args=args, kwargs=kwargs)
+
+        return self.function_action(symbolic_function)
 
 
 
@@ -699,23 +784,23 @@ class SymbolicHandler(object):
 #
 #
 #
-def _arg_extractor(args):
-    """Extracts arguments from lists or tuples and returns them
-    "flattened" (extracting lists within lists to a flat list).
-
-    Args:
-        args: can be any argument.
-
-    Returns:
-        list
-    """
-    flat = []
-    for arg in args:
-        if isinstance(arg, (list, tuple, pd.Index)):
-            flat.extend(_arg_extractor(arg))
-        else:
-            flat.append(arg)
-    return flat
+# def _arg_extractor(args):
+#     """Extracts arguments from lists or tuples and returns them
+#     "flattened" (extracting lists within lists to a flat list).
+#
+#     Args:
+#         args: can be any argument.
+#
+#     Returns:
+#         list
+#     """
+#     flat = []
+#     for arg in args:
+#         if isinstance(arg, (list, tuple, pd.Index)):
+#             flat.extend(_arg_extractor(arg))
+#         else:
+#             flat.append(arg)
+#     return flat
 
 
 # def flatten_arguments(f):

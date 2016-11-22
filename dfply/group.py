@@ -3,7 +3,7 @@ from .base import *
 #@label_selection
 #@pipe
 #@selection
-@dfpipe(selector=True)
+@dfpipe(selector=True, args_as_labels=True, flatten_args=True)
 def groupby(df, *args):
     """
     Groups a pandas DataFrame by assigning groups to the `._grouped_by`
@@ -19,7 +19,8 @@ def groupby(df, *args):
     Returns:
         Grouped DataFrame.
     """
-    group_by = list(df.columns.values[args])
+    #group_by = list(df.columns.values[args])
+    group_by = list(args)
     existing_groups = getattr(df, "_grouped_by", None)
 
     if existing_groups is not None:
@@ -32,7 +33,7 @@ def groupby(df, *args):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def ungroup(df):
     """
     Removes any groupings from a DataFrame by setting the `._grouped_by`

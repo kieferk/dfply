@@ -32,7 +32,7 @@ def validate_set_ops(df, other):
 # ------------------------------------------------------------------------------
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def union(df, other, index=False, keep='first'):
     """
     Returns rows that appear in either DataFrame.
@@ -67,7 +67,7 @@ def union(df, other, index=False, keep='first'):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def intersect(df, other, index=False, keep='first'):
     """
     Returns rows that appear in both DataFrames.
@@ -113,7 +113,7 @@ def intersect(df, other, index=False, keep='first'):
 
 
 #@pipe
-@dfpipe(handle_grouping=False, handle_symbolic=False)
+@dfpipe(ignore_grouping=True, ignore_symbolic=True)
 def set_diff(df, other, index=False, keep='first'):
     """
     Returns rows that appear in the first DataFrame but not the second.

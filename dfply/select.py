@@ -133,14 +133,14 @@ def columns_between(start_col, end_col, inclusive=True):
 
 #@pipe
 #@selection
-@dfpipe(selector=True)
+@dfpipe(selector=True, args_as_positional=True)
 def select(df, *args):
     return df[df.columns[list(args)]]
 
 
 #@pipe
 #@selection
-@dfpipe(selector=True)
+@dfpipe(selector=True, args_as_positional=True)
 def drop(df, *args):
     return df.drop(df.columns[list(args)], axis=1)
 
