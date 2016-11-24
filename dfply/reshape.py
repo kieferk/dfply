@@ -46,7 +46,7 @@ def arrange(df, *args, **kwargs):
 
 #@pipe
 #@symbolic_reference
-@dfpipe(kwargs_as_labels=True)
+@dfpipe(kwarg_selectors=True)
 def rename(df, **kwargs):
     """Renames columns, where keyword argument values are the current names
     of columns and keys are the new names.
@@ -66,7 +66,7 @@ def rename(df, **kwargs):
 # ------------------------------------------------------------------------------
 
 #@label_selection
-@dfpipe(args_as_labels=True, flatten_args=True)
+@dfpipe(selector_args=True, flatten_args=True)
 def gather(df, key, values, *args, **kwargs):
     """
     Melts the specified columns in your DataFrame into two key:value columns.
@@ -96,6 +96,8 @@ def gather(df, key, values, *args, **kwargs):
 
     if len(args) == 0:
         args = df.columns.tolist()
+    else:
+        args = selection_joiner(args, df.columns.tolist())
 
     if kwargs.get('add_id', False):
         df = df.assign(_ID=np.arange(df.shape[0]))
@@ -141,7 +143,7 @@ def convert_type(df, columns):
 
 
 #@label_selection
-@dfpipe(args_as_labels=True)
+@dfpipe(selector_args=True)
 def spread(df, key, values, convert=False):
     """
     Transforms a "long" DataFrame into a "wide" format using a key and value
@@ -209,7 +211,7 @@ def spread(df, key, values, convert=False):
 
 #@pipe
 #@symbolic_reference
-@dfpipe(args_as_labels=True)
+@dfpipe(arg_selectors=[0])
 def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
              extra='drop', fill='right'):
     """
@@ -280,7 +282,7 @@ def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
 # ------------------------------------------------------------------------------
 
 #@label_selection
-@dfpipe(args_as_labels=True, flatten_arguments=True)
+@dfpipe(arg_selectors=True, flatten_arguments=True)
 def unite(df, colname, *args, **kwargs):
     """
     Does the inverse of `separate`, joining columns together by a specified
@@ -306,7 +308,7 @@ def unite(df, colname, *args, **kwargs):
             value to the string `'nan'` prior to joining.
     """
 
-    to_unite = list(args)
+    to_unite = selection_joiner(args, df.columns.tolist())
     sep = kwargs.get('sep', '_')
     remove = kwargs.get('remove', True)
     # possible na_action values

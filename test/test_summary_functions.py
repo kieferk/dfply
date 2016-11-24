@@ -224,10 +224,12 @@ def test_colmax():
 
 
 def test_median():
-    df = diamonds >> groupby(X.cut) >> head(3) >> select(X.cut, X.x)
+    df = diamonds >> groupby(X.cut) >> head(3) >> select(X.cut, X.x) >> ungroup()
     # straight summarize
     t = df >> summarize(m=median(X.x))
     df_truth = pd.DataFrame({'m': [4.05]})
+    print t
+    print df_truth
     assert t.equals(df_truth)
     # grouped summarize
     t = df >> groupby(X.cut) >> summarize(m=median(X.x))
@@ -255,7 +257,7 @@ def test_median():
 
 
 def test_var():
-    df = diamonds >> groupby(X.cut) >> head(3) >> select(X.cut, X.x)
+    df = diamonds >> groupby(X.cut) >> head(3) >> select(X.cut, X.x) >> ungroup()
     # straight summarize
     t = df >> summarize(v=var(X.x))
     df_truth = pd.DataFrame({'v': [0.687392]})
@@ -290,7 +292,7 @@ def test_var():
 
 
 def test_sd():
-    df = diamonds >> groupby(X.cut) >> head(3) >> select(X.cut, X.x)
+    df = diamonds >> groupby(X.cut) >> head(3) >> select(X.cut, X.x) >> ungroup()
     # straight summarize
     t = df >> summarize(s=sd(X.x))
     df_truth = pd.DataFrame({'s': [0.829091]})

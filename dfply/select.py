@@ -21,10 +21,10 @@ class SelectionHelper(object):
 @helper_function(delay_evaluation=True)
 def starts_with(substr, ignore_case=True):
     if ignore_case:
-        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+        f = lambda df: np.array([c for i,c in enumerate(df.columns)
                                  if c.lower().startswith(substr.lower())])
     else:
-        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+        f = lambda df: np.array([c for i,c in enumerate(df.columns)
                                  if c.startswith(substr)])
     return SelectionHelper(f)
 
@@ -33,10 +33,10 @@ def starts_with(substr, ignore_case=True):
 @helper_function(delay_evaluation=True)
 def ends_with(substr, ignore_case=True):
     if ignore_case:
-        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+        f = lambda df: np.array([c for i,c in enumerate(df.columns)
                                  if c.lower().endswith(substr.lower())])
     else:
-        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+        f = lambda df: np.array([c for i,c in enumerate(df.columns)
                                  if c.endswith(substr)])
     return SelectionHelper(f)
 
@@ -45,10 +45,10 @@ def ends_with(substr, ignore_case=True):
 @helper_function(delay_evaluation=True)
 def contains(substr, ignore_case=True):
     if ignore_case:
-        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+        f = lambda df: np.array([c for i,c in enumerate(df.columns)
                                  if substr.lower() in c.lower()])
     else:
-        f = lambda df: np.array([i for i,c in enumerate(df.columns)
+        f = lambda df: np.array([c for i,c in enumerate(df.columns)
                                  if substr in c])
     return SelectionHelper(f)
 
@@ -57,7 +57,7 @@ def contains(substr, ignore_case=True):
 @helper_function(delay_evaluation=True)
 def matches(pattern):
     pattern = re.compile(pattern)
-    f = lambda df: np.array([i for i,c in enumerate(df.columns)
+    f = lambda df: np.array([c for i,c in enumerate(df.columns)
                              if pattern.search(c) is not None])
     return SelectionHelper(f)
 
@@ -72,7 +72,7 @@ def columns_from(column):
     elif isinstance(column, str):
         decision_func = lambda ind, cols: ind >= list(cols).index(column)
 
-    f = lambda df: np.array([i for i,c in enumerate(df.columns)
+    f = lambda df: np.array([c for i,c in enumerate(df.columns)
                              if decision_func(i, df.columns)])
     return SelectionHelper(f)
 
@@ -87,7 +87,7 @@ def columns_to(column):
     elif isinstance(column, str):
         decision_func = lambda ind, cols: ind < list(cols).index(column)
 
-    f = lambda df: np.array([i for i,c in enumerate(df.columns)
+    f = lambda df: np.array([c for i,c in enumerate(df.columns)
                              if decision_func(i, df.columns)])
     return SelectionHelper(f)
 
@@ -102,7 +102,7 @@ def columns_through(column):
     elif isinstance(column, str):
         decision_func = lambda ind, cols: ind <= list(cols).index(column)
 
-    f = lambda df: np.array([i for i,c in enumerate(df.columns)
+    f = lambda df: np.array([c for i,c in enumerate(df.columns)
                              if decision_func(i, df.columns)])
     return SelectionHelper(f)
 
@@ -125,24 +125,33 @@ def columns_between(start_col, end_col, inclusive=True):
     else:
         decision_func = lambda ind, cols: ind > indexer(start_col, cols) and ind < indexer(end_col, cols)
 
-    f = lambda df: np.array([i for i,c in enumerate(df.columns)
+    f = lambda df: np.array([c for i,c in enumerate(df.columns)
                              if decision_func(i, df.columns)])
 
     return SelectionHelper(f)
 
 
+def selection_arg_joiner(args):
+    args = [[x] if isinstance(x, str) else x for x in args]
+    if len(args) > 1:
+        return reduce(lambda x, y: [item for item in x if item in y], args)
+    else:
+        return args
+
 #@pipe
 #@selection
-@dfpipe(selector=True, args_as_positional=True)
+@dfpipe(arg_selectors=True)
 def select(df, *args):
-    return df[df.columns[list(args)]]
+    args = selection_joiner(args, df.columns.tolist())
+    return df[[x for x in args]]
 
 
 #@pipe
 #@selection
-@dfpipe(selector=True, args_as_positional=True)
+@dfpipe(arg_selectors=True)
 def drop(df, *args):
-    return df.drop(df.columns[list(args)], axis=1)
+    args = selection_joiner(args, df.columns.tolist())
+    return df.drop(args, axis=1)
 
 # @positional_selection
 # def select(df, *args):

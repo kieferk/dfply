@@ -31,7 +31,7 @@ def mutate(df, **kwargs):
 
 #@dfpipe
 #@flatten_arguments
-@dfpipe(selector=True, flatten_arguments=True)
+@dfpipe(arg_selectors=True, flatten_arguments=True)
 def transmute(df, *keep_columns, **kwargs):
     """
     Creates columns and then returns those new columns and optionally specified

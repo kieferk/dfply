@@ -29,9 +29,10 @@ def sample(df, *args, **kwargs):
 #@pipe
 #@group_delegation
 #@symbolic_reference
-@dfpipe(args_as_labels=True)
+@dfpipe(arg_selectors=True)
 def distinct(df, *args, **kwargs):
-    return df.drop_duplicates(list(args), **kwargs)
+    args = selection_joiner(args, df.columns.tolist())
+    return df.drop_duplicates(args, **kwargs)
 
 
 #@dfpipe
