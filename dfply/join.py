@@ -206,7 +206,7 @@ def semi_join(df, other, **kwargs):
     if not right_on:
         right_on = [col_name for col_name in df.columns.values.tolist() if col_name in other.columns.values.tolist()]
         left_on = right_on
-    else:
+    elif not isinstance(right_on, (list, tuple)):
         right_on = [right_on]
     other_reduced = other[right_on].drop_duplicates()
     joined = df.merge(other_reduced, how='inner', left_on=left_on,
@@ -241,7 +241,7 @@ def anti_join(df, other, **kwargs):
     if not right_on:
         right_on = [col_name for col_name in df.columns.values.tolist() if col_name in other.columns.values.tolist()]
         left_on = right_on
-    else:
+    elif not isinstance(right_on, (list, tuple)):
         right_on = [right_on]
     other_reduced = other[right_on].drop_duplicates()
     joined = df.merge(other_reduced, how='left', left_on=left_on,
