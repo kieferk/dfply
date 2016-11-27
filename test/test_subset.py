@@ -80,3 +80,23 @@ def test_mask():
     df_mask = df_mask & (diamonds.table < 55) & (diamonds.price < 500)
     df = diamonds[df_mask]
     assert df.equals(test2)
+
+
+def test_top_n():
+    with pytest.raises(ValueError):
+        diamonds >> top_n()
+    test2 = diamonds >> top_n(n=6)
+    df2 = diamonds.sort_values('z', ascending=False).head(6).sort_index()
+    assert test2.equals(df2)
+    test3 = diamonds >> top_n(col=X.x, n=5)
+    df3 = diamonds.sort_values('x', ascending=False).head(5).sort_index()
+    assert test3.equals(df3)
+    test4 = diamonds >> top_n(col=X.cut, n=1)
+    df4 = diamonds[diamonds.cut == 'Very Good']
+    assert test4.equals(df4)
+    test5 = diamonds >> groupby(X.cut) >> top_n(n=2)
+    df5 = diamonds.ix[[27415, 27630, 23539, 27517, 27518, 24297, 24328, 24067, 25999, 26444, 48410]]
+    assert test5.equals(df5)
+    test6 = diamonds >> top_n(col=X.x, ascending=False, n=5)
+    df6 = diamonds.sort_values('x', ascending=True).head(8).sort_index()
+    assert test6.equals(df6)
