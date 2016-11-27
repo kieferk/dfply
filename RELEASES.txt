@@ -1,3 +1,7 @@
+v0.2.4
+- Bug fixed in semi-join and anti-join
+- top_n added
+
 v0.2.3
 Inplace piping added using the `>>=` operator. The `pipe` decorator internals
 have been changed to make this possible through the addition of an `__rshift__`
