@@ -233,3 +233,22 @@ def select_if(df, fun):
         except:
             pass
     return df[cols]
+
+
+@pipe
+def drop_if(df, fun):
+    """Drops columns where fun(ction) is true
+
+    Args:
+        fun: a function that will be applied to columns
+
+    """
+    cols = list()
+    for col in df:
+        try:
+            if fun(df[col]):
+                cols.append(col)
+        except:
+            pass
+    inverse_cols = [col for col in df if col not in cols]
+    return df[inverse_cols]

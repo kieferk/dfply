@@ -187,3 +187,72 @@ def test_select_if():
             pass
     df_if = diamonds[cols]
     assert df_if.equals(diamonds >> select_if(lambda col: any(col.str.contains('.'))))
+
+
+def test_drop_if():
+    # test 1: returns a dataframe where any column does not have a mean greater than 3
+    # this means numeric columns with mean less than 3, and also any non-numeric column
+    # (since it does not have a mean)
+    cols = list()
+    for col in diamonds:
+        try:
+            if mean(diamonds[col]) > 3:
+                cols.append(col)
+        except:
+            pass
+    inverse_cols = [col for col in diamonds if col not in cols]
+    df_if = diamonds[inverse_cols]
+    assert df_if.equals(diamonds >> drop_if(lambda col: mean(col) > 3))
+    # test 2: use and
+    # return colums where both conditions are false:
+    # the mean greater than 3, and max < 50
+    # again, this will include non-numeric columns
+    cols = list()
+    for col in diamonds:
+        try:
+            if mean(diamonds[col]) > 3 and max(diamonds[col]) < 50:
+                cols.append(col)
+        except:
+            pass
+    inverse_cols = [col for col in diamonds if col not in cols]
+    df_if = diamonds[inverse_cols]
+    assert df_if.equals(diamonds >> drop_if(lambda col: mean(col) > 3 and max(col) < 50))
+    # test 3: use or
+    # this will return a dataframe where either of the two conditions are false:
+    # the mean is greater than 3, or the max < 6
+    cols = list()
+    for col in diamonds:
+        try:
+            if mean(diamonds[col]) > 3 or max(diamonds[col]) < 6:
+                cols.append(col)
+        except:
+            pass
+    inverse_cols = [col for col in diamonds if col not in cols]
+    df_if = diamonds[inverse_cols]
+    assert df_if.equals(diamonds >> drop_if(lambda col: mean(col) > 3 or max(col) < 6))
+    # test 4: string operations - contain a specific string
+    # this will drop any columns if they contain the word 'Ideal'
+    cols = list()
+    for col in diamonds:
+        try:
+            if any(diamonds[col].str.contains('Ideal')):
+                cols.append(col)
+        except:
+            pass
+    inverse_cols = [col for col in diamonds if col not in cols]
+    df_if = diamonds[inverse_cols]
+    assert df_if.equals(diamonds >> drop_if(lambda col: any(col.str.contains('Ideal'))))
+    # test 5: drop any text columns
+    # uses the special '.' regex symbol to find any text value
+    cols = list()
+    for col in diamonds:
+        try:
+            if any(diamonds[col].str.contains('.')):
+                cols.append(col)
+        except:
+            pass
+    inverse_cols = [col for col in diamonds if col not in cols]
+    df_if = diamonds[inverse_cols]
+    assert df_if.equals(diamonds >> drop_if(lambda col: any(col.str.contains('.'))))
+
+test_drop_if()
