@@ -132,3 +132,58 @@ def drop_through():
     assert df.equals(diamonds >> drop_through('x'))
     assert df.equals(diamonds >> drop_through(X.x))
     assert df.equals(diamonds >> drop_through(7))
+
+
+def test_select_if():
+    # test 1: manually build diamonds subset where columns are numeric and
+    # mean is greater than 3
+    cols = list()
+    for col in diamonds:
+        try:
+            if mean(diamonds[col]) > 3:
+                cols.append(col)
+        except:
+            pass
+    df_if = diamonds[cols]
+    assert df_if.equals(diamonds >> select_if(lambda col: mean(col) > 3))
+    # test 2: use and
+    cols = list()
+    for col in diamonds:
+        try:
+            if mean(diamonds[col]) > 3 and max(diamonds[col]) < 50:
+                cols.append(col)
+        except:
+            pass
+    df_if = diamonds[cols]
+    assert df_if.equals(diamonds >> select_if(lambda col: mean(col) > 3 and max(col) < 50))
+    # test 3: use or
+    cols = list()
+    for col in diamonds:
+        try:
+            if mean(diamonds[col]) > 3 or max(diamonds[col]) < 6:
+                cols.append(col)
+        except:
+            pass
+    df_if = diamonds[cols]
+    assert df_if.equals(diamonds >> select_if(lambda col: mean(col) > 3 or max(col) < 6))
+    # test 4: string operations - contain a specific string
+    cols = list()
+    for col in diamonds:
+        try:
+            if any(diamonds[col].str.contains('Ideal')):
+                cols.append(col)
+        except:
+            pass
+    df_if = diamonds[cols]
+    assert df_if.equals(diamonds >> select_if(lambda col: any(col.str.contains('Ideal'))))
+    # test 5: get any text columns
+    # uses the special '.' regex symbol to find any text value
+    cols = list()
+    for col in diamonds:
+        try:
+            if any(diamonds[col].str.contains('.')):
+                cols.append(col)
+        except:
+            pass
+    df_if = diamonds[cols]
+    assert df_if.equals(diamonds >> select_if(lambda col: any(col.str.contains('.'))))

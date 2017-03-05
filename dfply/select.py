@@ -223,7 +223,7 @@ def select_if(df, fun):
 
     Args:
         fun: a function that will be applied to columns
-    
+
     """
     cols = list()
     for col in df:
