@@ -254,5 +254,3 @@ def test_drop_if():
     inverse_cols = [col for col in diamonds if col not in cols]
     df_if = diamonds[inverse_cols]
     assert df_if.equals(diamonds >> drop_if(lambda col: any(col.str.contains('.'))))
-
-test_drop_if()
