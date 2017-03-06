@@ -215,3 +215,40 @@ def drop_through(df, end_index):
             label, or symbolic pandas series.
     """
     return df.drop(df.columns[:end_index+1], axis=1)
+
+
+@pipe
+def select_if(df, fun):
+    """Selects columns where fun(ction) is true
+
+    Args:
+        fun: a function that will be applied to columns
+
+    """
+    cols = list()
+    for col in df:
+        try:
+            if fun(df[col]):
+                cols.append(col)
+        except:
+            pass
+    return df[cols]
+
+
+@pipe
+def drop_if(df, fun):
+    """Drops columns where fun(ction) is true
+
+    Args:
+        fun: a function that will be applied to columns
+
+    """
+    cols = list()
+    for col in df:
+        try:
+            if fun(df[col]):
+                cols.append(col)
+        except:
+            pass
+    inverse_cols = [col for col in df if col not in cols]
+    return df[inverse_cols]
