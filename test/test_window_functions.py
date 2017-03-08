@@ -163,3 +163,28 @@ def test_percent_rank():
     assert df_pr.equals(df_truth.assign(pr=[0.0, 0.0, 0.0, 1.0, 1.0]))
     df_pr = df >> mutate(pr=percent_rank(X.x, ascending=False))
     assert df_pr.equals(df_truth.assign(pr=[0.75, 1.0, 0.50, 0.25, 0.00]))
+
+
+def test_row_number():
+    df = diamonds.copy().head(5).sort_values(by='x')
+    df['rn'] = range(1, df.shape[0] + 1)
+    df['rn'] = df['rn'].astype(float)
+    df.sort_index(inplace=True)
+    assert df.equals(diamonds >> head(5) >> mutate(rn=row_number(X.x)))
+    # test 2: row number with desc() option
+    df = diamonds.copy().head(5).sort_values(by='x', ascending=False)
+    df['rn'] = range(1, df.shape[0] + 1)
+    df['rn'] = df['rn'].astype(float)
+    df.sort_index(inplace=True)
+    assert df.equals(diamonds >> head(5) >> mutate(rn=row_number(desc(X.x))))
+    # test 3: row number with ascending keyword
+    df = diamonds.copy().head(5).sort_values(by='x', ascending=False)
+    df['rn'] = range(1, df.shape[0] + 1)
+    df['rn'] = df['rn'].astype(float)
+    df.sort_index(inplace=True)
+    assert df.equals(diamonds >> head(5) >> mutate(rn=row_number(X.x, ascending=False)))
+    # test 4: with a group by
+    df = diamonds.copy().head(5)
+    df['rn'] = [1, 1, 1, 2, 2]
+    df['rn'] = df['rn'].astype(float)
+    assert df.equals(diamonds >> head(5) >> groupby(X.cut) >> mutate(rn=row_number(X.x)))

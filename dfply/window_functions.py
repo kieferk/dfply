@@ -198,3 +198,20 @@ def percent_rank(series, ascending=True):
         return 0
     percents = (series.rank(method='min', ascending=ascending) - 1) / (series.size - 1)
     return percents
+
+
+@make_symbolic
+def row_number(series, ascending=True):
+    """
+    Returns row number based on column rank
+    Equivalent to `series.rank(method='first', ascending=ascending)`.
+
+    Args:
+        series: column to rank.
+
+    Kwargs:
+        ascending (bool): whether to rank in ascending order (default is `True`).
+    """
+
+    series_rank = series.rank(method='first', ascending=ascending)
+    return series_rank
