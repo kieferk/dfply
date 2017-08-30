@@ -47,6 +47,8 @@ def resolve_selection(df, *args, drop=False):
 @symbolic_evaluation(eval_as_selector=True)
 def select(df, *args):
     ordering, column_indices = resolve_selection(df, *args)
+    if (column_indices == 0).all():
+        return df[[]]
     selection = np.where((column_indices == np.max(column_indices)) &
                          (column_indices >= 0))[0]
     df = df.iloc[:, selection]
@@ -62,6 +64,8 @@ def select(df, *args):
 @symbolic_evaluation(eval_as_selector=True)
 def drop(df, *args):
     _, column_indices = resolve_selection(df, *args, drop=True)
+    if (column_indices == 0).all():
+        return df[[]]
     selection = np.where((column_indices == np.max(column_indices)) &
                          (column_indices >= 0))[0]
     return df.iloc[:, selection]
