@@ -23,4 +23,6 @@ def test_inplace_pipe():
     df = diamonds[['price','carat']].head(5)
     d = diamonds.copy()
     d >>= select(X.price, X.carat) >> head(5)
+    print(df)
+    print(d)
     assert df.equals(d)

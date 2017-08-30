@@ -1,36 +1,41 @@
 # dfply
 
-### Version: 0.2.4
+### Version: 0.3.0
 
-The dfply package makes it possible to do R's dplyr-style data manipulation with pipes
+> **Note: Version 0.3.0 is the first big update in awhile, and changes a lot of
+the "base" code. The `pandas-ply` package is no longer being imported. I have coded
+my own version of the "symbolic" objects that I was borrowing from `pandas-ply`. Also,
+I am no longer supporting Python 2, sorry!
+
+The `dfply` package makes it possible to do R's `dplyr`-style data manipulation with pipes
 in python on pandas DataFrames.
 
-This is an alternative to [pandas-ply](https://github.com/coursera/pandas-ply)
-and [dplython](https://github.com/dodger487/dplython), which both engineer dplyr
-syntax and functionality in python. The dfply code for symbolic representation
-of pandas DataFrames and series (e.g. `X.variable`) is imported from pandas-ply.
+This is an alternative to [`pandas-ply`](https://github.com/coursera/pandas-ply)
+and [`dplython`](https://github.com/dodger487/dplython), which both engineer `dplyr`
+syntax and functionality in python. There are probably more packages that attempt
+to enable `dplyr`-style dataframe manipulation in python, but those are the two I
+am aware of.
 
-dfply uses a decorator-based architecture for the piping functionality and
+`dfply` uses a decorator-based architecture for the piping functionality and
 to "categorize" the types of data manipulation functions. The goal of this  
-architecture is to make dfply concise and easily extensible, simply by chaining
+architecture is to make `dfply` concise and easily extensible, simply by chaining
 together different decorators that each have a distinct effect on the wrapped
-function. There is a more in-depth overview of the decorators and how dfply can be
+function. There is a more in-depth overview of the decorators and how `dfply` can be
 customized below.
 
-Dfply is intended to (at least) mimic the functionality of dplyr. The syntax
-is the same for the most part, but may vary in some cases.
+`dfply` is intended to mimic the functionality of `dplyr`. The syntax
+is the same for the most part, but will vary in some cases as Python is a
+considerably different programming language than R.
 
-Most of the core functionality of dplyr is complete, and the remainder is
-actively being added in. Going forward I expect functionality that is not
-directly part of dplyr to be incorporated into dfply as well. This is not
-intended to be a direct port of dplyr, but instead a port of the _ease,
-convenience and readability_ the dplyr package provides for data manipulation
+A good amount of the core functionality of `dplyr` is complete, and the remainder is
+actively being added in. Going forward I hope functionality that is not
+directly part of `dplyr` to be incorporated into `dfply` as well. This is not
+intended to be an absolute mimic of `dplyr`, but instead a port of the _ease,
+convenience and readability_ the `dplyr` package provides for data manipulation
 tasks.
 
-
 **Expect frequent updates to the package version as features are added and
-any bugs are fixed. That being said, the current version appears to be
-stable.**
+any bugs are fixed.**
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -162,11 +167,12 @@ side of the `>>=` pipe and the DataFrame variable is overwritten with the
 output of the operations.
 
 
-### The pandas-ply `X` DataFrame symbol
+### The `X` DataFrame symbol
 
 The DataFrame as it is passed through the piping operations is represented
-by the symbol `X`. This functionality is imported from pandas-ply, and allows
-operations on the DataFrame to be deferred until the appropriate time. Selecting
+by the symbol `X`. It records the actions you want to take (represented by
+the `Intention` class), but does not evaluate them until the appropriate time.
+Operations on the DataFrame are deferred. Selecting
 two of the columns, for example, can be done using the symbolic `X` DataFrame
 during the piping operations.
 
@@ -182,38 +188,14 @@ diamonds >> select(X.carat, X.cut) >> head(3)
 
 ### Selecting and dropping
 
-#### `select*()` and `drop*()` functions
+#### `select()` and `drop()` functions
 
-A variety of selection functions are available. The current functions are:
+There are two functions for selection, inverse of each other: `select` and
+`drop`. The `select` and `drop` functions accept string labels, integer positions,
+and/or symbolically represented column names (`X.column`). They also accept symbolic "selection
+filter" functions, which will be covered shortly.
 
-- `select(*columns)` returns the columns specified by the arguments
-- `select_containing(*substrings)` returns columns containing substrings
-- `select_startswith(*substrings)` returns columns starting with substrings
-- `select_endswith(*substrings)` returns columns ending with substrings
-- `select_between(column1, column2)` returns columns between two specified columns (inclusive)
-- `select_to(column)` returns columns up to a specified column (exclusive)
-- `select_from(column)` returns columns starting from a specified column (inclusive)
-- `select_through(column)` returns columns up through a specified column (exclusive)
-
-There are complimentary dropping functions to all the selection functions,
-which will remove the specified columns instead of selecting them:
-
-- `drop(*columns)`
-- `drop_containing(*substrings)`
-- `drop_startswith(*substrings)`
-- `drop_endswith(*substrings)`
-- `drop_between(column1, column2)`
-- `drop_to(column)`
-- `drop_from(column)`
-- `drop_through(column)`
-
-Column selection and dropping functions are designed to work with an arbitrary
-combination of string labels, positional integers, or symbolic (`X.column`)
-pandas Series objects.
-
-The functions also "flatten" their arguments so that lists or tuples of selectors
-will become individual arguments. This doesn't impact the user except for the
-fact that you can mix single selectors and lists of selectors as arguments.
+The example below selects "cut", "price", "x", and "y" from the diamonds dataset.
 
 ```python
 diamonds >> select(1, X.price, ['x', 'y']) >> head(2)
@@ -223,39 +205,151 @@ diamonds >> select(1, X.price, ['x', 'y']) >> head(2)
 1  Premium    326  3.89  3.84
 ```
 
-```python
-diamonds >> drop_endswith('e','y','z') >> head(2)
-
-   carat      cut color  depth     x
-0   0.23    Ideal     E   61.5  3.95
-1   0.21  Premium     E   59.8  3.89
-```
+If you were instead to use `drop`, you would get back all columns besides those specified.
 
 ```python
-diamonds >> drop_through(X.clarity) >> select_to(X.x) >> head(2)
+diamonds >> drop(1, X.price, ['x', 'y']) >> head(2)
 
-   depth  table  price
-0   61.5   55.0    326
-1   59.8   61.0    326
+   carat color clarity  depth  table     z
+0   0.23     E     SI2   61.5   55.0  2.43
+1   0.21     E     SI1   59.8   61.0  2.31
 ```
+
+
+#### Selection using the inversion `~` operator on symbolic columns
+
+One particularly nice thing about `dplyr`'s selection functions is that you can
+drop columns inside of a select statement by putting a subtraction sign in front,
+like so: `... %>% select(-col)`. The same can be done in `dfply`, but instead of
+the subtraction operator you use the tilde `~`.
+
+For example, let's say I wanted to select any column _except_ carat, color, and
+clarity in my dataframe. One way to do this is to specify those for removal using
+the `~` operator like so:
+
+
+```python
+diamonds >> select(~X.carat, ~X.color, ~X.clarity) >> head(2)
+
+       cut  depth  table  price     x     y     z
+0    Ideal   61.5   55.0    326  3.95  3.98  2.43
+1  Premium   59.8   61.0    326  3.89  3.84  2.31
+```
+
+Note that if you are going to use the inversion operator, you _must_ place it
+prior to the symbolic `X` (or a symbolic such as a selection filter function, covered
+next). For example, using the inversion operator on a list of columns will
+result in an error:
+
+```python
+diamonds >> select(~[X.carat, X.color, X.clarity]) >> head(2)
+
+TypeError: bad operand type for unary ~: 'list'
+```
+
+
+#### Selection filter functions
+
+The vanilla `select` and `drop` functions are useful, but there are a variety of
+selection functions inspired by `dplyr` available to make selecting and dropping
+columns a breeze. These functions are intended to be put inside of the `select` and
+`drop` functions, and can be paired with the `~` inverter.
+
+First, a quick rundown of the available functions:
+- `starts_with(prefix)`: find columns that start with a string prefix.
+- `ends_with(suffix)`: find columns that end with a string suffix.
+- `contains(substr)`: find columns that contain a substring in their name.
+- `everything()`: all columns.
+- `columns_between(start_col, end_col, inclusive=True)`: find columns between a specified start and end column.
+The `inclusive` boolean keyword argument indicates whether the end column should be included or not.
+- `columns_to(end_col, inclusive=True)`: get columns up to a specified end column. The `inclusive`
+argument indicates whether the ending column should be included or not.
+- `columns_from(start_col)`: get the columns starting at a specified column.
+
+The selection filter functions are best explained by example. Let's say I wanted to
+select only the columns that started with a "c":
+
+```python
+diamonds >> select(starts_with('c')) >> head(2)
+
+   carat      cut color clarity
+0   0.23    Ideal     E     SI2
+1   0.21  Premium     E     SI1
+```
+
+The selection filter functions are instances of the class `Intention`, just like the
+`X` placeholder, and so I can also use the inversion operator with them. For example,
+I can alternatively select the columns that do not start with "c":
+
+```python
+diamonds >> select(~starts_with('c')) >> head(2)
+
+   depth  table  price     x     y     z
+0   61.5   55.0    326  3.95  3.98  2.43
+1   59.8   61.0    326  3.89  3.84  2.31
+```
+
+They work the same inside the `drop` function, but with the intention of removal.
+I could, for example, use the `columns_from` selection filter to drop all columns
+from "price" onwards:
+
+```python
+diamonds >> drop(columns_from(X.price)) >> head(2)
+
+   carat      cut color clarity  depth  table
+0   0.23    Ideal     E     SI2   61.5   55.0
+1   0.21  Premium     E     SI1   59.8   61.0
+```
+
+As the example above shows, you can use symbolic column names inside of the
+selection filter function! You can also mix together selection filters and standard
+selections inside of the same `select` or `drop` command.
+
+For my next trick, I will select the first two columns, the last two columns, and
+the "depth" column using a mixture of selection techniques:
+
+```python
+diamonds >> select(columns_to(1, inclusive=True), 'depth', columns_from(-2)) >> head(2)
+
+   carat      cut  depth     y     z
+0   0.23    Ideal   61.5  3.98  2.43
+1   0.21  Premium   59.8  3.84  2.31
+```
+
 
 ### Subsetting and filtering
 
 #### `row_slice()`
 
 Slices of rows can be selected with the `row_slice()` function. You can pass
-single integer indices and/or lists of integer indices to select rows as with
-pandas' `.iloc`.
+single integer indices or a list of indices to select rows as with. This is
+going to be the same as using pandas' `.iloc`.
 
 ```python
-diamonds >> row_slice(1,2,[10,15])
+diamonds >> row_slice([10,15])
 
     carat      cut color clarity  depth  table  price     x     y     z
-1    0.21  Premium     E     SI1   59.8   61.0    326  3.89  3.84  2.31
-2    0.23     Good     E     VS1   56.9   65.0    327  4.05  4.07  2.31
 10   0.30     Good     J     SI1   64.0   55.0    339  4.25  4.28  2.73
 15   0.32  Premium     E      I1   60.9   58.0    345  4.38  4.42  2.68
 ```
+
+Note that this can also be used with the `group_by` function, and will operate
+like a call to `.iloc` on each group. The `group_by` pipe function is
+covered later, but it essentially works the same as pandas `.groupby` (with a
+few subtle differences).
+
+```python
+diamonds >> group_by('cut') >> row_slice(5)
+
+     carat        cut color clarity  depth  table  price     x     y     z
+128   0.91       Fair     H     SI2   64.4   57.0   2763  6.11  6.09  3.93
+20    0.30       Good     I     SI2   63.3   56.0    351  4.26  4.30  2.71
+40    0.33      Ideal     I     SI2   61.2   56.0    403  4.49  4.50  2.75
+26    0.24    Premium     I     VS1   62.5   57.0    355  3.97  3.94  2.47
+21    0.23  Very Good     E     VS2   63.8   55.0    352  3.85  3.92  2.48
+```
+
+
 
 #### `sample()`
 
@@ -301,6 +395,7 @@ diamonds >> distinct(X.color)
 28   0.23  Very Good     D     VS2   60.5   61.0    357  3.96  3.97  2.40
 ```
 
+
 #### `mask()`
 
 Filtering rows with logical criteria is done with `mask()`, which accepts
@@ -333,11 +428,11 @@ diamonds >> mask(X.cut == 'Ideal', X.color == 'E', X.table < 55, X.price < 500)
 
 #### `mutate()`
 
-New variables can be created with the `mutate()` function (named that to match
-dplyr).
+New variables can be created with the `mutate()` function (named that way to match
+`dplyr`).
 
 ```python
-diamonds >> mutate(x_plus_y=X.x + X.y) >> select_from('x') >> head(3)
+diamonds >> mutate(x_plus_y=X.x + X.y) >> select(columns_from('x')) >> head(3)
 
       x     y     z  x_plus_y
 0  3.95  3.98  2.43      7.93
@@ -348,17 +443,18 @@ diamonds >> mutate(x_plus_y=X.x + X.y) >> select_from('x') >> head(3)
 Multiple variables can be created in a single call.
 
 ```python
-diamonds >> mutate(x_plus_y=X.x + X.y, y_div_z=(X.y / X.z)) >> select_from('x') >> head(3)
+diamonds >> mutate(x_plus_y=X.x + X.y, y_div_z=(X.y / X.z)) >> select(columns_from('x')) >> head(3)
 
-      x     y     z   y_div_z  x_plus_y
-0  3.95  3.98  2.43  1.637860      7.93
-1  3.89  3.84  2.31  1.662338      7.73
-2  4.05  4.07  2.31  1.761905      8.12
+      x     y     z  x_plus_y   y_div_z
+0  3.95  3.98  2.43      7.93  1.637860
+1  3.89  3.84  2.31      7.73  1.662338
+2  4.05  4.07  2.31      8.12  1.761905
 ```
 
-NOTE: because of python's unordered keyword arguments, the new variables
-created with mutate are not (yet) guaranteed to be created in the same order
-that they are input into the function call. This is on the todo list.
+> Note: In Python the new variables created with mutate may not be guaranteed
+to be created in the same order that they are input into the function call, though
+this may have been changed in Python 3...
+
 
 #### `transmute()`
 
@@ -368,40 +464,42 @@ created variables.
 ```python
 diamonds >> transmute(x_plus_y=X.x + X.y, y_div_z=(X.y / X.z)) >> head(3)
 
-    y_div_z  x_plus_y
-0  1.637860      7.93
-1  1.662338      7.73
-2  1.761905      8.12
+   x_plus_y   y_div_z
+0      7.93  1.637860
+1      7.73  1.662338
+2      8.12  1.761905
 ```
+
 
 ### Grouping
 
-#### `groupby()` and `ungroup()`
+#### `group_by()` and `ungroup()`
 
-DataFrames are grouped along variables using the `groupby()` function and
+DataFrames are grouped along variables using the `group_by()` function and
 ungrouped with the `ungroup()` function. Functions chained after grouping a
-DataFrame are applied by group until returning or ungrouping. Hierarchical/multiindexing is automatically removed.
+DataFrame are applied by group until returning or ungrouping. Hierarchical/multiindexing
+is automatically removed.
 
-In the example below, the `lead()` and `lag()` functions are dfply convenience
+> Note: In the example below, the `lead()` and `lag()` functions are dfply convenience
 wrappers around the pandas `.shift()` Series method.
 
 
 ```python
-(diamonds >> groupby(X.cut) >>
+(diamonds >> group_by(X.cut) >>
  mutate(price_lead=lead(X.price), price_lag=lag(X.price)) >>
- head(2) >> select(X.cut, X.price, X.price_lead))
+ head(2) >> select(X.cut, X.price, X.price_lead, X.price_lag))
 
           cut  price  price_lead  price_lag
-8        Fair    337         NaN     2757.0
-91       Fair   2757       337.0     2759.0
-2        Good    327         NaN      335.0
-4        Good    335       327.0      339.0
-0       Ideal    326         NaN      340.0
-11      Ideal    340       326.0      344.0
-1     Premium    326         NaN      334.0
-3     Premium    334       326.0      342.0
-5   Very Good    336         NaN      336.0
-6   Very Good    336       336.0      337.0
+8        Fair    337      2757.0        NaN
+91       Fair   2757      2759.0      337.0
+2        Good    327       335.0        NaN
+4        Good    335       339.0      327.0
+0       Ideal    326       340.0        NaN
+11      Ideal    340       344.0      326.0
+1     Premium    326       334.0        NaN
+3     Premium    334       342.0      326.0
+5   Very Good    336       336.0        NaN
+6   Very Good    336       337.0      336.0
 ```
 
 
@@ -411,8 +509,7 @@ wrappers around the pandas `.shift()` Series method.
 
 Sorting is done by the `arrange()` function, which wraps around the pandas
 `.sort_values()` DataFrame method. Arguments and keyword arguments are passed
-through to that function (arguments are also currently flattened like in the select
-functions).
+through to that function.
 
 ```python
 diamonds >> arrange(X.table, ascending=False) >> head(5)
@@ -425,12 +522,13 @@ diamonds >> arrange(X.table, ascending=False) >> head(5)
 49375   0.70  Fair     H     VS1   62.0   73.0   2100  5.65  5.54  3.47
 
 
-(diamonds >> groupby(X.cut) >> arrange(X.price) >>
+(diamonds >> group_by(X.cut) >> arrange(X.price) >>
  head(3) >> ungroup() >> mask(X.carat < 0.23))
-       carat        cut color clarity  depth  table  price     x     y     z
-28270   0.25       Fair     E     VS1   55.2   64.0    361  4.21  4.23  2.33
-13      0.31      Ideal     J     SI2   62.2   54.0    344  4.35  4.37  2.71
-5       0.24  Very Good     J    VVS2   62.8   57.0    336  3.94  3.96  2.48
+
+    carat      cut color clarity  depth  table  price     x     y     z
+8    0.22     Fair     E     VS2   65.1   61.0    337  3.87  3.78  2.49
+1    0.21  Premium     E     SI1   59.8   61.0    326  3.89  3.84  2.31
+12   0.22  Premium     F     SI1   60.4   61.0    342  3.88  3.84  2.33
 ```
 
 #### `rename()`
@@ -851,7 +949,7 @@ a >> set_diff(c)
 
 ### Binding
 
-dfply comes with convenience wrappers around `pandas.concat()` for joining
+`dfply` comes with convenience wrappers around `pandas.concat()` for joining
 DataFrames by rows or by columns.
 
 The toy DataFrames below (`a` and `b`) are the same as the ones used to display
@@ -908,7 +1006,7 @@ as can be seen above.
 
 ### Summarization
 
-There are two summarization functions in dfply that match dplr: `summarize` and
+There are two summarization functions in `dfply` that match `dplr`: `summarize` and
 `summarize_each` (though these functions use the 'z' spelling rather than 's').
 
 #### `summarize()`
@@ -927,7 +1025,7 @@ diamonds >> summarize(price_mean=X.price.mean(), price_std=X.price.std())
 `summarize()` can of course be used with groupings as well.
 
 ```python
-diamonds >> groupby('cut') >> summarize(price_mean=X.price.mean(), price_std=X.price.std())
+diamonds >> group_by('cut') >> summarize(price_mean=X.price.mean(), price_std=X.price.std())
 
          cut   price_mean    price_std
 0       Fair  4358.757764  3560.386612
@@ -955,7 +1053,7 @@ diamonds >> summarize_each([np.mean, np.var], X.price, 'depth')
 `summarize_each()` works with groupings as well.
 
 ```python
-diamonds >> groupby(X.cut) >> summarize_each([np.mean, np.var], X.price, 4)
+diamonds >> group_by(X.cut) >> summarize_each([np.mean, np.var], X.price, 4)
 
          cut   price_mean     price_var  depth_mean  depth_var
 0       Fair  4358.757764  1.266848e+07   64.041677  13.266319
@@ -968,9 +1066,9 @@ diamonds >> groupby(X.cut) >> summarize_each([np.mean, np.var], X.price, 4)
 
 ## Embedded column functions
 
-**UNDER CONSTRUCTION**
+**UNDER CONSTRUCTION: documentation not complete.**
 
-Like dplyr the dfply package provides functions to perform various operations
+Like `dplyr`, the `dfply` package provides functions to perform various operations
 on pandas Series. These are typically window functions and summarization
 functions, and wrap symbolic arguments in function calls.
 
@@ -982,28 +1080,29 @@ of the same length.
 
 #### `lead()` and `lag()`
 
-The `lead(series, n)` function pushes values in a vector forward, adding `NaN`
-values in the leading positions. Likewise, the `lag(series, n)` function
-pushes values backwards inserting `NaN` values in the last positions. Both
+The `lead(series, n)` function pushes values in a vector upward, adding `NaN`
+values in the end positions. Likewise, the `lag(series, n)` function
+pushes values downward, inserting `NaN` values in the initial positions. Both
 are calls to pandas `Series.shift()` function under the hood.
 
 ```python
-diamonds >> mutate(price_lead=lead(X.price, 2), price_lag=lag(X.price, 2)) >>
+(diamonds >> mutate(price_lead=lead(X.price, 2), price_lag=lag(X.price, 2)) >>
             select(X.price, -2, -1) >>
-            head(6)
+            head(6))
 
-   price  price_lag  price_lead
-0    326      327.0         NaN
-1    326      334.0         NaN
-2    327      335.0       326.0
-3    334      336.0       326.0
-4    335      336.0       327.0
-5    336      337.0       334.0
+    price  price_lag  price_lead
+ 0    326        NaN       327.0
+ 1    326        NaN       334.0
+ 2    327      326.0       335.0
+ 3    334      326.0       336.0
+ 4    335      327.0       336.0
+ 5    336      334.0       337.0
 ```
 
 #### `between()`
 
-`between(series, a, b, inclusive=False)`
+The `between(series, a, b, inclusive=False)` function checks to see if values are
+between two given bookend values.
 
 ```python
 diamonds >> select(X.price) >> mutate(price_btwn=between(X.price, 330, 340)) >> head(6)
@@ -1019,7 +1118,8 @@ diamonds >> select(X.price) >> mutate(price_btwn=between(X.price, 330, 340)) >> 
 
 #### `dense_rank()`
 
-`dense_rank(series, ascending=True)`
+The `dense_rank(series, ascending=True)` function is a wrapper around the `scipy`
+function for calculating dense rank.
 
 ```python
 diamonds >> select(X.price) >> mutate(price_drank=dense_rank(X.price)) >> head(6)
@@ -1035,7 +1135,8 @@ diamonds >> select(X.price) >> mutate(price_drank=dense_rank(X.price)) >> head(6
 
 #### `min_rank()`
 
-`min_rank(series, ascending=True)`
+Likewise, `min_rank(series, ascending=True)` is a wrapper around the `scipy` ranking
+function with min rank specified.
 
 ```python
 diamonds >> select(X.price) >> mutate(price_mrank=min_rank(X.price)) >> head(6)
@@ -1051,7 +1152,7 @@ price  price_mrank
 
 #### `cumsum()`
 
-`cumsum(series)`
+The `cumsum(series)` function calculates a cumulative sum of a column.
 
 ```python
 diamonds >> select(X.price) >> mutate(price_cumsum=cumsum(X.price)) >> head(6)
@@ -1314,15 +1415,40 @@ diamonds >> groupby(X.cut) >> summarize(price_sd=sd(X.price))
 
 
 
-## Decorators
+## Advanced: `dfply` internal decorators, classes, and extending functionality
 
-Under the hood, dfply functions work using a collection of different decorators.
-Each decorator performs a specific operation on the function parameters, and
-the variety of dfply function behavior is made possible by this compartmentalization.
+Under the hood, `dfply` functions work using a collection of different decorators and
+special classes.
+
+### The `Intention` class
+
+Python is not a lazily-evaluated language. Typically, something like this
+would not work:
+
+```python
+diamonds >> select(X.carat) >> head(2)
+```
+
+The `X` is supposed to represent the current state of the data through the
+piping operator chain, and `X.carat` indicates "select the carat column from
+the current data at this point in the chain". But Python will try to evaluate
+what `X` is, then what `X.carat` is, then what `select(X.carat)` is, all before
+the diamonds dataset ever gets evaluated.
+
+The solution to this is to delay the evaluation until the appropriate time. I will
+not get into the granular details here (but feel free to check it out for yourself
+in `base.py`). The gist is that things to be delayed are represented by a
+special `Intention` class that "waits" until it is time to evaluate the stored
+commands with a given dataframe. This is the core of how `dplyr` data manipulation
+syntax is made possible in `dfply`.
+
+(Thanks to the creators of the `dplython` and `pandas-ply` for trailblazing a lot
+of this before I made this package.)
+
 
 ### `@pipe`
 
-The primary decorator that makes chaining functions with the `>>` operator
+The primary decorator that enables chaining functions with the `>>` operator
 is `@pipe`. For functions to work with the piping syntax they must be decorated
 with `@pipe`.
 
@@ -1350,11 +1476,11 @@ def myfunc(df, *args, **kwargs):
 ### `@group_delegation`
 
 In order to delegate a function across specified groupings (assigned by the
-`groupby()` function), decorate the function with the `@group_delegation`
+`group_by()` function), decorate the function with the `@group_delegation`
 decorator. This decorator will query the DataFrame for assigned groupings and
 apply the function to those groups individually.
 
-Groupings are assigned by dfply as an attribute `._grouped_by` to the DataFrame
+Groupings are assigned by `dfply` as an attribute `._grouped_by` to the DataFrame
 proceeding through the piped functions. `@group_delegation` checks for the
 attribute and applies the function by group if groups exist. Any hierarchical
 indexing is removed by the decorator as well.
@@ -1369,21 +1495,45 @@ def myfunc(df, *args, **kwargs):
   # code
 ```
 
-### `@symbolic_evaluation` and `@symbolic_reference`
+### `@symbolic_evaluation`
 
-Evaluation of the symbolic pandas-ply `X` DataFrame by piped functions is
+Evaluation of any `Intention`-class symbolic object (such as `X`) is
 handled by the `@symbolic_evaluation` function. For example, when calling
 `mutate(new_price = X.price * 2.5)` the `X.price` symbolic representation of
 the price column in the DataFrame will be evaluated to the actual Series
-by the decorator.
+by this decorator.
 
-`@symbolic_reference` tries to evaluate the _label_ or name of the symbolic object
-rather than the actual values. This is particularly useful for the selection
-and dropping functions where the index of the columns is desired rather than
-the actual values of the column. That being said, `@symbolic_reference` is merely
-a convenience; decorating a function with `@symbolic_evaluation` and then
-manually extracting the labels of the Series or DataFrame objects within the
-decorated function would behave the same.
+The `@symbolic_evaluation` decorator can have functionality modified by
+optional keyword arguments:
+
+#### `eval_symbols`
+
+```python
+@symbolic_evaluation(eval_symbols=False)
+def my_function(df, arg1, arg2):
+    ...
+```
+
+If the `eval_symbols` argument is `True`, all symbolics will be evaluated
+with the passed-in dataframe. If `False` or `None`, there will be no attempt
+to evaluate symbolics.
+
+A list can also be passed in. The list can contain a mix of positional integers
+and string keywords, which reference positional arguments and keyworded arguments
+respectively. This targets which arguments or keyword arguments to try and
+evaluate specifically:
+
+
+```python
+# This indicates that arg1, arg2, and kw1 should be targeted for symbolic
+# evaluation, but not the other arguments.
+# Note that positional indexes reference arguments AFTER the passed-in dataframe.
+# For example, 0 refers to arg1, not df.
+@symbolic_evaluation(eval_symbols=[0,1,'kw1'])
+def my_function(df, arg1, arg2, arg3, kw1=True, kw2=False):
+    ...
+```
+
 
 
 ### `@dfpipe`
@@ -1433,6 +1583,7 @@ the piping syntax.
 
 The `nth()` code, for example, is below:
 
+
 ```python
 @make_symbolic
 def nth(series, n, order_by=None):
@@ -1449,38 +1600,6 @@ can use the `@make_symbolic` to wait until they have access to the DataFrame
 to evaluate.
 
 
-### Extending and mixing behavior with decorators
-
-One of the primary reasons that the dfply logic was built on these decorators
-was to make the package easily extensible. Though decoration
-of functions should typically follow a basic order (`@pipe` first, then `@group_delegation`,
-etc.), choosing to include or omit certain decorators in the chain allows the behavior of
-your functions to be easily customized.
-
-The currently built-in decorators are:
-
-- `@pipe`: controlling piping through `>>` operators.
-- `@group_delegation`: controlling the delegation of functions by grouping.
-- `@symbolic_evaluation`: evaluating symbolic pandas-ply DataFrames and Series.
-- `@symbolic_reference`: evaluating symbolic objects to their labels/names.
-- `@dfpipe`: decorator chaining `@pipe`, `@group_delegation`, and `@symbolic_evaluation`.
-- `@flatten_arguments`: extracts arguments in lists/tuples to be single arguments
-for the decorated function.
-- `@join_index_arguments`: joins single and list/array arguments into a single
-numpy array (used by row_slice).
-- `@column_indices_as_labels`: converts string, integer, and symbolic arguments
-referring to columns into string column labels for the decorated function.
-- `@column_indices_as_positions`: converts string, integer, and symbolic arguments
-referring to columns into integer column positions for the decorated function.
-- `@label_selection`: chains together `@pipe`, `@group_delegation`, `@symbolic_reference`,
-and `@column_indices_as_labels`.
-- `@positional_selection`: chains together `@pipe`, `@group_delegation`, `@symbolic_reference`,
-and `@column_indices_as_positions`.
-- `@make_symbolic`: turns functions into symbolic functions that "wait" for
-the piped DataFrame to evaluate.
-
-For many examples of these decorators and how they can be used together to achieve
-different types of behavior on piped DataFrames, please see the source code!
 
 ## Contributing
 
@@ -1493,8 +1612,3 @@ ongoing list of things that still need to be resolved and features to be added.
 
 If you submit a pull request with features or bugfixes, please target the
 "develop" branch rather than the "master" branch.
-
-
-## TODO:
-
-**TODO list has been moved to the "Projects" section of the github repo.**

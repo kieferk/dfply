@@ -8,7 +8,7 @@ from .base import *
 def lead(series, i=1):
     """
     Returns a series shifted forward by a value. `NaN` values will be filled
-    in the beginning.
+    in the end.
 
     Same as a call to `series.shift(i)`
 
@@ -17,7 +17,7 @@ def lead(series, i=1):
         i (int): number of positions to shift forward.
     """
 
-    shifted = series.shift(i)
+    shifted = series.shift(i * -1)
     return shifted
 
 
@@ -25,7 +25,7 @@ def lead(series, i=1):
 def lag(series, i=1):
     """
     Returns a series shifted backwards by a value. `NaN` values will be filled
-    in the end.
+    in the beginning.
 
     Same as a call to `series.shift(-i)`
 
@@ -34,7 +34,7 @@ def lag(series, i=1):
         i (int): number of positions to shift backward.
     """
 
-    shifted = series.shift(i * -1)
+    shifted = series.shift(i)
     return shifted
 
 

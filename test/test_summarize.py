@@ -20,7 +20,7 @@ def test_summarize():
     })
     pcut['price_mean'] = [diamonds[diamonds.cut == c].price.mean() for c in pcut.cut.values]
     pcut['price_std'] = [diamonds[diamonds.cut == c].price.std() for c in pcut.cut.values]
-    assert pcut.equals(diamonds >> groupby('cut') >>
+    assert pcut.equals(diamonds >> group_by('cut') >>
                        summarize(price_mean=X.price.mean(), price_std=X.price.std()))
 
 
@@ -48,9 +48,9 @@ def test_summarize_each():
 
     group = group[['cut','price_mean','price_var','depth_mean','depth_var']]
 
-    test1 = (diamonds >> groupby(X.cut) >>
+    test1 = (diamonds >> group_by(X.cut) >>
              summarize_each([np.mean, np.var], X.price, 4))
-    test2 = (diamonds >> groupby('cut') >>
+    test2 = (diamonds >> group_by('cut') >>
              summarize_each([np.mean, np.var], X.price, 'depth'))
 
     assert group.equals(test1)

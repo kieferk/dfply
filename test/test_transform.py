@@ -27,8 +27,8 @@ def group_mutate_helper(df):
 def test_group_mutate():
     df = diamonds.copy()
     df = df.groupby('cut').apply(group_mutate_helper)
-    d = diamonds >> groupby('cut') >> mutate(testcol=X.x*X.shape[0]) >> ungroup()
-    assert df.equals(d)
+    d = diamonds >> group_by('cut') >> mutate(testcol=X.x*X.shape[0]) >> ungroup()
+    assert df.equals(d.sort_index())
 
 
 def test_transmute():
@@ -42,5 +42,7 @@ def test_group_transmute():
     df = diamonds.copy()
     df = df.groupby('cut').apply(group_mutate_helper).reset_index(drop=True)
     df = df[['cut','testcol']]
-    d = diamonds >> groupby('cut') >> transmute(testcol=X.x*X.shape[0])
-    assert df.equals(d)
+    d = diamonds >> group_by('cut') >> transmute(testcol=X.x*X.shape[0])
+    print(d.head())
+    print(df.head())
+    assert df.equals(d.sort_index())

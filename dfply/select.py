@@ -4,214 +4,122 @@ from .base import *
 # Select and drop operators
 # ------------------------------------------------------------------------------
 
-@positional_selection
+def selection_context(arg, context):
+    if isinstance(arg, Intention):
+        arg = arg.evaluate(context)
+        if isinstance(arg, pd.Index):
+            arg = list(arg)
+        if isinstance(arg, pd.Series):
+            arg = arg.name
+    return arg
+
+
+def selection_filter(f):
+    def wrapper(*args, **kwargs):
+        return Intention(lambda x: f(list(x.columns),
+                                     *(selection_context(a, x) for a in args),
+                                     **{k:selection_context(v, x) for k,v in kwargs.items()}))
+    return wrapper
+
+
+def resolve_selection(df, *args, drop=False):
+    if len(args) > 0:
+        args = [a for a in flatten(args)]
+        ordering = []
+        column_indices = np.zeros(df.shape[1])
+        for selector in args:
+            visible = np.where(selector != 0)[0]
+            if not drop:
+                column_indices[visible] = selector[visible]
+            else:
+                column_indices[visible] = selector[visible] * -1
+            for selection in np.where(selector == 1)[0]:
+                if not df.columns[selection] in ordering:
+                    ordering.append(df.columns[selection])
+    else:
+        ordering = list(df.columns)
+        column_indices = np.ones(df.shape[1])
+    return ordering, column_indices
+
+
+@pipe
+@group_delegation
+@symbolic_evaluation(eval_as_selector=True)
 def select(df, *args):
-    """Selects specific columns.
+    ordering, column_indices = resolve_selection(df, *args)
+    if (column_indices == 0).all():
+        return df[[]]
+    selection = np.where((column_indices == np.max(column_indices)) &
+                         (column_indices >= 0))[0]
+    df = df.iloc[:, selection]
+    if all([col in ordering for col in df.columns]):
+        ordering = [c for c in ordering if c in df.columns]
+        return df[ordering]
+    else:
+        return df
 
-    Args:
-        *args: Can be integers, strings, symbolic series (`X.mycol`), or lists
-            of those. It can also handle pandas DataFrames, in which case the
-            columns as named in that DataFrame are selected by name from df.
-    """
-    return df[df.columns[list(args)]]
 
-
-@positional_selection
+@pipe
+@group_delegation
+@symbolic_evaluation(eval_as_selector=True)
 def drop(df, *args):
-    """Drops specific columns.
-
-    Args:
-        *args: Can be integers, strings, symbolic series (`X.mycol`), or lists
-            of those. It can also handle pandas DataFrames, in which case the
-            columns as named in that DataFrame are dropped by name from df.
-    """
-    columns = [col for i, col in enumerate(df.columns) if not i in args]
-    return df[columns]
+    _, column_indices = resolve_selection(df, *args, drop=True)
+    if (column_indices == 0).all():
+        return df[[]]
+    selection = np.where((column_indices == np.max(column_indices)) &
+                         (column_indices >= 0))[0]
+    return df.iloc[:, selection]
 
 
-@label_selection
-def select_containing(df, *args):
-    """Selects columns containing a substring or substrings.
-
-    Args:
-        *args: Integers, strings, symbolic series objects, or lists of those
-            are allowed. In the case of integers and strings, the column name
-            is found that corresponds to the position in the dataframe and
-            that name is used as a substring.
-    """
-    column_matches = [
-        col for col in df.columns if any([(x in col) for x in args])
-    ]
-    return df[column_matches]
+@selection_filter
+def starts_with(columns, prefix):
+    return [c for c in columns if c.startswith(prefix)]
 
 
-@label_selection
-def drop_containing(df, *args):
-    """Drops columns containing a substring or substrings.
-
-    Args:
-        *args: Integers, strings, symbolic series objects, or lists of those
-            are allowed. In the case of integers and strings, the column name
-            is found that corresponds to the position in the dataframe and
-            that name is used as a substring.
-    """
-    column_matches = [
-        col for col in df.columns if any([(x in col) for x in args])
-    ]
-    return df.drop(column_matches, axis=1)
+@selection_filter
+def ends_with(columns, suffix):
+    return [c for c in columns if c.endswith(suffix)]
 
 
-@label_selection
-def select_startswith(df, *args):
-    """Selects columns starting with a substring or substrings.
-
-    Args:
-        *args: Integers, strings, symbolic series objects, or lists of those
-            are allowed. In the case of integers and strings, the column name
-            is found that corresponds to the position in the dataframe and
-            that name is used as a substring.
-    """
-    column_matches = [
-        col for col in df.columns if any([col.startswith(x) for x in args])
-    ]
-    return df[column_matches]
+@selection_filter
+def contains(columns, substr):
+    return [c for c in columns if substr in c]
 
 
-@label_selection
-def drop_startswith(df, *args):
-    """Drops columns starting with a substring or substrings.
-
-    Args:
-        *args: Integers, strings, symbolic series objects, or lists of those
-            are allowed. In the case of integers and strings, the column name
-            is found that corresponds to the position in the dataframe and
-            that name is used as a substring.
-    """
-    column_matches = [
-        col for col in df.columns if any([col.startswith(x) for x in args])
-    ]
-    return df.drop(column_matches, axis=1)
+@selection_filter
+def everything(columns):
+    return columns
 
 
-@label_selection
-def select_endswith(df, *args):
-    """Selects columns ending with a substring or substrings.
-
-    Args:
-        *args: Integers, strings, symbolic series objects, or lists of those
-            are allowed. In the case of integers and strings, the column name
-            is found that corresponds to the position in the dataframe and
-            that name is used as a substring.
-    """
-    column_matches = [
-        col for col in df.columns if any([col.endswith(x) for x in args])
-    ]
-    return df[column_matches]
+@selection_filter
+def num_range(columns, prefix, range):
+    colnames = [prefix+str(i) for i in range]
+    return [c for c in columns if c in colnames]
 
 
-@label_selection
-def drop_endswith(df, *args):
-    """Drops columns ending with a substring or substrings.
-
-    Args:
-        *args: Integers, strings, symbolic series objects, or lists of those
-            are allowed. In the case of integers and strings, the column name
-            is found that corresponds to the position in the dataframe and
-            that name is used as a substring.
-    """
-    column_matches = [
-        col for col in df.columns if any([col.endswith(x) for x in args])
-    ]
-    return df.drop(column_matches, axis=1)
+@selection_filter
+def one_of(columns, specified):
+    return [c for c in columns if c in specified]
 
 
-@positional_selection
-def select_between(df, start_index, end_index):
-    """Selects columns between a starting column and ending column, inclusive.
-
-    Args:
-        start_index: Left-side starting column indicated by an integer, string
-            label, or symbolic pandas series.
-        end_index: Right-side ending column indicated by an integer, string
-            label, or symbolic pandas series.
-    """
-    return df[df.columns[start_index:end_index+1]]
+@selection_filter
+def columns_between(columns, start_col, end_col, inclusive=True):
+    if isinstance(start_col, str):
+        start_col = columns.index(start_col)
+    if isinstance(end_col, str):
+        end_col = columns.index(end_col)
+    return columns[start_col:end_col + int(inclusive)]
 
 
-@positional_selection
-def drop_between(df, start_index, end_index):
-    """Drops columns between a starting column and ending column, inclusive.
-
-    Args:
-        start_index: Left-side starting column indicated by an integer, string
-            label, or symbolic pandas series.
-        end_index: Right-side ending column indicated by an integer, string
-            label, or symbolic pandas series.
-    """
-    return df.drop(df.columns[start_index:end_index+1], axis=1)
+@selection_filter
+def columns_from(columns, start_col):
+    if isinstance(start_col, str):
+        start_col = columns.index(start_col)
+    return columns[start_col:]
 
 
-@positional_selection
-def select_from(df, start_index):
-    """Selects columns starting from a specified column.
-
-    Args:
-        start_index: Left-side limit column indicated by an integer, string
-            label, or symbolic pandas series.
-    """
-    return df[df.columns[start_index:]]
-
-
-@positional_selection
-def drop_from(df, start_index):
-    """Drops columns starting from a specified column.
-
-    Args:
-        start_index: Left-side limit column indicated by an integer, string
-            label, or symbolic pandas series.
-    """
-    return df.drop(df.columns[start_index:], axis=1)
-
-
-@positional_selection
-def select_to(df, end_index):
-    """Selects columns up to a specified column (exclusive).
-
-    Args:
-        end_index: Right-side limit column indicated by an integer, string
-            label, or symbolic pandas series.
-    """
-    return df[df.columns[:end_index]]
-
-
-@positional_selection
-def drop_to(df, end_index):
-    """Drops columns up to a specified column (exclusive).
-
-    Args:
-        end_index: Right-side limit column indicated by an integer, string
-            label, or symbolic pandas series.
-    """
-    return df.drop(df.columns[:end_index], axis=1)
-
-
-@positional_selection
-def select_through(df, end_index):
-    """Selects columns up through a specified column (inclusive).
-
-    Args:
-        end_index: Right-side limit column indicated by an integer, string
-            label, or symbolic pandas series.
-    """
-    return df[df.columns[:end_index+1]]
-
-
-@positional_selection
-def drop_through(df, end_index):
-    """Drops columns up through a specified column (inclusive).
-
-    Args:
-        end_index: Right-side limit column indicated by an integer, string
-            label, or symbolic pandas series.
-    """
-    return df.drop(df.columns[:end_index+1], axis=1)
+@selection_filter
+def columns_to(columns, end_col, inclusive=False):
+    if isinstance(end_col, str):
+        end_col = columns.index(end_col)
+    return columns[:end_col + int(inclusive)]

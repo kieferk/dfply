@@ -1,3 +1,17 @@
+v0.3.0
+Lots and lots of big changes here. Total reworking of the internal functionality.
+The good news is that it should (basically) work the same as before, but
+hopefully better. Obviously keep in mind that this is still beta and there will
+be plenty of bugs to work out on the horizon, but the preexisting tests pass for now...
+There is not backward compatibility with old versions as the decorator names
+have changed, but again, the functionality is otherwise the same.
+
+Some major things (see readme for details):
+- Moved entirely to python 3 support only. It may still work in python 2, but don't count on it.
+- pandas-ply is no longer required; It was brittle and so rolled my own stuff.
+- Selection "subfunctions" are now working and the selection functions have been changed in light of this.
+
+
 v0.2.4
 - Bug fixed in semi-join and anti-join
 - top_n added

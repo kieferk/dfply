@@ -15,7 +15,7 @@ def test_head():
 
 def test_grouped_head():
     df = diamonds.groupby(['cut','color']).apply(lambda x: x.head(2)).reset_index(drop=True)
-    d = diamonds >> groupby('cut','color') >> head(2)
+    d = diamonds >> group_by('cut','color') >> head(2)
     assert df.equals(d.reset_index(drop=True))
 
 
@@ -27,7 +27,7 @@ def test_tail():
 
 def test_grouped_tail():
     df = diamonds.groupby(['cut','color']).apply(lambda x: x.tail(2)).reset_index(drop=True)
-    d = diamonds >> groupby('cut','color') >> tail(2)
+    d = diamonds >> group_by('cut','color') >> tail(2)
     assert df.equals(d.reset_index(drop=True))
 
 
@@ -52,7 +52,7 @@ def test_sample():
     df = diamonds.sample(frac=0.001, random_state=random_state)
     assert df.equals(d)
 
-    d = diamonds >> groupby(X.cut) >> sample(n=10, random_state=random_state)
+    d = diamonds >> group_by(X.cut) >> sample(n=10, random_state=random_state)
     d = d.reset_index(drop=True)
     df = diamonds.groupby('cut').apply(lambda x: x.sample(n=10, random_state=random_state))
     df = df.reset_index(drop=True)
@@ -63,7 +63,7 @@ def test_row_slice():
     df = diamonds.iloc[[0,1],:]
     assert df.equals(diamonds >> row_slice([0,1]))
     df = diamonds.groupby('cut').apply(lambda df: df.iloc[0,:]).reset_index(drop=True)
-    d = diamonds >> groupby(X.cut) >> row_slice(0)
+    d = diamonds >> group_by(X.cut) >> row_slice(0)
     assert df.equals(d.reset_index(drop=True))
     df = diamonds.loc[diamonds.table > 61, :]
     assert df.equals(diamonds >> row_slice(X.table > 61))
@@ -82,6 +82,13 @@ def test_mask():
     assert df.equals(test2)
 
 
+# def test_mask_small():
+#     a = (diamonds >> group_by(X.cut) >> arrange(X.price) >>
+#          head(3) >> ungroup() >> mask(X.carat < 0.23))
+#     print(a)
+#     assert False
+
+
 def test_top_n():
     with pytest.raises(ValueError):
         diamonds >> top_n()
@@ -94,7 +101,7 @@ def test_top_n():
     test4 = diamonds >> top_n(col=X.cut, n=1)
     df4 = diamonds[diamonds.cut == 'Very Good']
     assert test4.equals(df4)
-    test5 = diamonds >> groupby(X.cut) >> top_n(n=2)
+    test5 = diamonds >> group_by(X.cut) >> top_n(n=2)
     df5 = diamonds.ix[[27415, 27630, 23539, 27517, 27518, 24297, 24328, 24067, 25999, 26444, 48410]]
     assert test5.equals(df5)
     test6 = diamonds >> top_n(col=X.x, ascending=False, n=5)

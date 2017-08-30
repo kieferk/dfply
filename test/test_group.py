@@ -8,6 +8,6 @@ from dfply import *
 
 
 def test_group_attributes():
-    d = diamonds >> groupby('cut')
+    d = diamonds >> group_by('cut')
     assert hasattr(d, '_grouped_by')
     assert d._grouped_by == ('cut',)
