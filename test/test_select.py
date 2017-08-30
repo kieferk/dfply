@@ -23,6 +23,14 @@ def test_select():
     assert df.equals(diamonds >> select([X.loc[:, ['carat','cut','price']]]))
 
 
+def test_select_inversion():
+    df = diamonds.iloc[:, 3:]
+    d = diamonds >> select(~X.carat, ~X.cut, ~X.color)
+    print(df.head())
+    print(d.head())
+    assert df.equals(d)
+
+
 def test_drop():
     df = diamonds.drop(['carat','cut','price'], axis=1)
     assert df.equals(diamonds >> drop('carat','cut','price'))

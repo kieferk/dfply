@@ -50,8 +50,11 @@ def select(df, *args):
     selection = np.where((column_indices == np.max(column_indices)) &
                          (column_indices >= 0))[0]
     df = df.iloc[:, selection]
-    ordering = [c for c in ordering if c in df.columns]
-    return df[ordering]
+    if all([col in ordering for col in df.columns]):
+        ordering = [c for c in ordering if c in df.columns]
+        return df[ordering]
+    else:
+        return df
 
 
 @pipe

@@ -82,6 +82,13 @@ def test_mask():
     assert df.equals(test2)
 
 
+# def test_mask_small():
+#     a = (diamonds >> group_by(X.cut) >> arrange(X.price) >>
+#          head(3) >> ungroup() >> mask(X.carat < 0.23))
+#     print(a)
+#     assert False
+
+
 def test_top_n():
     with pytest.raises(ValueError):
         diamonds >> top_n()
