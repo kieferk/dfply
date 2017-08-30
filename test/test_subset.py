@@ -88,6 +88,7 @@ def test_mask():
 #     print(a)
 #     assert False
 
+#  d = diamonds >> group_by(X.cut) >> mutate(price_lag=lag(X.price)) >> head(2) >> select(X.cut, X.price_lag)
 
 def test_top_n():
     with pytest.raises(ValueError):

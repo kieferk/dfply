@@ -170,9 +170,11 @@ class IntentionEvaluator(object):
 
     def _evaluate(self, df, arg):
         if isinstance(arg, Intention):
-            return arg.evaluate(df)
-        else:
-            return arg
+            negate = arg.inverted
+            arg = arg.evaluate(df)
+            if negate:
+                arg = ~arg
+        return arg
 
     def _evaluate_label(self, df, arg):
         arg = self._evaluate(df, arg)
