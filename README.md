@@ -1,6 +1,6 @@
 # dfply
 
-### Version: 0.3.0
+### Version: 0.3.1
 
 > Note: Version 0.3.0 is the first big update in awhile, and changes a lot of
 the "base" code. The `pandas-ply` package is no longer being imported. I have coded

@@ -1,3 +1,12 @@
+v0.3.1
+This update is almost solely the pull requests by @bleearmstrong that were sitting
+in the repo waiting. There were some minor bug-fixes and changes too.
+
+- `select_if` and `drop_if` are now available to perform selection according to a function
+- `mutate_if` allows variable creation if a criterion function is evaluated as True
+- `row_number` window function is available (same as rank(method='first'))
+- `distinct` can take no arguments, making it equivalent to `drop_duplicates` with no arguments
+
 v0.3.0
 Lots and lots of big changes here. Total reworking of the internal functionality.
 The good news is that it should (basically) work the same as before, but
