@@ -40,6 +40,14 @@ def test_distinct():
     df = diamonds.drop_duplicates(['cut','depth'])
     assert df.equals(d)
 
+    df = diamonds[['carat', 'cut']].drop_duplicates()
+    d = diamonds >> select(X.carat, X.cut) >> distinct()
+    assert df.equals(d)
+
+    df = diamonds[['carat', 'cut']].drop_duplicates(keep='last')
+    d = diamonds >> select(X.carat, X.cut) >> distinct(keep='last')
+    assert df.equals(d)
+
 
 def test_sample():
     random_state = 55
