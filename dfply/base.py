@@ -5,8 +5,11 @@ from functools import partial
 
 
 def _recursive_apply(f, l):
-    if isinstance(l, (tuple, list)):
-        return [_recursive_apply(f, l_) for l_ in l]
+    if isinstance(l, (list, tuple)):
+        out = [_recursive_apply(f, l_) for l_ in l]
+        if isinstance(l, tuple):
+            out = tuple(out)
+        return out
     else:
         return f(l)
 
@@ -17,6 +20,14 @@ def contextualize(arg, context):
     return arg
 
 
+def flatten(l):
+    for el in l:
+        if isinstance(el, (tuple, list)):
+            yield from flatten(el)
+        else:
+            yield el
+
+
 def _check_delayed_eval(args, kwargs):
     check = lambda x: isinstance(x, Intention)
     delay = any([a for a in flatten(_recursive_apply(check, args))])
@@ -24,12 +35,19 @@ def _check_delayed_eval(args, kwargs):
     return delay
 
 
+def _context_args(args):
+    return lambda x: _recursive_apply(partial(contextualize, context=x), args)
+
+
+def _context_kwargs(kwargs):
+    values_ = lambda x: _recursive_apply(partial(contextualize, context=x),
+                                        list(kwargs.values()))
+    return lambda x: {k:v for k,v in zip(kwargs.keys(), values_(x))}
+
+
 def _delayed_function(function, args, kwargs):
-    await_args = lambda x: _recursive_apply(partial(contextualize, context=x), args)
-    await_kwarg_values = lambda x: _recursive_apply(partial(contextualize, context=x),
-                                                    list(kwargs.values()))
-    return lambda x: function(*await_args(x),
-                              **{k:v for k,v in zip(kwargs.keys(), await_kwarg_values(x))})
+    return lambda x: function(*_context_args(args)(x),
+                              **_context_kwargs(kwargs)(x))
 
 
 def make_symbolic(f):
@@ -53,17 +71,16 @@ class Intention(object):
         return self.function(context)
 
     def __getattr__(self, attribute):
-        return Intention(lambda x: getattr(self.function(x), attribute), invert=self.inverted)
+        return Intention(lambda x: getattr(self.function(x), attribute),
+                         invert=self.inverted)
 
     def __invert__(self):
         return Intention(self.function, invert=not self.inverted)
 
     def __call__(self, *args, **kwargs):
-        args_ = lambda x: _recursive_apply(partial(contextualize, context=x), args)
-        kwarg_values_ = lambda x: _recursive_apply(partial(contextualize, context=x),
-                                                        list(kwargs.values()))
-        return Intention(lambda x: self.function(x)(*args_(x),
-                                                    **{k:v for k,v in zip(kwargs.keys(), kwarg_values_(x))}))
+        return Intention(lambda x: self.function(x)(*_context_args(args)(x),
+                                                    **_context_kwargs(kwargs)(x)),
+                         invert=self.inverted)
 
 
 
@@ -87,8 +104,8 @@ _magic_method_names = [
 
 def _set_magic_method(name):
     def magic_method(self, *args, **kwargs):
-        return Intention(lambda x: getattr(self.function(x), name)(*(contextualize(a, x) for a in args),
-                                                                   **{k:contextualize(v, x) for k,v in kwargs.items()}),
+        return Intention(lambda x: getattr(self.function(x), name)(*_context_args(args)(x),
+                                                                   **_context_kwargs(kwargs)(x)),
                          invert=self.inverted)
     return magic_method
 
@@ -121,16 +138,6 @@ class pipe(object):
 
         result = self.function(other_copy)
 
-        #r_grouped_by = getattr(result, '_grouped_by', None)
-        #if r_grouped_by is None:
-        #    result._grouped_by = getattr(other, '_grouped_by', None)
-
-        #print(result.head(3))
-        #print(getattr(result, '_grouped_by', None))
-        #if not grouped_by is None:
-            #print(grouped_by)
-            #result._grouped_by = grouped_by
-
         for p in self.chained_pipes:
             result = p.__rrshift__(result)
         return result
@@ -139,15 +146,6 @@ class pipe(object):
     def __call__(self, *args, **kwargs):
         return pipe(lambda x: self.function(x, *args, **kwargs))
 
-
-
-
-def flatten(l):
-    for el in l:
-        if isinstance(el, (tuple, list)):
-            yield from flatten(el)
-        else:
-            yield el
 
 
 class IntentionEvaluator(object):
@@ -304,8 +302,6 @@ def symbolic_evaluation(function=None, eval_symbols=True, eval_as_label=[],
 
 
 
-
-
 class group_delegation(object):
 
     __name__ = "group_delegation"
@@ -329,17 +325,13 @@ class group_delegation(object):
             df.reset_index(drop=True, inplace=True)
 
         return df
-        #return df.sort_index()
 
 
     def __call__(self, *args, **kwargs):
         grouped_by = getattr(args[0], '_grouped_by', None)
-        #print(grouped_by)
         if (grouped_by is None) or not all([g in args[0].columns for g in grouped_by]):
-            #print('or here', args[1:])
             return self.function(*args, **kwargs)
         else:
-            #print('here', args[1:])
             applied = self._apply(args[0], *args[1:], **kwargs)
             applied._grouped_by = grouped_by
             return applied
