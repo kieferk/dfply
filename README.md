@@ -2,7 +2,7 @@
 
 ### Version: 0.3.0
 
-> **Note: Version 0.3.0 is the first big update in awhile, and changes a lot of
+> Note: Version 0.3.0 is the first big update in awhile, and changes a lot of
 the "base" code. The `pandas-ply` package is no longer being imported. I have coded
 my own version of the "symbolic" objects that I was borrowing from `pandas-ply`. Also,
 I am no longer supporting Python 2, sorry!
@@ -43,9 +43,11 @@ any bugs are fixed.**
 
 - [Overview of functions](#overview-of-functions)
   - [The `>>` and `>>=` pipe operators](#the--and--pipe-operators)
-  - [The pandas-ply `X` DataFrame symbol](#the-pandas-ply-x-dataframe-symbol)
+  - [The `X` DataFrame symbol](#the-x-dataframe-symbol)
   - [Selecting and dropping](#selecting-and-dropping)
-    - [`select*()` and `drop*()` functions](#select-and-drop-functions)
+    - [`select()` and `drop()` functions](#select-and-drop-functions)
+    - [Selection using the inversion `~` operator on symbolic columns](#selection-using-the-inversion--operator-on-symbolic-columns)
+    - [Selection filter functions](#selection-filter-functions)
   - [Subsetting and filtering](#subsetting-and-filtering)
     - [`row_slice()`](#row_slice)
     - [`sample()`](#sample)
@@ -55,7 +57,7 @@ any bugs are fixed.**
     - [`mutate()`](#mutate)
     - [`transmute()`](#transmute)
   - [Grouping](#grouping)
-    - [`groupby()` and `ungroup()`](#groupby-and-ungroup)
+    - [`group_by()` and `ungroup()`](#group_by-and-ungroup)
   - [Reshaping](#reshaping)
     - [`arrange()`](#arrange)
     - [`rename()`](#rename)
@@ -104,15 +106,19 @@ any bugs are fixed.**
     - [`median()`](#median)
     - [`var()`](#var)
     - [`sd()`](#sd)
-- [Decorators](#decorators)
+- [Extending `dfply` with custom functions](#extending-dfply-with-custom-functions)
+  - [Case 1: A custom "pipe" function with `@dfpipe`](#case-1-a-custom-pipe-function-with-dfpipe)
+  - [Case 2: A function that works with symbolic objects using `@make_symbolic`](#case-2-a-function-that-works-with-symbolic-objects-using-make_symbolic)
+    - [Without symbolic arguments, `@make_symbolic` functions work like normal functions!](#without-symbolic-arguments-make_symbolic-functions-work-like-normal-functions)
+- [Advanced: understanding base `dfply` decorators](#advanced-understanding-base-dfply-decorators)
+  - [The `Intention` class](#the-intention-class)
   - [`@pipe`](#pipe)
   - [`@group_delegation`](#group_delegation)
-  - [`@symbolic_evaluation` and `@symbolic_reference`](#symbolic_evaluation-and-symbolic_reference)
+  - [`@symbolic_evaluation`](#symbolic_evaluation)
+    - [Controlling `@symbolic_evaluation` with the `eval_symbols` argument](#controlling-symbolic_evaluation-with-the-eval_symbols-argument)
   - [`@dfpipe`](#dfpipe)
   - [`@make_symbolic`](#make_symbolic)
-  - [Extending and mixing behavior with decorators](#extending-and-mixing-behavior-with-decorators)
 - [Contributing](#contributing)
-- [TODO:](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -1414,11 +1420,154 @@ diamonds >> groupby(X.cut) >> summarize(price_sd=sd(X.price))
 ```
 
 
+## Extending `dfply` with custom functions
 
-## Advanced: `dfply` internal decorators, classes, and extending functionality
+There are a lot of built-in functions, but you are almost certainly going to
+reach a point where you want to use some of your own functions with the `dfply`
+piping syntax. Luckily, `dfply` comes with two handy decorators to make this
+as easy as possible.
+
+> **For a more detailed walkthrough of these two cases, see the [
+basics-extending-functionality.ipynb](./examples/basics-extending-functionality.ipynb)
+jupyter notebook in the examples folder.**
+
+
+### Case 1: A custom "pipe" function with `@dfpipe`
+
+You might want to make a custom function that can be a piece of the pipe chain.
+For example, say we wanted to write a `dfply` wrapper around a simplified
+version of `pd.crosstab`. For the most part, you'll only need to do two things
+to make this work:
+1. Make sure that your function's first argument will be the dataframe passed in
+implicitly by the pipe.
+2. Decorate the function with the `@dfpipe` decorator.
+
+Here is an example of the `dfply`-enabled crosstab function:
+
+```python
+@dfpipe
+def crosstab(df, index, columns):
+    return pd.crosstab(index, columns)
+```
+
+Normally you could use `pd.crosstab` like so:
+
+```python
+pd.crosstab(diamonds.cut, diamonds.color)
+
+color         D     E     F     G     H     I    J
+cut                                               
+Fair        163   224   312   314   303   175  119
+Good        662   933   909   871   702   522  307
+Ideal      2834  3903  3826  4884  3115  2093  896
+Premium    1603  2337  2331  2924  2360  1428  808
+Very Good  1513  2400  2164  2299  1824  1204  678
+```
+
+The same result can be achieved now with the custom function in pipe syntax:
+
+```python
+diamonds >> crosstab(X.cut, X.color)
+
+color         D     E     F     G     H     I    J
+cut                                               
+Fair        163   224   312   314   303   175  119
+Good        662   933   909   871   702   522  307
+Ideal      2834  3903  3826  4884  3115  2093  896
+Premium    1603  2337  2331  2924  2360  1428  808
+Very Good  1513  2400  2164  2299  1824  1204  678
+```
+
+
+### Case 2: A function that works with symbolic objects using `@make_symbolic`
+
+Many tasks are simpler and do not require the capacity to work as a pipe function. The dfply window functions are the common examples of this: functions that take a Series (or symbolic Series) and return a modified version.
+
+
+Let's say we had a dataframe with dates represented by strings that we wanted to convert to pandas datetime objects using the pd.to_datetime function. Below is a tiny example dataframe with this issue.
+
+```python
+sales = pd.DataFrame(dict(date=['7/10/17','7/11/17','7/12/17','7/13/17','7/14/17'],
+                          sales=[1220, 1592, 908, 1102, 1395]))
+
+sales
+
+      date  sales
+0  7/10/17   1220
+1  7/11/17   1592
+2  7/12/17    908
+3  7/13/17   1102
+4  7/14/17   1395
+```
+
+Using the `pd.to_datetime` function inside of a call to mutate will unfortunately
+break:
+
+```python
+sales >> mutate(pd_date=pd.to_datetime(X.date, infer_datetime_format=True))
+
+...
+
+TypeError: __index__ returned non-int (type Intention)
+```
+
+`dfply` functions are special in that they "know" to delay their evaluation until
+the data is at that point in the chain. `pd.to_datetime` is not such a function,
+and will immediately try to evaluate `X.date`. With a symbolic `Intention` argument
+passed in (`X` is an `Intention` object), the function will fail.
+
+
+Instead, we will need to make a wrapper around `pd.to_datetime`
+that can handle these symbolic arguments and delay evaluation until the right time.
+
+It's quite simple: all you need to do is decorate a function with the @make_symbolic decorator:
+
+```python
+@make_symbolic
+def to_datetime(series, infer_datetime_format=True):
+    return pd.to_datetime(series, infer_datetime_format=infer_datetime_format)
+```
+
+Now the function can be used with symbolic arguments:
+
+```python
+sales >> mutate(pd_date=to_datetime(X.date))
+
+      date  sales    pd_date
+0  7/10/17   1220 2017-07-10
+1  7/11/17   1592 2017-07-11
+2  7/12/17    908 2017-07-12
+3  7/13/17   1102 2017-07-13
+4  7/14/17   1395 2017-07-14
+```
+
+#### Without symbolic arguments, `@make_symbolic` functions work like normal functions!
+
+A particularly nice thing about functions decorated with `@make_symbolic` is that
+they will operate normally if passed arguments that are not `Intention` symbolic
+objects.
+
+For example, you can pass in the series itself and it will return the new
+series of converted dates:
+
+```python
+to_datetime(sales.date)
+
+0   2017-07-10
+1   2017-07-11
+2   2017-07-12
+3   2017-07-13
+4   2017-07-14
+Name: date, dtype: datetime64[ns]
+```
+
+
+## Advanced: understanding base `dfply` decorators
 
 Under the hood, `dfply` functions work using a collection of different decorators and
-special classes.
+special classes. Below the most important ones are detailed. Understanding these
+are important if you are planning on making big additions or changes to the code.
+
 
 ### The `Intention` class
 
@@ -1506,7 +1655,8 @@ by this decorator.
 The `@symbolic_evaluation` decorator can have functionality modified by
 optional keyword arguments:
 
-#### `eval_symbols`
+
+#### Controlling `@symbolic_evaluation` with the `eval_symbols` argument
 
 ```python
 @symbolic_evaluation(eval_symbols=False)
@@ -1534,6 +1684,10 @@ def my_function(df, arg1, arg2, arg3, kw1=True, kw2=False):
     ...
 ```
 
+In reality, you are unlikely to need this behavior unless you really want to
+prevent `dfply` from trying to evaluate symbolic arguments. Remember that if
+an argument is not symbolic it will be evaluated as normal, so there shouldn't
+be much harm leaving it at default other than a little bit of computational overhead.
 
 
 ### `@dfpipe`
