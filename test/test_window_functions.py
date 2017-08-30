@@ -187,4 +187,4 @@ def test_row_number():
     df = diamonds.copy().head(5)
     df['rn'] = [1, 1, 1, 2, 2]
     df['rn'] = df['rn'].astype(float)
-    assert df.equals(diamonds >> head(5) >> groupby(X.cut) >> mutate(rn=row_number(X.x)))
+    assert df.equals((diamonds >> head(5) >> group_by(X.cut) >> mutate(rn=row_number(X.x))).sort_index())
