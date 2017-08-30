@@ -5,6 +5,7 @@ from .vector import *
 # Series summary functions
 # ------------------------------------------------------------------------------
 
+
 @make_symbolic
 def mean(series):
     """

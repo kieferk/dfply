@@ -12,19 +12,30 @@ def arrange_apply_helperfunc(df):
     df = df.head(5)
     return df
 
+# def test_arrange_small():
+#     d = diamonds >> arrange(desc(X.cut), desc(X.price))
+#     print(d.head(25))
+#     assert False
+
 
 def test_arrange():
     df = diamonds.groupby('cut').apply(arrange_apply_helperfunc).reset_index(drop=True)
-    d = (diamonds >> groupby('cut') >> arrange('depth', ascending=False) >>
+    d = (diamonds >> group_by('cut') >> arrange('depth', ascending=False) >>
+         head(5) >> ungroup()).reset_index(drop=True)
+    #print('df', df, df.shape)
+    #print('d', d, d.shape)
+    assert df.equals(d)
+
+    d = (diamonds >> group_by('cut') >> arrange(X.depth, ascending=False) >>
          head(5) >> ungroup()).reset_index(drop=True)
     assert df.equals(d)
 
-    d = (diamonds >> groupby('cut') >> arrange(X.depth, ascending=False) >>
-         head(5) >> ungroup()).reset_index(drop=True)
-    assert df.equals(d)
+    print(type(d), type(df), type(diamonds))
 
     df = diamonds.sort_values(['cut','price'], ascending=False)
     d = diamonds >> arrange(desc(X.cut), desc(X.price))
+    print('df', df >> head(5))
+    print('d', d >> head(5))
     assert df.equals(d)
 
 
@@ -196,4 +207,7 @@ def test_unite():
         'c':[True, False, np.nan],
         'united':['1_a_True','2_b_False','3_c_nan']
     })
+
+    print(true4)
+    print(test4)
     assert true4.equals(test4)

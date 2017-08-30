@@ -1,5 +1,4 @@
 from .base import *
-from .base import _arg_extractor
 import re
 
 
@@ -27,7 +26,7 @@ def arrange(df, *args, **kwargs):
             `DataFrame.sort_values` function.
     """
 
-    flat_args = _arg_extractor(args)
+    flat_args = [a for a in flatten(args)]
 
     series = [df[arg] if isinstance(arg, str) else
               df.iloc[:, arg] if isinstance(arg, int) else
@@ -44,7 +43,7 @@ def arrange(df, *args, **kwargs):
 # ------------------------------------------------------------------------------
 
 @pipe
-@symbolic_reference
+@symbolic_evaluation(eval_as_label=True)
 def rename(df, **kwargs):
     """Renames columns, where keyword argument values are the current names
     of columns and keys are the new names.
@@ -64,7 +63,8 @@ def rename(df, **kwargs):
 # Elongate
 # ------------------------------------------------------------------------------
 
-@label_selection
+@pipe
+@symbolic_evaluation(eval_as_label=['*'])
 def gather(df, key, values, *args, **kwargs):
     """
     Melts the specified columns in your DataFrame into two key:value columns.
@@ -94,6 +94,8 @@ def gather(df, key, values, *args, **kwargs):
 
     if len(args) == 0:
         args = df.columns.tolist()
+    else:
+        args = [a for a in flatten(args)]
 
     if kwargs.get('add_id', False):
         df = df.assign(_ID=np.arange(df.shape[0]))
@@ -138,7 +140,8 @@ def convert_type(df, columns):
 
 
 
-@label_selection
+@pipe
+@symbolic_evaluation(eval_as_label=['*'])
 def spread(df, key, values, convert=False):
     """
     Transforms a "long" DataFrame into a "wide" format using a key and value
@@ -205,7 +208,7 @@ def spread(df, key, values, convert=False):
 # ------------------------------------------------------------------------------
 
 @pipe
-@symbolic_reference
+@symbolic_evaluation(eval_as_label=['*'])
 def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
              extra='drop', fill='right'):
     """
@@ -275,7 +278,8 @@ def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
 # Unite columns
 # ------------------------------------------------------------------------------
 
-@label_selection
+@pipe
+@symbolic_evaluation(eval_as_label=['*'])
 def unite(df, colname, *args, **kwargs):
     """
     Does the inverse of `separate`, joining columns together by a specified
@@ -301,7 +305,7 @@ def unite(df, colname, *args, **kwargs):
             value to the string `'nan'` prior to joining.
     """
 
-    to_unite = list(args)
+    to_unite = list([a for a in flatten(args)])
     sep = kwargs.get('sep', '_')
     remove = kwargs.get('remove', True)
     # possible na_action values
@@ -310,6 +314,8 @@ def unite(df, colname, *args, **kwargs):
     # as_string: becomes string 'nan'
     na_action = kwargs.get('na_action', 'maintain')
 
+
+    print(to_unite, sep, remove, na_action)
 
     if na_action == 'maintain':
         df[colname] = df[to_unite].apply(lambda x: np.nan if any(x.isnull())

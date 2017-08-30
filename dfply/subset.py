@@ -28,14 +28,20 @@ def sample(df, *args, **kwargs):
 
 @pipe
 @group_delegation
-@symbolic_reference
+@symbolic_evaluation(eval_as_label=['*'])
 def distinct(df, *args, **kwargs):
     return df.drop_duplicates(list(args), **kwargs)
 
 
 @dfpipe
-@join_index_arguments
 def row_slice(df, indices):
+    if isinstance(indices, (tuple, list)):
+        indices = np.array(indices)
+    if isinstance(indices, int):
+        indices = np.array([indices])
+    if isinstance(indices, pd.Series):
+        indices = indices.values
+
     if indices.dtype == bool:
         return df.loc[indices, :]
     else:
