@@ -15,8 +15,10 @@ def mean(series):
         series (pandas.Series): column to summarize.
     """
 
-    mean_s = series.mean()
-    return mean_s
+    if np.issubdtype(series.dtype, np.number):
+        return series.mean()
+    else:
+        return np.nan
 
 
 @make_symbolic
@@ -155,8 +157,10 @@ def median(series):
         series (pandas.Series): column to summarize.
     """
 
-    median_s = series.median()
-    return median_s
+    if np.issubdtype(series.dtype, np.number):
+        return series.median()
+    else:
+        return np.nan
 
 
 @make_symbolic
@@ -167,9 +171,10 @@ def var(series):
     Args:
         series (pandas.Series): column to summarize.
     """
-
-    var_s = series.var()
-    return var_s
+    if np.issubdtype(series.dtype, np.number):
+        return series.var()
+    else:
+        return np.nan
 
 
 @make_symbolic
@@ -181,5 +186,7 @@ def sd(series):
         series (pandas.Series): column to summarize.
     """
 
-    sd_s = series.std()
-    return sd_s
+    if np.issubdtype(series.dtype, np.number):
+        return series.std()
+    else:
+        return np.nan

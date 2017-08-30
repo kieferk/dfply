@@ -71,6 +71,40 @@ def drop(df, *args):
     return df.iloc[:, selection]
 
 
+
+@pipe
+def select_if(df, fun):
+    """Selects columns where fun(ction) is true
+    Args:
+        fun: a function that will be applied to columns
+    """
+    def _filter_f(col):
+        try:
+            return fun(df[col])
+        except:
+            return False
+            
+    cols = list(filter(_filter_f, df.columns))
+    return df[cols]
+
+
+@pipe
+def drop_if(df, fun):
+    """Drops columns where fun(ction) is true
+    Args:
+        fun: a function that will be applied to columns
+    """
+    def _filter_f(col):
+        try:
+            return fun(df[col])
+        except:
+            return False
+
+    cols = list(filter(_filter_f, df.columns))
+    return df.drop(cols, axis=1)
+
+
+
 @selection_filter
 def starts_with(columns, prefix):
     return [c for c in columns if c.startswith(prefix)]
