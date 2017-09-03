@@ -7,6 +7,10 @@ the "base" code. The `pandas-ply` package is no longer being imported. I have co
 my own version of the "symbolic" objects that I was borrowing from `pandas-ply`. Also,
 I am no longer supporting Python 2, sorry!
 
+> **In v0.3 `groupby` has been renamed to `group_by` to mirror the `dplyr` function.
+If this breaks your legacy code, one possible fix is to have `from dfply.group import group_by as groupby`
+in your package imports.**
+
 The `dfply` package makes it possible to do R's `dplyr`-style data manipulation with pipes
 in python on pandas DataFrames.
 
