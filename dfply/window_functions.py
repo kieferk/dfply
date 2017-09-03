@@ -198,3 +198,30 @@ def percent_rank(series, ascending=True):
         return 0
     percents = (series.rank(method='min', ascending=ascending) - 1) / (series.size - 1)
     return percents
+
+
+@make_symbolic
+def row_number(series, ascending=True):
+    """
+    Returns row number based on column rank
+    Equivalent to `series.rank(method='first', ascending=ascending)`.
+
+    Args:
+        series: column to rank.
+
+    Kwargs:
+        ascending (bool): whether to rank in ascending order (default is `True`).
+
+    Usage:
+    diamonds >> head() >> mutate(rn=row_number(X.x))
+
+       carat      cut color clarity  depth  table  price     x     y     z   rn
+    0   0.23    Ideal     E     SI2   61.5   55.0    326  3.95  3.98  2.43  2.0
+    1   0.21  Premium     E     SI1   59.8   61.0    326  3.89  3.84  2.31  1.0
+    2   0.23     Good     E     VS1   56.9   65.0    327  4.05  4.07  2.31  3.0
+    3   0.29  Premium     I     VS2   62.4   58.0    334  4.20  4.23  2.63  4.0
+    4   0.31     Good     J     SI2   63.3   58.0    335  4.34  4.35  2.75  5.0
+    """
+
+    series_rank = series.rank(method='first', ascending=ascending)
+    return series_rank

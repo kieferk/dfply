@@ -30,6 +30,8 @@ def sample(df, *args, **kwargs):
 @group_delegation
 @symbolic_evaluation(eval_as_label=['*'])
 def distinct(df, *args, **kwargs):
+    if not args:
+        return df.drop_duplicates(**kwargs)
     return df.drop_duplicates(list(args), **kwargs)
 
 
