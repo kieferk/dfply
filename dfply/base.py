@@ -35,6 +35,7 @@ class pipe(object):
 
     def __init__(self, function):
         self.function = function
+        self.__doc__ = function.__doc__
 
 
     def __rrshift__(self, other):
