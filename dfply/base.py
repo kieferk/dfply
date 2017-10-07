@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import warnings
-from functools import partial
+from functools import partial, wraps
 
 
 def _recursive_apply(f, l):
@@ -123,6 +123,8 @@ class pipe(object):
 
     def __init__(self, function):
         self.function = function
+        self.__doc__ = function.__doc__
+
         self.chained_pipes = []
 
 
@@ -162,6 +164,7 @@ class IntentionEvaluator(object):
                  eval_as_selector=[]):
         super(IntentionEvaluator, self).__init__()
         self.function = function
+        self.__doc__ = function.__doc__
 
         self.eval_symbols = eval_symbols
         self.eval_as_label = eval_as_label
@@ -296,6 +299,7 @@ def symbolic_evaluation(function=None, eval_symbols=True, eval_as_label=[],
     if function:
         return IntentionEvaluator(function)
     else:
+        @wraps(function)
         def wrapper(function):
             return IntentionEvaluator(function, eval_symbols=eval_symbols,
                                       eval_as_label=eval_as_label,
@@ -310,6 +314,7 @@ class group_delegation(object):
 
     def __init__(self, function):
         self.function = function
+        self.__doc__ = function.__doc__
 
 
     def _apply(self, df, *args, **kwargs):
