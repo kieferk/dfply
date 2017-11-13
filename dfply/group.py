@@ -1,10 +1,12 @@
 from .base import *
 
+
 @pipe
 @symbolic_evaluation(eval_as_label=True)
 def group_by(df, *args):
     df._grouped_by = args
     return df
+
 
 @pipe
 def ungroup(df):

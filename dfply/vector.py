@@ -1,6 +1,7 @@
 from .base import *
 import collections
 
+
 # ------------------------------------------------------------------------------
 # series ordering
 # ------------------------------------------------------------------------------
@@ -25,15 +26,15 @@ def order_series_by(series, order_series):
 
     if isinstance(order_series, (list, tuple)):
         sorter = pd.concat(order_series, axis=1)
-        sorter_columns = ['_sorter'+str(i) for i in range(len(order_series))]
+        sorter_columns = ['_sorter' + str(i) for i in range(len(order_series))]
         sorter.columns = sorter_columns
         sorter['series'] = series.values
         sorted_series = sorter.sort_values(sorter_columns)['series']
         return sorted_series
     else:
         sorted_series = pd.DataFrame({
-            'series':series.values,
-            'order':order_series.values
+            'series': series.values,
+            'order': order_series.values
         }).sort_values('order', ascending=True)['series']
         return sorted_series
 
@@ -69,7 +70,6 @@ def desc(series):
     """
 
     return series.rank(method='min', ascending=False)
-
 
 
 # ------------------------------------------------------------------------------
@@ -222,7 +222,7 @@ def if_else(condition, when_true, otherwise):
     assert (len(condition) == len(when_true)) and (len(condition) == len(otherwise))
 
     output = np.array([when_true[i] if c else otherwise[i]
-                       for i,c in enumerate(condition)])
+                       for i, c in enumerate(condition)])
     return output
 
 

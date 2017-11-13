@@ -41,8 +41,8 @@ def _context_args(args):
 
 def _context_kwargs(kwargs):
     values_ = lambda x: _recursive_apply(partial(contextualize, context=x),
-                                        list(kwargs.values()))
-    return lambda x: {k:v for k,v in zip(kwargs.keys(), values_(x))}
+                                         list(kwargs.values()))
+    return lambda x: {k: v for k, v in zip(kwargs.keys(), values_(x))}
 
 
 def _delayed_function(function, args, kwargs):
@@ -58,11 +58,11 @@ def make_symbolic(f):
             return Intention(delayed)
         else:
             return f(*args, **kwargs)
+
     return wrapper
 
 
 class Intention(object):
-
     def __init__(self, function=lambda x: x, invert=False):
         self.function = function
         self.inverted = invert
@@ -83,7 +83,6 @@ class Intention(object):
                          invert=self.inverted)
 
 
-
 _magic_method_names = [
     '__abs__', '__add__', '__and__', '__cmp__', '__complex__', '__contains__',
     '__delattr__', '__delete__', '__delitem__', '__delslice__', '__div__',
@@ -95,30 +94,31 @@ _magic_method_names = [
     '__iter__', '__itruediv__', '__ixor__', '__le__', '__len__', '__long__',
     '__lshift__', '__lt__', '__mod__', '__mul__', '__ne__', '__neg__',
     '__nonzero__', '__oct__', '__or__', '__pos__', '__pow__', '__radd__',
-    '__rand__', '__rcmp__', '__rdiv__', '__rdivmod__', #'__repr__',
+    '__rand__', '__rcmp__', '__rdiv__', '__rdivmod__',  # '__repr__',
     '__reversed__', '__rfloordiv__', '__rlshift__', '__rmod__', '__rmul__',
     '__ror__', '__rpow__', '__rrshift__', '__rshift__', '__rsub__',
     '__rtruediv__', '__rxor__', '__set__', '__setitem__', '__setslice__',
     '__sub__', '__truediv__', '__unicode__', '__xor__', '__str__',
 ]
 
+
 def _set_magic_method(name):
     def magic_method(self, *args, **kwargs):
         return Intention(lambda x: getattr(self.function(x), name)(*_context_args(args)(x),
                                                                    **_context_kwargs(kwargs)(x)),
                          invert=self.inverted)
+
     return magic_method
+
 
 for name in _magic_method_names:
     setattr(Intention, name, _set_magic_method(name))
-
 
 # Initialize the global X symbol
 X = Intention()
 
 
 class pipe(object):
-
     __name__ = "pipe"
 
     def __init__(self, function):
@@ -127,12 +127,10 @@ class pipe(object):
 
         self.chained_pipes = []
 
-
     def __rshift__(self, other):
         assert isinstance(other, pipe)
         self.chained_pipes.append(other)
         return self
-
 
     def __rrshift__(self, other):
         other_copy = other.copy()
@@ -144,10 +142,8 @@ class pipe(object):
             result = p.__rrshift__(result)
         return result
 
-
     def __call__(self, *args, **kwargs):
         return pipe(lambda x: self.function(x, *args, **kwargs))
-
 
 
 class IntentionEvaluator(object):
@@ -170,7 +166,6 @@ class IntentionEvaluator(object):
         self.eval_as_label = eval_as_label
         self.eval_as_selector = eval_as_selector
 
-
     def _evaluate(self, df, arg):
         if isinstance(arg, Intention):
             negate = arg.inverted
@@ -190,7 +185,6 @@ class IntentionEvaluator(object):
         if isinstance(arg, int):
             arg = cols[arg]
         return arg
-
 
     def _evaluate_selector(self, df, arg):
         negate = False
@@ -221,7 +215,6 @@ class IntentionEvaluator(object):
             selection_vector[col_idx] = 1
         return selection_vector
 
-
     def _evaluator_loop(self, df, arg, eval_func):
         if isinstance(arg, (list, tuple)):
             return [self._evaluator_loop(df, a_, eval_func) for a_ in arg]
@@ -231,14 +224,11 @@ class IntentionEvaluator(object):
     def _symbolic_eval(self, df, arg):
         return self._evaluator_loop(df, arg, self._evaluate)
 
-
     def _symbolic_to_label(self, df, arg):
         return self._evaluator_loop(df, arg, self._evaluate_label)
 
-
     def _symbolic_to_selector(self, df, arg):
         return self._evaluator_loop(df, arg, self._evaluate_selector)
-
 
     def _recursive_arg_eval(self, df, args):
         eval_symbols = self._find_eval_args(self.eval_symbols, args)
@@ -250,9 +240,8 @@ class IntentionEvaluator(object):
             else self._symbolic_to_selector(df, a) if i in eval_as_selector
             else self._symbolic_eval(df, a) if i in eval_symbols
             else a
-            for i,a in enumerate(args)
-                ]
-
+            for i, a in enumerate(args)
+        ]
 
     def _recursive_kwarg_eval(self, df, kwargs):
         eval_symbols = self._find_eval_kwargs(self.eval_symbols, kwargs)
@@ -260,13 +249,12 @@ class IntentionEvaluator(object):
         eval_as_selector = self._find_eval_kwargs(self.eval_as_selector, kwargs)
 
         return {
-            k:(self._symbolic_to_label(df, v) if k in eval_as_label
-               else self._symbolic_to_selector(df, v) if k in eval_as_selector
-               else self._symbolic_eval(df, v) if k in eval_symbols
-               else v)
-            for k,v in kwargs.items()
-            }
-
+            k: (self._symbolic_to_label(df, v) if k in eval_as_label
+                else self._symbolic_to_selector(df, v) if k in eval_as_selector
+            else self._symbolic_eval(df, v) if k in eval_symbols
+            else v)
+            for k, v in kwargs.items()
+        }
 
     def _find_eval_args(self, request, args):
         if (request == True) or ('*' in request):
@@ -275,14 +263,12 @@ class IntentionEvaluator(object):
             return []
         return request
 
-
     def _find_eval_kwargs(self, request, kwargs):
         if (request == True) or ('**' in request):
             return [k for k in kwargs.keys()]
         elif request in [None, False]:
             return []
         return request
-
 
     def __call__(self, *args, **kwargs):
         df = args[0]
@@ -291,7 +277,6 @@ class IntentionEvaluator(object):
         kwargs = self._recursive_kwarg_eval(df, kwargs)
 
         return self.function(df, *args, **kwargs)
-
 
 
 def symbolic_evaluation(function=None, eval_symbols=True, eval_as_label=[],
@@ -304,18 +289,16 @@ def symbolic_evaluation(function=None, eval_symbols=True, eval_as_label=[],
             return IntentionEvaluator(function, eval_symbols=eval_symbols,
                                       eval_as_label=eval_as_label,
                                       eval_as_selector=eval_as_selector)
+
         return wrapper
 
 
-
 class group_delegation(object):
-
     __name__ = "group_delegation"
 
     def __init__(self, function):
         self.function = function
         self.__doc__ = function.__doc__
-
 
     def _apply(self, df, *args, **kwargs):
         grouped = df.groupby(df._grouped_by)
@@ -333,7 +316,6 @@ class group_delegation(object):
 
         return df
 
-
     def __call__(self, *args, **kwargs):
         grouped_by = getattr(args[0], '_grouped_by', None)
         if (grouped_by is None) or not all([g in args[0].columns for g in grouped_by]):
@@ -342,7 +324,6 @@ class group_delegation(object):
             applied = self._apply(args[0], *args[1:], **kwargs)
             applied._grouped_by = grouped_by
             return applied
-
 
 
 def dfpipe(f):
