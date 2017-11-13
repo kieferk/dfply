@@ -433,6 +433,18 @@ diamonds >> mask(X.cut == 'Ideal', X.color == 'E', X.table < 55, X.price < 500)
 50625   0.30  Ideal     E     SI2   62.0   54.0    401  4.33  4.35  2.69
 ```
 
+Alternatively, `mask()` can also be called using the alias `filter_by()`:
+
+```python
+diamonds >> filter_by(X.cut == 'Ideal', X.color == 'E', X.table < 55, X.price < 500)
+
+       carat    cut color clarity  depth  table  price     x     y     z
+26683   0.33  Ideal     E     SI2   62.2   54.0    427  4.44  4.46  2.77
+32297   0.34  Ideal     E     SI2   62.4   54.0    454  4.49  4.52  2.81
+40928   0.30  Ideal     E     SI1   61.6   54.0    499  4.32  4.35  2.67
+50623   0.30  Ideal     E     SI2   62.1   54.0    401  4.32  4.35  2.69
+50625   0.30  Ideal     E     SI2   62.0   54.0    401  4.33  4.35  2.69
+```
 
 ### DataFrame transformation
 
