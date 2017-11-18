@@ -3,7 +3,7 @@ from .base import *
 
 @dfpipe
 def summarize(df, **kwargs):
-    return pd.DataFrame({k:[v] for k,v in kwargs.items()})
+    return pd.DataFrame({k: [v] for k, v in kwargs.items()})
 
 
 @dfpipe

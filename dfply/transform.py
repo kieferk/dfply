@@ -1,7 +1,6 @@
 from .base import *
 
 
-
 @dfpipe
 def mutate(df, **kwargs):
     """
@@ -55,10 +54,10 @@ def mutate_if(df, predicate, fun):
             pass
     df[cols] = df[cols].apply(fun)
     return df
-    
-    #df2 = df.copy()
-    #df2[cols] = df2[cols].apply(fun)
-    #return df2
+
+    # df2 = df.copy()
+    # df2[cols] = df2[cols].apply(fun)
+    # return df2
 
 
 @dfpipe
@@ -98,5 +97,5 @@ def transmute(df, *keep_columns, **kwargs):
                 keep_cols.append(df.columns[col])
 
     df = df.assign(**kwargs)
-    columns = [k for k in kwargs.keys()]+list(keep_cols)
+    columns = [k for k in kwargs.keys()] + list(keep_cols)
     return df.select(lambda x: x in columns, axis=1)
