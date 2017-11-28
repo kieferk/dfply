@@ -7,7 +7,7 @@ __pycache__/
 .cache
 
 # Annoying Mac File
-.DC_Store
+.DS_Store
 
 # workbook test files
 test/feature_workbook.ipynb
