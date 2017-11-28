@@ -18,5 +18,5 @@ test/worksheet.py
 dist
 build
 
-# egg_info
-dfply.egg_info
+# egg-info
+dfply.egg-info
