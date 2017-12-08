@@ -102,7 +102,7 @@ class group_delegation(object):
                 pass_args = args[1:]
 
             df = self._apply_combine_reset(df, *pass_args, **kwargs)
-            if all([True if group in df.columns else False for group in grouped_by]):
+            if all([group in df.columns for group in grouped_by]):
                 df._grouped_by = grouped_by
             else:
                 warnings.warn('Grouping lost during transformation.')
