@@ -7,7 +7,7 @@ __pycache__/
 .cache
 
 # Annoying Mac File
-.DC_Store
+.DS_Store
 
 # workbook test files
 test/feature_workbook.ipynb
@@ -18,5 +18,5 @@ test/worksheet.py
 dist
 build
 
-# egg_info
-dfply.egg_info
+# egg-info
+dfply.egg-info
