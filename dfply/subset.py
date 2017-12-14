@@ -21,6 +21,7 @@ def tail(df, n=5):
 # Sampling
 # ------------------------------------------------------------------------------
 
+
 @dfpipe
 def sample(df, *args, **kwargs):
     return df.sample(*args, **kwargs)
@@ -79,3 +80,8 @@ def top_n(df, n=None, ascending=True, col=None):
     index['ranks'] = index[col].rank(ascending=ascending)
     index = index[index['ranks'] >= index['ranks'].nlargest(n).min()]
     return df.reindex(index.index)
+
+
+@dfpipe
+def pull(df, column=-1):
+    return df.ix[:, column]
