@@ -64,6 +64,9 @@ def mask(df, *args):
     return df[mask.values]
 
 
+filter_by = mask   # alias for mask()
+
+
 @dfpipe
 def top_n(df, n=None, ascending=True, col=None):
     if not n:

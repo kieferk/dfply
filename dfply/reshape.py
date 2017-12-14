@@ -56,7 +56,7 @@ def rename(df, **kwargs):
             values are current names of columns.
     """
 
-    return df.rename(columns={v:k for k,v in kwargs.items()})
+    return df.rename(columns={v: k for k, v in kwargs.items()})
 
 
 # ------------------------------------------------------------------------------
@@ -123,8 +123,8 @@ def convert_type(df, columns):
         if len(column_values) == 0:
             continue
         # boolean
-        if set(column_values.values) < {'True','False'}:
-            out_df[col] = out_df[col].map({'True':True, 'False':False})
+        if set(column_values.values) < {'True', 'False'}:
+            out_df[col] = out_df[col].map({'True': True, 'False': False})
             continue
         # numeric
         if pd.to_numeric(column_values, errors='coerce').isnull().sum() == 0:
@@ -137,7 +137,6 @@ def convert_type(df, columns):
             continue
 
     return out_df
-
 
 
 @pipe
@@ -186,7 +185,7 @@ def spread(df, key, values, convert=False):
     spread_data = out_df[[key, values]]
 
     if not all(spread_data.groupby([spread_data.index, key]).agg(
-        'count').reset_index()[values] < 2):
+            'count').reset_index()[values] < 2):
         raise ValueError('Duplicate identifiers')
 
     spread_data = spread_data.pivot(columns=key, values=values)
@@ -237,25 +236,25 @@ def separate(df, column, into, sep="[\W_]+", remove=True, convert=False,
     assert isinstance(into, (tuple, list))
 
     if isinstance(sep, (tuple, list)):
-        inds = [0]+list(sep)
+        inds = [0] + list(sep)
         if len(inds) > len(into):
             if extra == 'drop':
-                inds = inds[:len(into)+1]
+                inds = inds[:len(into) + 1]
             elif extra == 'merge':
-                inds = inds[:len(into)]+[None]
+                inds = inds[:len(into)] + [None]
         else:
-            inds = inds+[None]
+            inds = inds + [None]
 
-        splits = df[column].map(lambda x: [str(x)[slice(inds[i], inds[i+1])]
-                                           if i < len(inds)-1 else np.nan
+        splits = df[column].map(lambda x: [str(x)[slice(inds[i], inds[i + 1])]
+                                           if i < len(inds) - 1 else np.nan
                                            for i in range(len(into))])
 
     else:
-        maxsplit = len(into)-1 if extra == 'merge' else 0
+        maxsplit = len(into) - 1 if extra == 'merge' else 0
         splits = df[column].map(lambda x: re.split(sep, x, maxsplit))
 
-    right_filler = lambda x: x + [np.nan for i in range(len(into)-len(x))]
-    left_filler = lambda x: [np.nan for i in range(len(into)-len(x))] + x
+    right_filler = lambda x: x + [np.nan for i in range(len(into) - len(x))]
+    left_filler = lambda x: [np.nan for i in range(len(into) - len(x))] + x
 
     if fill == 'right':
         splits = [right_filler(x) for x in splits]
@@ -314,15 +313,14 @@ def unite(df, colname, *args, **kwargs):
     # as_string: becomes string 'nan'
     na_action = kwargs.get('na_action', 'maintain')
 
-
     print(to_unite, sep, remove, na_action)
 
     if na_action == 'maintain':
         df[colname] = df[to_unite].apply(lambda x: np.nan if any(x.isnull())
-                                     else sep.join(x.map(str)), axis=1)
+        else sep.join(x.map(str)), axis=1)
     elif na_action == 'ignore':
         df[colname] = df[to_unite].apply(lambda x: sep.join(x[~x.isnull()].map(str)),
-                                     axis=1)
+                                         axis=1)
     elif na_action == 'as_string':
         df[colname] = df[to_unite].astype(str).apply(lambda x: sep.join(x), axis=1)
 
