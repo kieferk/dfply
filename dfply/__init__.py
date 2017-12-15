@@ -12,3 +12,7 @@ from .data import diamonds
 from .summary_functions import *
 from .window_functions import *
 from .vector import *
+
+for verb in dir():
+    if 'ize' in verb:
+        exec(verb.replace('ize', 'ise') + '=' + verb)
