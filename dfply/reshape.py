@@ -32,10 +32,9 @@ def arrange(df, *args, **kwargs):
               df.iloc[:, arg] if isinstance(arg, int) else
               pd.Series(arg) for arg in flat_args]
 
-    sorter = pd.concat(series, axis=1)
-    sorter.index = df.index
+    sorter = pd.concat(series, axis=1).reset_index(drop=True)
     sorter = sorter.sort_values(sorter.columns.tolist(), **kwargs)
-    return df.loc[sorter.index, :]
+    return df.iloc[sorter.index, :]
 
 
 # ------------------------------------------------------------------------------
