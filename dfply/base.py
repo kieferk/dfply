@@ -306,7 +306,11 @@ class group_delegation(object):
     def _apply(self, df, *args, **kwargs):
         grouped = df.groupby(df._grouped_by)
 
-        df = grouped.apply(self.function, *args, **kwargs)
+        dff = grouped.apply(self.function, *args, **kwargs)
+        # Save all the metadata attributes back into the new data frame
+        for field in df._metadata:
+            setattr(dff, field, getattr(df, field))
+        df = dff
 
         for name in df.index.names[:-1]:
             if name in df:
