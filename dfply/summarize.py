@@ -1,12 +1,12 @@
 from .base import *
 
 
-@dfpipe
+@dfpipe_degroup
 def summarize(df, **kwargs):
     return pd.DataFrame({k: [v] for k, v in kwargs.items()})
 
 
-@dfpipe
+@dfpipe_degroup
 def summarize_each(df, functions, *args):
     columns, values = [], []
     for arg in args:

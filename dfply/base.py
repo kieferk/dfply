@@ -51,6 +51,44 @@ def _delayed_function(function, args, kwargs):
 
 
 def make_symbolic(f):
+    """Decorator to convert a function into a symbolic function. Decorating a
+    function with `make_symbolic` enables the use of symbolic arguments that
+    will need to be delayed later.
+
+    Example:
+        Sometimes, like in the window and summary functions that operate on
+        series, it is necessary to defer the evaluation of a function. For
+        example, in the code below:
+
+        >>> diamonds >> summarize(price_third=nth(X.price, 3))
+
+        The `nth()`` function would typically be evaluated before `summarize()`
+        and the symbolic argument `X.price` would not be evaluated at the right
+        time.
+
+        The `@make_symbolic` decorator can be placed above functions to convert
+        them into symbolic functions that will wait to evaluate. Again, this is
+        used primarily for functions that are embedded inside the function call
+        within the piping syntax.
+
+        The nth() code, for example, is below:
+
+        ```python
+        @make_symbolic
+        def nth(series, n, order_by=None):
+            if order_by is not None:
+                series = order_series_by(series, order_by)
+            try:
+                return series.iloc[n]
+            except:
+                return np.nan
+        ```
+
+        Functions you write that you want to be able to embed as an argument can
+        use the @make_symbolic to wait until they have access to the DataFrame
+        to evaluate.
+
+    """
     def wrapper(*args, **kwargs):
         delay = _check_delayed_eval(args, kwargs)
         if delay:
@@ -63,6 +101,12 @@ def make_symbolic(f):
 
 
 class Intention(object):
+     """The `Intention` class defers evaluation. Python does not evaluate lazily
+     by design; this is emulated by chaining lambda functions.
+
+    `Intention` is not intended to be used directly. As the name implies it is
+    the representation of an intended action to be done at a later time.
+    """
     def __init__(self, function=lambda x: x, invert=False):
         self.function = function
         self.inverted = invert
@@ -119,6 +163,32 @@ X = Intention()
 
 
 class pipe(object):
+    """The pipe decorator allows functions to send a dataframe from one operation
+    to the next via the >> piping operator.
+
+    For functions to work with the piping syntax they must be decorated with `@pipe.`
+
+    Any function decorated with `@pipe` implicitly receives a single first
+    argument expected to be a pandas DataFrame. This is the DataFrame being
+    passed through the pipe. For example, mutate and select have function
+    specifications mutate(df, **kwargs) and select(df, *args, **kwargs),
+    but when used do not require the user to insert the DataFrame as an argument.
+
+    ```python
+    diamonds >> mutate(new_var=X.price + X.depth) >> select(X.new_var)
+    ```
+
+    If you create a new function decorated by `@pipe`, the function definition
+    should contain an initial argument that represents the DataFrame being
+    passed through the piping operations.
+
+    ```python
+    @pipe
+    def myfunc(df, *args, **kwargs):
+      # code
+    ```
+    """
+
     __name__ = "pipe"
 
     def __init__(self, function):
@@ -329,8 +399,23 @@ class group_delegation(object):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 applied._grouped_by = grouped_by
-            
+
             return applied
+
+
+class degroup(object):
+    __name__ = "degroup"
+
+    def __init__(self, function):
+        self.function = function
+        self.__doc__ = function.__doc__
+
+
+    def __call__(self, *args, **kwargs):
+        applied = self.function(*args, **kwargs)
+        setattr(applied, '_grouped_by', None)
+        return applied
+
 
 
 def dfpipe(f):
@@ -339,3 +424,13 @@ def dfpipe(f):
             symbolic_evaluation(f)
         )
     )
+
+
+def dfpipe_degroup(f):
+    return pipe(
+        degroup(
+            group_delegation(
+                symbolic_evaluation(f)
+                )
+            )
+        )
