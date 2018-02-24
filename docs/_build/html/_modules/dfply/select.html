@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dfply.select &#8212; dfply 0.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for dfply.select</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="o">*</span>
+
+
+<span class="c1"># ------------------------------------------------------------------------------</span>
+<span class="c1"># Select and drop operators</span>
+<span class="c1"># ------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="selection_context"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.selection_context">[docs]</a><span class="k">def</span> <span class="nf">selection_context</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Intention</span><span class="p">):</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">return</span> <span class="n">arg</span></div>
+
+
+<div class="viewcode-block" id="selection_filter"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.selection_filter">[docs]</a><span class="k">def</span> <span class="nf">selection_filter</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Intention</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
+                                     <span class="o">*</span><span class="p">(</span><span class="n">selection_context</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">),</span>
+                                     <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">selection_context</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()}))</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+<div class="viewcode-block" id="resolve_selection"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.resolve_selection">[docs]</a><span class="k">def</span> <span class="nf">resolve_selection</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">args</span><span class="p">)]</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">column_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">selector</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">visible</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">selector</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">drop</span><span class="p">:</span>
+                <span class="n">column_indices</span><span class="p">[</span><span class="n">visible</span><span class="p">]</span> <span class="o">=</span> <span class="n">selector</span><span class="p">[</span><span class="n">visible</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">column_indices</span><span class="p">[</span><span class="n">visible</span><span class="p">]</span> <span class="o">=</span> <span class="n">selector</span><span class="p">[</span><span class="n">visible</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">for</span> <span class="n">selection</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">selector</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">selection</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ordering</span><span class="p">:</span>
+                    <span class="n">ordering</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">selection</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">column_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">ordering</span><span class="p">,</span> <span class="n">column_indices</span></div>
+
+
+<span class="nd">@pipe</span>
+<span class="nd">@group_delegation</span>
+<span class="nd">@symbolic_evaluation</span><span class="p">(</span><span class="n">eval_as_selector</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">ordering</span><span class="p">,</span> <span class="n">column_indices</span> <span class="o">=</span> <span class="n">resolve_selection</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">column_indices</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">df</span><span class="p">[[]]</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">column_indices</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">column_indices</span><span class="p">))</span> <span class="o">&amp;</span>
+                         <span class="p">(</span><span class="n">column_indices</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">selection</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">col</span> <span class="ow">in</span> <span class="n">ordering</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]):</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ordering</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">ordering</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="nd">@pipe</span>
+<span class="nd">@group_delegation</span>
+<span class="nd">@symbolic_evaluation</span><span class="p">(</span><span class="n">eval_as_selector</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">drop</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">column_indices</span> <span class="o">=</span> <span class="n">resolve_selection</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">column_indices</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">df</span><span class="p">[[]]</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">column_indices</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">column_indices</span><span class="p">))</span> <span class="o">&amp;</span>
+                         <span class="p">(</span><span class="n">column_indices</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="n">selection</span><span class="p">]</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">select_if</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fun</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Selects columns where fun(ction) is true</span>
+<span class="sd">    Args:</span>
+<span class="sd">        fun: a function that will be applied to columns</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_filter_f</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fun</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">_filter_f</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">drop_if</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">fun</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Drops columns where fun(ction) is true</span>
+<span class="sd">    Args:</span>
+<span class="sd">        fun: a function that will be applied to columns</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_filter_f</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fun</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">_filter_f</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">cols</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="nd">@selection_filter</span>
+<div class="viewcode-block" id="starts_with"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.starts_with">[docs]</a><span class="k">def</span> <span class="nf">starts_with</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)]</span></div>
+
+
+<span class="nd">@selection_filter</span>
+<div class="viewcode-block" id="ends_with"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.ends_with">[docs]</a><span class="k">def</span> <span class="nf">ends_with</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">suffix</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suffix</span><span class="p">)]</span></div>
+
+
+<span class="nd">@selection_filter</span>
+<div class="viewcode-block" id="contains"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.contains">[docs]</a><span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">substr</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">substr</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]</span></div>
+
+
+<span class="nd">@selection_filter</span>
+<div class="viewcode-block" id="everything"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.everything">[docs]</a><span class="k">def</span> <span class="nf">everything</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">columns</span></div>
+
+
+<span class="nd">@selection_filter</span>
+<div class="viewcode-block" id="num_range"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.num_range">[docs]</a><span class="k">def</span> <span class="nf">num_range</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="nb">range</span><span class="p">):</span>
+    <span class="n">colnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">colnames</span><span class="p">]</span></div>
+
+
+<span class="nd">@selection_filter</span>
+<div class="viewcode-block" id="one_of"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.one_of">[docs]</a><span class="k">def</span> <span class="nf">one_of</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">specified</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">specified</span><span class="p">]</span></div>
+
+
+<span class="nd">@selection_filter</span>
+<div class="viewcode-block" id="columns_between"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.columns_between">[docs]</a><span class="k">def</span> <span class="nf">columns_between</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">start_col</span><span class="p">,</span> <span class="n">end_col</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">start_col</span> <span class="o">=</span> <span class="n">columns</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">start_col</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">end_col</span> <span class="o">=</span> <span class="n">columns</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">end_col</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">columns</span><span class="p">[</span><span class="n">start_col</span><span class="p">:</span><span class="n">end_col</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">inclusive</span><span class="p">)]</span></div>
+
+
+<span class="nd">@selection_filter</span>
+<div class="viewcode-block" id="columns_from"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.columns_from">[docs]</a><span class="k">def</span> <span class="nf">columns_from</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">start_col</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">start_col</span> <span class="o">=</span> <span class="n">columns</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">start_col</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">columns</span><span class="p">[</span><span class="n">start_col</span><span class="p">:]</span></div>
+
+
+<span class="nd">@selection_filter</span>
+<div class="viewcode-block" id="columns_to"><a class="viewcode-back" href="../../source/dfply.html#dfply.select.columns_to">[docs]</a><span class="k">def</span> <span class="nf">columns_to</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">end_col</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">end_col</span> <span class="o">=</span> <span class="n">columns</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">end_col</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">columns</span><span class="p">[:</span><span class="n">end_col</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">inclusive</span><span class="p">)]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Kiefer Katovich.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

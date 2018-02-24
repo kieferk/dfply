@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dfply.set_ops &#8212; dfply 0.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for dfply.set_ops</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="validate_set_ops"><a class="viewcode-back" href="../../source/dfply.html#dfply.set_ops.validate_set_ops">[docs]</a><span class="k">def</span> <span class="nf">validate_set_ops</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function to ensure that DataFrames are valid for set operations.</span>
+<span class="sd">    Columns must be the same name in the same order, and indices must be of the</span>
+<span class="sd">    same dimension with the same names.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">():</span>
+        <span class="n">not_in_df</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="n">not_in_other</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;Error: not compatible.&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">not_in_df</span><span class="p">):</span>
+            <span class="n">error_string</span> <span class="o">+=</span> <span class="s1">&#39; Cols in y but not x: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">not_in_df</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">not_in_other</span><span class="p">):</span>
+            <span class="n">error_string</span> <span class="o">+=</span> <span class="s1">&#39; Cols in x but not y: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">not_in_other</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Index dimension mismatch&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Index mismatch&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span></div>
+
+
+<span class="c1"># ------------------------------------------------------------------------------</span>
+<span class="c1"># `union`</span>
+<span class="c1"># ------------------------------------------------------------------------------</span>
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns rows that appear in either DataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): data passed in through the pipe.</span>
+<span class="sd">        other (pandas.DataFrame): other DataFrame to use for set operation with</span>
+<span class="sd">            the first.</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        index (bool): Boolean indicating whether to consider the pandas index</span>
+<span class="sd">            as part of the set operation (default `False`).</span>
+<span class="sd">        keep (str): Indicates which duplicate should be kept. Options are `&#39;first&#39;`</span>
+<span class="sd">            and `&#39;last&#39;`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">validate_set_ops</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+    <span class="n">stacked</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">index</span><span class="p">:</span>
+        <span class="n">stacked_reset_indexes</span> <span class="o">=</span> <span class="n">stacked</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">index_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">stacked_reset_indexes</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="n">index_name</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="n">stacked_reset_indexes</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="n">keep</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">index_cols</span><span class="p">)</span>
+        <span class="n">return_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="n">index_name</span>
+        <span class="k">return</span> <span class="n">return_df</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stacked</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="n">keep</span><span class="p">)</span>
+
+
+<span class="c1"># ------------------------------------------------------------------------------</span>
+<span class="c1"># `intersect`</span>
+<span class="c1"># ------------------------------------------------------------------------------</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns rows that appear in both DataFrames.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): data passed in through the pipe.</span>
+<span class="sd">        other (pandas.DataFrame): other DataFrame to use for set operation with</span>
+<span class="sd">            the first.</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        index (bool): Boolean indicating whether to consider the pandas index</span>
+<span class="sd">            as part of the set operation (default `False`).</span>
+<span class="sd">        keep (str): Indicates which duplicate should be kept. Options are `&#39;first&#39;`</span>
+<span class="sd">            and `&#39;last&#39;`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">validate_set_ops</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">index</span><span class="p">:</span>
+        <span class="n">df_reset_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">other_reset_index</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">index_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_reset_index</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="n">df_index_names</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_reset_index</span><span class="p">,</span> <span class="n">other_reset_index</span><span class="p">,</span>
+                              <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span>
+                              <span class="n">left_on</span><span class="o">=</span><span class="n">df_reset_index</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                              <span class="n">right_on</span><span class="o">=</span><span class="n">df_reset_index</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                     <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">index_cols</span><span class="p">))</span>
+        <span class="n">return_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="n">df_index_names</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="n">return_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="n">keep</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_df</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span>
+                             <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span>
+                             <span class="n">left_on</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                             <span class="n">right_on</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="n">return_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="n">keep</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_df</span>
+
+
+<span class="c1"># ------------------------------------------------------------------------------</span>
+<span class="c1"># `set_diff`</span>
+<span class="c1"># ------------------------------------------------------------------------------</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">set_diff</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns rows that appear in the first DataFrame but not the second.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): data passed in through the pipe.</span>
+<span class="sd">        other (pandas.DataFrame): other DataFrame to use for set operation with</span>
+<span class="sd">            the first.</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        index (bool): Boolean indicating whether to consider the pandas index</span>
+<span class="sd">            as part of the set operation (default `False`).</span>
+<span class="sd">        keep (str): Indicates which duplicate should be kept. Options are `&#39;first&#39;`</span>
+<span class="sd">            and `&#39;last&#39;`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">validate_set_ops</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">index</span><span class="p">:</span>
+        <span class="n">df_reset_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">other_reset_index</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">index_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_reset_index</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="n">df_index_names</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_reset_index</span><span class="p">,</span> <span class="n">other_reset_index</span><span class="p">,</span>
+                              <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+                              <span class="n">left_on</span><span class="o">=</span><span class="n">df_reset_index</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                              <span class="n">right_on</span><span class="o">=</span><span class="n">other_reset_index</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                              <span class="n">indicator</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                     <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">index_cols</span><span class="p">))</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="n">return_df</span><span class="p">[</span><span class="n">return_df</span><span class="o">.</span><span class="n">_merge</span> <span class="o">==</span> <span class="s1">&#39;left_only&#39;</span><span class="p">]</span>
+        <span class="n">return_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="n">df_index_names</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="n">return_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="n">keep</span><span class="p">)[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">return_df</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span>
+                             <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+                             <span class="n">left_on</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                             <span class="n">right_on</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                             <span class="n">indicator</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="n">return_df</span><span class="p">[</span><span class="n">return_df</span><span class="o">.</span><span class="n">_merge</span> <span class="o">==</span> <span class="s1">&#39;left_only&#39;</span><span class="p">]</span>
+        <span class="n">return_df</span> <span class="o">=</span> <span class="n">return_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="n">keep</span><span class="p">)[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">return_df</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Kiefer Katovich.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

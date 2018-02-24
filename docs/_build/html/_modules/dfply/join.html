@@ -1,0 +1,387 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dfply.join &#8212; dfply 0.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for dfply.join</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="o">*</span>
+
+
+<span class="c1"># ------------------------------------------------------------------------------</span>
+<span class="c1"># SQL-style joins</span>
+<span class="c1"># ------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="get_join_parameters"><a class="viewcode-back" href="../../source/dfply.html#dfply.join.get_join_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_join_parameters</span><span class="p">(</span><span class="n">join_kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convenience function to determine the columns to join the right and</span>
+<span class="sd">    left DataFrames on, as well as any suffixes for the columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">by</span> <span class="o">=</span> <span class="n">join_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;by&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">suffixes</span> <span class="o">=</span> <span class="n">join_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;suffixes&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;_x&#39;</span><span class="p">,</span> <span class="s1">&#39;_y&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">by</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">left_on</span><span class="p">,</span> <span class="n">right_on</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">by</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">left_on</span><span class="p">,</span> <span class="n">right_on</span> <span class="o">=</span> <span class="n">by</span><span class="p">,</span> <span class="n">by</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">left_on</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">by</span><span class="p">]</span>
+            <span class="n">right_on</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">by</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">left_on</span><span class="p">,</span> <span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span></div>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">inner_join</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Joins on values present in both DataFrames.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Left DataFrame (passed in via pipe)</span>
+<span class="sd">        other (pandas.DataFrame): Right DataFrame</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        by (str or list): Columns to join on. If a single string, will join</span>
+<span class="sd">            on that column. If a list of lists which contain strings or</span>
+<span class="sd">            integers, the right/left columns to join on.</span>
+<span class="sd">        suffixes (list): String suffixes to append to column names in left</span>
+<span class="sd">            and right DataFrames.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        a &gt;&gt; inner_join(b, by=&#39;x1&#39;)</span>
+
+<span class="sd">          x1  x2     x3</span>
+<span class="sd">        0  A   1   True</span>
+<span class="sd">        1  B   2  False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">left_on</span><span class="p">,</span> <span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span> <span class="o">=</span> <span class="n">get_join_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="n">left_on</span><span class="p">,</span>
+                      <span class="n">right_on</span><span class="o">=</span><span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="n">suffixes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">joined</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">full_join</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Joins on values present in either DataFrame. (Alternate to `outer_join`)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Left DataFrame (passed in via pipe)</span>
+<span class="sd">        other (pandas.DataFrame): Right DataFrame</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        by (str or list): Columns to join on. If a single string, will join</span>
+<span class="sd">            on that column. If a list of lists which contain strings or</span>
+<span class="sd">            integers, the right/left columns to join on.</span>
+<span class="sd">        suffixes (list): String suffixes to append to column names in left</span>
+<span class="sd">            and right DataFrames.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        a &gt;&gt; outer_join(b, by=&#39;x1&#39;)</span>
+
+<span class="sd">          x1   x2     x3</span>
+<span class="sd">        0  A  1.0   True</span>
+<span class="sd">        1  B  2.0  False</span>
+<span class="sd">        2  C  3.0    NaN</span>
+<span class="sd">        3  D  NaN   True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">left_on</span><span class="p">,</span> <span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span> <span class="o">=</span> <span class="n">get_join_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="n">left_on</span><span class="p">,</span>
+                      <span class="n">right_on</span><span class="o">=</span><span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="n">suffixes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">joined</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">outer_join</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Joins on values present in either DataFrame. (Alternate to `full_join`)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Left DataFrame (passed in via pipe)</span>
+<span class="sd">        other (pandas.DataFrame): Right DataFrame</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        by (str or list): Columns to join on. If a single string, will join</span>
+<span class="sd">            on that column. If a list of lists which contain strings or</span>
+<span class="sd">            integers, the right/left columns to join on.</span>
+<span class="sd">        suffixes (list): String suffixes to append to column names in left</span>
+<span class="sd">            and right DataFrames.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        a &gt;&gt; full_join(b, by=&#39;x1&#39;)</span>
+
+<span class="sd">          x1   x2     x3</span>
+<span class="sd">        0  A  1.0   True</span>
+<span class="sd">        1  B  2.0  False</span>
+<span class="sd">        2  C  3.0    NaN</span>
+<span class="sd">        3  D  NaN   True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">left_on</span><span class="p">,</span> <span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span> <span class="o">=</span> <span class="n">get_join_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="n">left_on</span><span class="p">,</span>
+                      <span class="n">right_on</span><span class="o">=</span><span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="n">suffixes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">joined</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">left_join</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Joins on values present in in the left DataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Left DataFrame (passed in via pipe)</span>
+<span class="sd">        other (pandas.DataFrame): Right DataFrame</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        by (str or list): Columns to join on. If a single string, will join</span>
+<span class="sd">            on that column. If a list of lists which contain strings or</span>
+<span class="sd">            integers, the right/left columns to join on.</span>
+<span class="sd">        suffixes (list): String suffixes to append to column names in left</span>
+<span class="sd">            and right DataFrames.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        a &gt;&gt; left_join(b, by=&#39;x1&#39;)</span>
+
+<span class="sd">          x1  x2     x3</span>
+<span class="sd">        0  A   1   True</span>
+<span class="sd">        1  B   2  False</span>
+<span class="sd">        2  C   3    NaN</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">left_on</span><span class="p">,</span> <span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span> <span class="o">=</span> <span class="n">get_join_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="n">left_on</span><span class="p">,</span>
+                      <span class="n">right_on</span><span class="o">=</span><span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="n">suffixes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">joined</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">right_join</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Joins on values present in in the right DataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Left DataFrame (passed in via pipe)</span>
+<span class="sd">        other (pandas.DataFrame): Right DataFrame</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        by (str or list): Columns to join on. If a single string, will join</span>
+<span class="sd">            on that column. If a list of lists which contain strings or</span>
+<span class="sd">            integers, the right/left columns to join on.</span>
+<span class="sd">        suffixes (list): String suffixes to append to column names in left</span>
+<span class="sd">            and right DataFrames.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        a &gt;&gt; right_join(b, by=&#39;x1&#39;)</span>
+
+<span class="sd">          x1   x2     x3</span>
+<span class="sd">        0  A  1.0   True</span>
+<span class="sd">        1  B  2.0  False</span>
+<span class="sd">        2  D  NaN   True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">left_on</span><span class="p">,</span> <span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span> <span class="o">=</span> <span class="n">get_join_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="n">left_on</span><span class="p">,</span>
+                      <span class="n">right_on</span><span class="o">=</span><span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="n">suffixes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">joined</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">semi_join</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns all of the rows in the left DataFrame that have a match</span>
+<span class="sd">    in the right DataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Left DataFrame (passed in via pipe)</span>
+<span class="sd">        other (pandas.DataFrame): Right DataFrame</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        by (str or list): Columns to join on. If a single string, will join</span>
+<span class="sd">            on that column. If a list of lists which contain strings or</span>
+<span class="sd">            integers, the right/left columns to join on.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        a &gt;&gt; semi_join(b, by=&#39;x1&#39;)</span>
+
+<span class="sd">          x1  x2</span>
+<span class="sd">        0  A   1</span>
+<span class="sd">        1  B   2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">left_on</span><span class="p">,</span> <span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span> <span class="o">=</span> <span class="n">get_join_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">right_on</span><span class="p">:</span>
+        <span class="n">right_on</span> <span class="o">=</span> <span class="p">[</span><span class="n">col_name</span> <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+        <span class="n">left_on</span> <span class="o">=</span> <span class="n">right_on</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_on</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">right_on</span> <span class="o">=</span> <span class="p">[</span><span class="n">right_on</span><span class="p">]</span>
+    <span class="n">other_reduced</span> <span class="o">=</span> <span class="n">other</span><span class="p">[</span><span class="n">right_on</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">other_reduced</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="n">left_on</span><span class="p">,</span>
+                      <span class="n">right_on</span><span class="o">=</span><span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;_y&#39;</span><span class="p">),</span>
+                      <span class="n">indicator</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;_merge==&quot;both&quot;&#39;</span><span class="p">)[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+    <span class="k">return</span> <span class="n">joined</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">anti_join</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns all of the rows in the left DataFrame that do not have a</span>
+<span class="sd">    match in the right DataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Left DataFrame (passed in via pipe)</span>
+<span class="sd">        other (pandas.DataFrame): Right DataFrame</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        by (str or list): Columns to join on. If a single string, will join</span>
+<span class="sd">            on that column. If a list of lists which contain strings or</span>
+<span class="sd">            integers, the right/left columns to join on.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        a &gt;&gt; anti_join(b, by=&#39;x1&#39;)</span>
+
+<span class="sd">          x1  x2</span>
+<span class="sd">        2  C   3</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">left_on</span><span class="p">,</span> <span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span> <span class="o">=</span> <span class="n">get_join_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">right_on</span><span class="p">:</span>
+        <span class="n">right_on</span> <span class="o">=</span> <span class="p">[</span><span class="n">col_name</span> <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">if</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+        <span class="n">left_on</span> <span class="o">=</span> <span class="n">right_on</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_on</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">right_on</span> <span class="o">=</span> <span class="p">[</span><span class="n">right_on</span><span class="p">]</span>
+    <span class="n">other_reduced</span> <span class="o">=</span> <span class="n">other</span><span class="p">[</span><span class="n">right_on</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">other_reduced</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="n">left_on</span><span class="p">,</span>
+                      <span class="n">right_on</span><span class="o">=</span><span class="n">right_on</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;_y&#39;</span><span class="p">),</span>
+                      <span class="n">indicator</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;_merge==&quot;left_only&quot;&#39;</span><span class="p">)[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+    <span class="k">return</span> <span class="n">joined</span>
+
+
+<span class="c1"># ------------------------------------------------------------------------------</span>
+<span class="c1"># Binding</span>
+<span class="c1"># ------------------------------------------------------------------------------</span>
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">bind_rows</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">join</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Binds DataFrames &quot;vertically&quot;, stacking them together. This is equivalent</span>
+<span class="sd">    to `pd.concat` with `axis=0`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Top DataFrame (passed in via pipe).</span>
+<span class="sd">        other (pandas.DataFrame): Bottom DataFrame.</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        join (str): One of `&quot;outer&quot;` or `&quot;inner&quot;`. Outer join will preserve</span>
+<span class="sd">            columns not present in both DataFrames, whereas inner joining will</span>
+<span class="sd">            drop them.</span>
+<span class="sd">        ignore_index (bool): Indicates whether to consider pandas indices as</span>
+<span class="sd">            part of the concatenation (defaults to `False`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">],</span> <span class="n">join</span><span class="o">=</span><span class="n">join</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="nd">@pipe</span>
+<span class="k">def</span> <span class="nf">bind_cols</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">join</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Binds DataFrames &quot;horizontally&quot;. This is equivalent to `pd.concat` with</span>
+<span class="sd">    `axis=1`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Left DataFrame (passed in via pipe).</span>
+<span class="sd">        other (pandas.DataFrame): Right DataFrame.</span>
+
+<span class="sd">    Kwargs:</span>
+<span class="sd">        join (str): One of `&quot;outer&quot;` or `&quot;inner&quot;`. Outer join will preserve</span>
+<span class="sd">            rows not present in both DataFrames, whereas inner joining will</span>
+<span class="sd">            drop them.</span>
+<span class="sd">        ignore_index (bool): Indicates whether to consider pandas indices as</span>
+<span class="sd">            part of the concatenation (defaults to `False`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">other</span><span class="p">],</span> <span class="n">join</span><span class="o">=</span><span class="n">join</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Kiefer Katovich.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

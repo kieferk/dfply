@@ -1,0 +1,392 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dfply package &#8212; dfply 0.3.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dfply-package">
+<h1>dfply package<a class="headerlink" href="#dfply-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dfply.data.html">dfply.data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dfply.data.html#module-dfply.data">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dfply.base">
+<span id="dfply-base-module"></span><h2>dfply.base module<a class="headerlink" href="#module-dfply.base" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dfply.base.Intention">
+<em class="property">class </em><code class="descclassname">dfply.base.</code><code class="descname">Intention</code><span class="sig-paren">(</span><em>function=&lt;function Intention.&lt;lambda&gt;&gt;</em>, <em>invert=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#Intention"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.Intention" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>The <cite>Intention</cite> class defers evaluation. Python does not evaluate lazily
+by design; this is emulated by chaining lambda functions.</p>
+<p><cite>Intention</cite> is not intended to be used directly. As the name implies it is
+the representation of an intended action to be done at a later time.</p>
+<dl class="method">
+<dt id="dfply.base.Intention.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#Intention.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.Intention.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dfply.base.IntentionEvaluator">
+<em class="property">class </em><code class="descclassname">dfply.base.</code><code class="descname">IntentionEvaluator</code><span class="sig-paren">(</span><em>function</em>, <em>eval_symbols=True</em>, <em>eval_as_label=[]</em>, <em>eval_as_selector=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#IntentionEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.IntentionEvaluator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Parent class for symbolic argument decorators.
+Default behavior is to recursively turn the arguments and keyword
+arguments of a decorated function into <cite>symbolic.Call</cite> objects that
+can be evaluated against a pandas DataFrame as it comes down a pipe.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dfply.base.X">
+<code class="descclassname">dfply.base.</code><code class="descname">X</code><a class="headerlink" href="#dfply.base.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <cite>Intention</cite> class defers evaluation. Python does not evaluate lazily
+by design; this is emulated by chaining lambda functions.</p>
+<p><cite>Intention</cite> is not intended to be used directly. As the name implies it is
+the representation of an intended action to be done at a later time.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.base.contextualize">
+<code class="descclassname">dfply.base.</code><code class="descname">contextualize</code><span class="sig-paren">(</span><em>arg</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#contextualize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.contextualize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="dfply.base.degroup">
+<em class="property">class </em><code class="descclassname">dfply.base.</code><code class="descname">degroup</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#degroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.degroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.base.dfpipe">
+<code class="descclassname">dfply.base.</code><code class="descname">dfpipe</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#dfpipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.dfpipe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.base.dfpipe_degroup">
+<code class="descclassname">dfply.base.</code><code class="descname">dfpipe_degroup</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#dfpipe_degroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.dfpipe_degroup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.base.flatten">
+<code class="descclassname">dfply.base.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>l</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#flatten"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.flatten" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="dfply.base.group_delegation">
+<em class="property">class </em><code class="descclassname">dfply.base.</code><code class="descname">group_delegation</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#group_delegation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.group_delegation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.base.make_symbolic">
+<code class="descclassname">dfply.base.</code><code class="descname">make_symbolic</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#make_symbolic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.make_symbolic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to convert a function into a symbolic function. Decorating a
+function with <cite>make_symbolic</cite> enables the use of symbolic arguments that
+will need to be delayed later.</p>
+<p class="rubric">Example</p>
+<p>Sometimes, like in the window and summary functions that operate on
+series, it is necessary to defer the evaluation of a function. For
+example, in the code below:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">diamonds</span> <span class="o">&gt;&gt;</span> <span class="n">summarize</span><span class="p">(</span><span class="n">price_third</span><span class="o">=</span><span class="n">nth</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">price</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The <cite>nth()`</cite> function would typically be evaluated before <cite>summarize()</cite>
+and the symbolic argument <cite>X.price</cite> would not be evaluated at the right
+time.</p>
+<p>The <cite>&#64;make_symbolic</cite> decorator can be placed above functions to convert
+them into symbolic functions that will wait to evaluate. Again, this is
+used primarily for functions that are embedded inside the function call
+within the piping syntax.</p>
+<p>The nth() code, for example, is below:</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
+&#64;make_symbolic
+def nth(series, n, order_by=None):</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>if order_by is not None:</dt>
+<dd>series = order_series_by(series, order_by)</dd>
+<dt>try:</dt>
+<dd>return series.iloc[n]</dd>
+<dt>except:</dt>
+<dd>return np.nan</dd>
+</dl>
+</div></blockquote>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+<p>Functions you write that you want to be able to embed as an argument can
+use the &#64;make_symbolic to wait until they have access to the DataFrame
+to evaluate.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dfply.base.pipe">
+<em class="property">class </em><code class="descclassname">dfply.base.</code><code class="descname">pipe</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#pipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.pipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>The pipe decorator allows functions to send a dataframe from one operation
+to the next via the &gt;&gt; piping operator.</p>
+<p>For functions to work with the piping syntax they must be decorated with <cite>&#64;pipe.</cite></p>
+<p>Any function decorated with <cite>&#64;pipe</cite> implicitly receives a single first
+argument expected to be a pandas DataFrame. This is the DataFrame being
+passed through the pipe. For example, mutate and select have function
+specifications mutate(df, <a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs) and select(df, <a href="#id11"><span class="problematic" id="id12">*</span></a>args, <a href="#id13"><span class="problematic" id="id14">**</span></a>kwargs),
+but when used do not require the user to insert the DataFrame as an argument.</p>
+<p><code class="docutils literal"><span class="pre">`python</span>
+<span class="pre">diamonds</span> <span class="pre">&gt;&gt;</span> <span class="pre">mutate(new_var=X.price</span> <span class="pre">+</span> <span class="pre">X.depth)</span> <span class="pre">&gt;&gt;</span> <span class="pre">select(X.new_var)</span>
+<span class="pre">`</span></code></p>
+<p>If you create a new function decorated by <cite>&#64;pipe</cite>, the function definition
+should contain an initial argument that represents the DataFrame being
+passed through the piping operations.</p>
+<p><a href="#id15"><span class="problematic" id="id16">``</span></a><a href="#id17"><span class="problematic" id="id18">`</span></a>python
+&#64;pipe
+def myfunc(df, <a href="#id19"><span class="problematic" id="id20">*</span></a>args, <a href="#id21"><span class="problematic" id="id22">**</span></a>kwargs):</p>
+<blockquote>
+<div># code</div></blockquote>
+<p><a href="#id23"><span class="problematic" id="id24">``</span></a><a href="#id25"><span class="problematic" id="id26">`</span></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.base.symbolic_evaluation">
+<code class="descclassname">dfply.base.</code><code class="descname">symbolic_evaluation</code><span class="sig-paren">(</span><em>function=None</em>, <em>eval_symbols=True</em>, <em>eval_as_label=[]</em>, <em>eval_as_selector=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/base.html#symbolic_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.base.symbolic_evaluation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-dfply.group">
+<span id="dfply-group-module"></span><h2>dfply.group module<a class="headerlink" href="#module-dfply.group" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dfply.join">
+<span id="dfply-join-module"></span><h2>dfply.join module<a class="headerlink" href="#module-dfply.join" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dfply.join.get_join_parameters">
+<code class="descclassname">dfply.join.</code><code class="descname">get_join_parameters</code><span class="sig-paren">(</span><em>join_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/join.html#get_join_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.join.get_join_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function to determine the columns to join the right and
+left DataFrames on, as well as any suffixes for the columns.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-dfply.reshape">
+<span id="dfply-reshape-module"></span><h2>dfply.reshape module<a class="headerlink" href="#module-dfply.reshape" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dfply.reshape.convert_type">
+<code class="descclassname">dfply.reshape.</code><code class="descname">convert_type</code><span class="sig-paren">(</span><em>df</em>, <em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/reshape.html#convert_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.reshape.convert_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function that attempts to convert columns into their appropriate
+data type.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-dfply.select">
+<span id="dfply-select-module"></span><h2>dfply.select module<a class="headerlink" href="#module-dfply.select" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dfply.select.columns_between">
+<code class="descclassname">dfply.select.</code><code class="descname">columns_between</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#columns_between"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.columns_between" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.columns_from">
+<code class="descclassname">dfply.select.</code><code class="descname">columns_from</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#columns_from"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.columns_from" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.columns_to">
+<code class="descclassname">dfply.select.</code><code class="descname">columns_to</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#columns_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.columns_to" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.contains">
+<code class="descclassname">dfply.select.</code><code class="descname">contains</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.contains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.ends_with">
+<code class="descclassname">dfply.select.</code><code class="descname">ends_with</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#ends_with"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.ends_with" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.everything">
+<code class="descclassname">dfply.select.</code><code class="descname">everything</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#everything"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.everything" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.num_range">
+<code class="descclassname">dfply.select.</code><code class="descname">num_range</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#num_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.num_range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.one_of">
+<code class="descclassname">dfply.select.</code><code class="descname">one_of</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#one_of"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.one_of" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.resolve_selection">
+<code class="descclassname">dfply.select.</code><code class="descname">resolve_selection</code><span class="sig-paren">(</span><em>df</em>, <em>*args</em>, <em>drop=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#resolve_selection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.resolve_selection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.selection_context">
+<code class="descclassname">dfply.select.</code><code class="descname">selection_context</code><span class="sig-paren">(</span><em>arg</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#selection_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.selection_context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.selection_filter">
+<code class="descclassname">dfply.select.</code><code class="descname">selection_filter</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#selection_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.selection_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.starts_with">
+<code class="descclassname">dfply.select.</code><code class="descname">starts_with</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/select.html#starts_with"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.starts_with" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-dfply.set_ops">
+<span id="dfply-set-ops-module"></span><h2>dfply.set_ops module<a class="headerlink" href="#module-dfply.set_ops" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dfply.set_ops.validate_set_ops">
+<code class="descclassname">dfply.set_ops.</code><code class="descname">validate_set_ops</code><span class="sig-paren">(</span><em>df</em>, <em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dfply/set_ops.html#validate_set_ops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.set_ops.validate_set_ops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to ensure that DataFrames are valid for set operations.
+Columns must be the same name in the same order, and indices must be of the
+same dimension with the same names.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-dfply.subset">
+<span id="dfply-subset-module"></span><h2>dfply.subset module<a class="headerlink" href="#module-dfply.subset" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dfply.summarize">
+<span id="dfply-summarize-module"></span><h2>dfply.summarize module<a class="headerlink" href="#module-dfply.summarize" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dfply.summary_functions">
+<span id="dfply-summary-functions-module"></span><h2>dfply.summary_functions module<a class="headerlink" href="#module-dfply.summary_functions" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dfply.transform">
+<span id="dfply-transform-module"></span><h2>dfply.transform module<a class="headerlink" href="#module-dfply.transform" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dfply.vector">
+<span id="dfply-vector-module"></span><h2>dfply.vector module<a class="headerlink" href="#module-dfply.vector" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dfply.window_functions">
+<span id="dfply-window-functions-module"></span><h2>dfply.window_functions module<a class="headerlink" href="#module-dfply.window_functions" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dfply">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dfply" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dfply package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-dfply.base">dfply.base module</a></li>
+<li><a class="reference internal" href="#module-dfply.group">dfply.group module</a></li>
+<li><a class="reference internal" href="#module-dfply.join">dfply.join module</a></li>
+<li><a class="reference internal" href="#module-dfply.reshape">dfply.reshape module</a></li>
+<li><a class="reference internal" href="#module-dfply.select">dfply.select module</a></li>
+<li><a class="reference internal" href="#module-dfply.set_ops">dfply.set_ops module</a></li>
+<li><a class="reference internal" href="#module-dfply.subset">dfply.subset module</a></li>
+<li><a class="reference internal" href="#module-dfply.summarize">dfply.summarize module</a></li>
+<li><a class="reference internal" href="#module-dfply.summary_functions">dfply.summary_functions module</a></li>
+<li><a class="reference internal" href="#module-dfply.transform">dfply.transform module</a></li>
+<li><a class="reference internal" href="#module-dfply.vector">dfply.vector module</a></li>
+<li><a class="reference internal" href="#module-dfply.window_functions">dfply.window_functions module</a></li>
+<li><a class="reference internal" href="#module-dfply">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dfply.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Kiefer Katovich.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/dfply.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
