@@ -5,5 +5,3 @@ dfply
    :maxdepth: 4
 
    dfply
-   setup
-   test
