@@ -221,6 +221,11 @@ def if_else(condition, when_true, otherwise):
         otherwise = np.repeat(otherwise, len(condition))
     assert (len(condition) == len(when_true)) and (len(condition) == len(otherwise))
 
+    if isinstance(when_true, pd.Series):
+        when_true = when_true.values
+    if isinstance(otherwise, pd.Series):
+        otherwise = otherwise.values
+
     output = np.array([when_true[i] if c else otherwise[i]
                        for i, c in enumerate(condition)])
     return output
