@@ -98,4 +98,4 @@ def transmute(df, *keep_columns, **kwargs):
 
     df = df.assign(**kwargs)
     columns = [k for k in kwargs.keys()] + list(keep_cols)
-    return df.select(lambda x: x in columns, axis=1)
+    return df[columns]
