@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: dfply
-Version: 0.3.0
+Version: 0.3.1a0
 Summary: dplyr-style piping operations for pandas dataframes
 Home-page: https://github.com/kieferk/dfply
 Author: Kiefer Katovich

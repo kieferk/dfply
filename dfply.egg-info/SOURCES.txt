@@ -1,5 +1,6 @@
 LICENSE.md
 MANIFEST.in
+README.md
 setup.py
 dfply/__init__.py
 dfply/base.py
