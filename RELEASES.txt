@@ -1,3 +1,6 @@
+v0.3.2
+Various PRs added fixing bugs, etc. 
+
 v0.3.1
 This update is almost solely the pull requests by @bleearmstrong that were sitting
 in the repo waiting. There were some minor bug-fixes and changes too.
