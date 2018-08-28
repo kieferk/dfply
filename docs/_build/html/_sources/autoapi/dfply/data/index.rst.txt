@@ -1,0 +1,43 @@
+
+
+:mod:`dfply.data`
+=================
+
+.. py:module:: dfply.data
+
+
+
+
+
+
+
+Package Contents
+----------------
+
+
+
+
+
+
+.. data:: root
+   
+
+   
+
+
+
+
+
+
+
+
+.. data:: diamonds
+   
+
+   
+
+
+
+
+
+

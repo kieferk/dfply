@@ -1,0 +1,408 @@
+
+
+:mod:`dfply.base`
+=================
+
+.. py:module:: dfply.base
+
+
+
+
+
+
+
+Module Contents
+---------------
+
+
+
+
+
+
+.. function:: _recursive_apply(f, l)
+
+   
+
+
+
+
+
+
+
+
+.. function:: contextualize(arg, context)
+
+   
+
+
+
+
+
+
+
+
+.. function:: flatten(l)
+
+   
+
+
+
+
+
+
+
+
+.. function:: _check_delayed_eval(args, kwargs)
+
+   
+
+
+
+
+
+
+
+
+.. function:: _context_args(args)
+
+   
+
+
+
+
+
+
+
+
+.. function:: _context_kwargs(kwargs)
+
+   
+
+
+
+
+
+
+
+
+.. function:: _delayed_function(function, args, kwargs)
+
+   
+
+
+
+
+
+
+
+
+.. function:: make_symbolic(f)
+
+   
+
+
+
+
+
+
+
+
+.. py:class:: Intention(function=lambda x: x, invert=False)
+
+   Bases::class:`object`
+
+   
+
+   
+
+   
+   
+   .. method:: evaluate(self, context)
+   
+      
+   
+
+   
+   
+   .. method:: __getattr__(self, attribute)
+   
+      
+   
+
+   
+   
+   .. method:: __invert__(self)
+   
+      
+   
+
+   
+   
+   .. method:: __call__(self, *args, **kwargs)
+   
+      
+   
+
+
+
+
+
+
+
+
+.. data:: _magic_method_names
+   :annotation: = ['__abs__', '__add__', '__and__', '__cmp__', '__complex__', '__contains__', '__delattr__', '__delete__', '__delitem__', '__delslice__', '__div__', '__divmod__', '__enter__', '__eq__', '__exit__', '__float__', '__floordiv__', '__ge__', '__get__', '__getitem__', '__getslice__', '__gt__', '__hash__', '__hex__', '__iadd__', '__iand__', '__idiv__', '__ifloordiv__', '__ilshift__', '__imod__', '__imul__', '__index__', '__int__', '__ior__', '__ipow__', '__irshift__', '__isub__', '__iter__', '__itruediv__', '__ixor__', '__le__', '__len__', '__long__', '__lshift__', '__lt__', '__mod__', '__mul__', '__ne__', '__neg__', '__nonzero__', '__oct__', '__or__', '__pos__', '__pow__', '__radd__', '__rand__', '__rcmp__', '__rdiv__', '__rdivmod__', '__reversed__', '__rfloordiv__', '__rlshift__', '__rmod__', '__rmul__', '__ror__', '__rpow__', '__rrshift__', '__rshift__', '__rsub__', '__rtruediv__', '__rxor__', '__set__', '__setitem__', '__setslice__', '__sub__', '__truediv__', '__unicode__', '__xor__', '__str__'] 
+
+   
+
+
+
+
+
+
+
+
+.. function:: _set_magic_method(name)
+
+   
+
+
+
+
+
+
+
+
+.. data:: X
+   
+
+   
+
+
+
+
+
+
+
+
+.. py:class:: pipe(function)
+
+   Bases::class:`object`
+
+   
+
+   
+   
+   .. attribute:: __name__
+      :annotation: = pipe 
+   
+      
+   
+
+   
+
+   
+
+   
+   
+   .. method:: __rshift__(self, other)
+   
+      
+   
+
+   
+   
+   .. method:: __rrshift__(self, other)
+   
+      
+   
+
+   
+   
+   .. method:: __call__(self, *args, **kwargs)
+   
+      
+   
+
+
+
+
+
+
+
+
+.. py:class:: IntentionEvaluator(function, eval_symbols=True, eval_as_label=[], eval_as_selector=[])
+
+   Bases::class:`object`
+
+   
+
+   Parent class for symbolic argument decorators.
+   Default behavior is to recursively turn the arguments and keyword
+   arguments of a decorated function into `symbolic.Call` objects that
+   can be evaluated against a pandas DataFrame as it comes down a pipe.
+
+   
+
+   
+   
+   .. attribute:: __name__
+      :annotation: = IntentionEvaluator 
+   
+      
+   
+
+   
+
+   
+
+   
+   
+   .. method:: _evaluate(self, df, arg)
+   
+      
+   
+
+   
+   
+   .. method:: _evaluate_label(self, df, arg)
+   
+      
+   
+
+   
+   
+   .. method:: _evaluate_selector(self, df, arg)
+   
+      
+   
+
+   
+   
+   .. method:: _evaluator_loop(self, df, arg, eval_func)
+   
+      
+   
+
+   
+   
+   .. method:: _symbolic_eval(self, df, arg)
+   
+      
+   
+
+   
+   
+   .. method:: _symbolic_to_label(self, df, arg)
+   
+      
+   
+
+   
+   
+   .. method:: _symbolic_to_selector(self, df, arg)
+   
+      
+   
+
+   
+   
+   .. method:: _recursive_arg_eval(self, df, args)
+   
+      
+   
+
+   
+   
+   .. method:: _recursive_kwarg_eval(self, df, kwargs)
+   
+      
+   
+
+   
+   
+   .. method:: _find_eval_args(self, request, args)
+   
+      
+   
+
+   
+   
+   .. method:: _find_eval_kwargs(self, request, kwargs)
+   
+      
+   
+
+   
+   
+   .. method:: __call__(self, *args, **kwargs)
+   
+      
+   
+
+
+
+
+
+
+
+
+.. function:: symbolic_evaluation(function=None, eval_symbols=True, eval_as_label=[], eval_as_selector=[])
+
+   
+
+
+
+
+
+
+
+
+.. py:class:: group_delegation(function)
+
+   Bases::class:`object`
+
+   
+
+   
+   
+   .. attribute:: __name__
+      :annotation: = group_delegation 
+   
+      
+   
+
+   
+
+   
+
+   
+   
+   .. method:: _apply(self, df, *args, **kwargs)
+   
+      
+   
+
+   
+   
+   .. method:: __call__(self, *args, **kwargs)
+   
+      
+   
+
+
+
+
+
+
+
+
+.. function:: dfpipe(f)
+
+   
+
+
+
+
+
+

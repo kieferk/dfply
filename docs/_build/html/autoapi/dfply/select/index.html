@@ -1,0 +1,194 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>dfply.select &#8212; dfply 0.3 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/autoapi.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dfply.select">
+<span id="dfply-select"></span><h1><a class="reference internal" href="#module-dfply.select" title="dfply.select"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dfply.select</span></code></a><a class="headerlink" href="#module-dfply.select" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dfply.select.selection_context">
+<code class="descclassname">dfply.select.</code><code class="descname">selection_context</code><span class="sig-paren">(</span><em>arg</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#selection_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.selection_context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.selection_filter">
+<code class="descclassname">dfply.select.</code><code class="descname">selection_filter</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#selection_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.selection_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.resolve_selection">
+<code class="descclassname">dfply.select.</code><code class="descname">resolve_selection</code><span class="sig-paren">(</span><em>df</em>, <em>*args</em>, <em>drop=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#resolve_selection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.resolve_selection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.select">
+<code class="descclassname">dfply.select.</code><code class="descname">select</code><span class="sig-paren">(</span><em>df</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.select.select" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.drop">
+<code class="descclassname">dfply.select.</code><code class="descname">drop</code><span class="sig-paren">(</span><em>df</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.select.drop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.select_if">
+<code class="descclassname">dfply.select.</code><code class="descname">select_if</code><span class="sig-paren">(</span><em>df</em>, <em>fun</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.select.select_if" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects columns where fun(ction) is true
+Args:</p>
+<blockquote>
+<div>fun: a function that will be applied to columns</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.drop_if">
+<code class="descclassname">dfply.select.</code><code class="descname">drop_if</code><span class="sig-paren">(</span><em>df</em>, <em>fun</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.select.drop_if" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drops columns where fun(ction) is true
+Args:</p>
+<blockquote>
+<div>fun: a function that will be applied to columns</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.starts_with">
+<code class="descclassname">dfply.select.</code><code class="descname">starts_with</code><span class="sig-paren">(</span><em>columns</em>, <em>prefix</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#starts_with"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.starts_with" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.ends_with">
+<code class="descclassname">dfply.select.</code><code class="descname">ends_with</code><span class="sig-paren">(</span><em>columns</em>, <em>suffix</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#ends_with"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.ends_with" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.contains">
+<code class="descclassname">dfply.select.</code><code class="descname">contains</code><span class="sig-paren">(</span><em>columns</em>, <em>substr</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#contains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.contains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.matches">
+<code class="descclassname">dfply.select.</code><code class="descname">matches</code><span class="sig-paren">(</span><em>columns</em>, <em>pattern</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#matches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.matches" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.everything">
+<code class="descclassname">dfply.select.</code><code class="descname">everything</code><span class="sig-paren">(</span><em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#everything"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.everything" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.num_range">
+<code class="descclassname">dfply.select.</code><code class="descname">num_range</code><span class="sig-paren">(</span><em>columns</em>, <em>prefix</em>, <em>range</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#num_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.num_range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.one_of">
+<code class="descclassname">dfply.select.</code><code class="descname">one_of</code><span class="sig-paren">(</span><em>columns</em>, <em>specified</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#one_of"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.one_of" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.columns_between">
+<code class="descclassname">dfply.select.</code><code class="descname">columns_between</code><span class="sig-paren">(</span><em>columns</em>, <em>start_col</em>, <em>end_col</em>, <em>inclusive=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#columns_between"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.columns_between" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.columns_from">
+<code class="descclassname">dfply.select.</code><code class="descname">columns_from</code><span class="sig-paren">(</span><em>columns</em>, <em>start_col</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#columns_from"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.columns_from" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.select.columns_to">
+<code class="descclassname">dfply.select.</code><code class="descname">columns_to</code><span class="sig-paren">(</span><em>columns</em>, <em>end_col</em>, <em>inclusive=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/select.html#columns_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.select.columns_to" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">dfply</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Sphinx AutoAPI Index</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Kiefer Katovich.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../../../_sources/autoapi/dfply/select/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

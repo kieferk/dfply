@@ -1,0 +1,71 @@
+
+
+:mod:`dfply`
+============
+
+.. py:module:: dfply
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   data/index.rst
+   
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   base/index.rst
+   
+   group/index.rst
+   
+   join/index.rst
+   
+   reshape/index.rst
+   
+   select/index.rst
+   
+   set_ops/index.rst
+   
+   subset/index.rst
+   
+   summarize/index.rst
+   
+   summary_functions/index.rst
+   
+   transform/index.rst
+   
+   vector/index.rst
+   
+   window_functions/index.rst
+   
+
+
+
+
+Package Contents
+----------------
+
+
+
+
+
+
+.. data:: diamonds
+   
+
+   
+
+
+
+
+
+

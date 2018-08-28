@@ -1,0 +1,342 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>dfply.join &#8212; dfply 0.3 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/autoapi.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dfply.join">
+<span id="dfply-join"></span><h1><a class="reference internal" href="#module-dfply.join" title="dfply.join"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dfply.join</span></code></a><a class="headerlink" href="#module-dfply.join" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dfply.join.get_join_parameters">
+<code class="descclassname">dfply.join.</code><code class="descname">get_join_parameters</code><span class="sig-paren">(</span><em>join_kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/join.html#get_join_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.join.get_join_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function to determine the columns to join the right and
+left DataFrames on, as well as any suffixes for the columns.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.join.inner_join">
+<code class="descclassname">dfply.join.</code><code class="descname">inner_join</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.join.inner_join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joins on values present in both DataFrames.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (pandas.DataFrame): Left DataFrame (passed in via pipe)
+other (pandas.DataFrame): Right DataFrame</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>by (str or list): Columns to join on. If a single string, will join</dt>
+<dd>on that column. If a list of lists which contain strings or
+integers, the right/left columns to join on.</dd>
+<dt>suffixes (list): String suffixes to append to column names in left</dt>
+<dd>and right DataFrames.</dd>
+</dl>
+</dd>
+<dt>Example:</dt>
+<dd><p class="first">a &gt;&gt; inner_join(b, by=’x1’)</p>
+<blockquote>
+<div>x1  x2     x3</div></blockquote>
+<p class="last">0  A   1   True
+1  B   2  False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.join.full_join">
+<code class="descclassname">dfply.join.</code><code class="descname">full_join</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.join.full_join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joins on values present in either DataFrame. (Alternate to <cite>outer_join</cite>)</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (pandas.DataFrame): Left DataFrame (passed in via pipe)
+other (pandas.DataFrame): Right DataFrame</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>by (str or list): Columns to join on. If a single string, will join</dt>
+<dd>on that column. If a list of lists which contain strings or
+integers, the right/left columns to join on.</dd>
+<dt>suffixes (list): String suffixes to append to column names in left</dt>
+<dd>and right DataFrames.</dd>
+</dl>
+</dd>
+<dt>Example:</dt>
+<dd><p class="first">a &gt;&gt; outer_join(b, by=’x1’)</p>
+<blockquote>
+<div>x1   x2     x3</div></blockquote>
+<p class="last">0  A  1.0   True
+1  B  2.0  False
+2  C  3.0    NaN
+3  D  NaN   True</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.join.outer_join">
+<code class="descclassname">dfply.join.</code><code class="descname">outer_join</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.join.outer_join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joins on values present in either DataFrame. (Alternate to <cite>full_join</cite>)</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (pandas.DataFrame): Left DataFrame (passed in via pipe)
+other (pandas.DataFrame): Right DataFrame</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>by (str or list): Columns to join on. If a single string, will join</dt>
+<dd>on that column. If a list of lists which contain strings or
+integers, the right/left columns to join on.</dd>
+<dt>suffixes (list): String suffixes to append to column names in left</dt>
+<dd>and right DataFrames.</dd>
+</dl>
+</dd>
+<dt>Example:</dt>
+<dd><p class="first">a &gt;&gt; full_join(b, by=’x1’)</p>
+<blockquote>
+<div>x1   x2     x3</div></blockquote>
+<p class="last">0  A  1.0   True
+1  B  2.0  False
+2  C  3.0    NaN
+3  D  NaN   True</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.join.left_join">
+<code class="descclassname">dfply.join.</code><code class="descname">left_join</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.join.left_join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joins on values present in in the left DataFrame.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (pandas.DataFrame): Left DataFrame (passed in via pipe)
+other (pandas.DataFrame): Right DataFrame</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>by (str or list): Columns to join on. If a single string, will join</dt>
+<dd>on that column. If a list of lists which contain strings or
+integers, the right/left columns to join on.</dd>
+<dt>suffixes (list): String suffixes to append to column names in left</dt>
+<dd>and right DataFrames.</dd>
+</dl>
+</dd>
+<dt>Example:</dt>
+<dd><p class="first">a &gt;&gt; left_join(b, by=’x1’)</p>
+<blockquote>
+<div>x1  x2     x3</div></blockquote>
+<p class="last">0  A   1   True
+1  B   2  False
+2  C   3    NaN</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.join.right_join">
+<code class="descclassname">dfply.join.</code><code class="descname">right_join</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.join.right_join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joins on values present in in the right DataFrame.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (pandas.DataFrame): Left DataFrame (passed in via pipe)
+other (pandas.DataFrame): Right DataFrame</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>by (str or list): Columns to join on. If a single string, will join</dt>
+<dd>on that column. If a list of lists which contain strings or
+integers, the right/left columns to join on.</dd>
+<dt>suffixes (list): String suffixes to append to column names in left</dt>
+<dd>and right DataFrames.</dd>
+</dl>
+</dd>
+<dt>Example:</dt>
+<dd><p class="first">a &gt;&gt; right_join(b, by=’x1’)</p>
+<blockquote>
+<div>x1   x2     x3</div></blockquote>
+<p class="last">0  A  1.0   True
+1  B  2.0  False
+2  D  NaN   True</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.join.semi_join">
+<code class="descclassname">dfply.join.</code><code class="descname">semi_join</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.join.semi_join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all of the rows in the left DataFrame that have a match
+in the right DataFrame.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (pandas.DataFrame): Left DataFrame (passed in via pipe)
+other (pandas.DataFrame): Right DataFrame</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>by (str or list): Columns to join on. If a single string, will join</dt>
+<dd>on that column. If a list of lists which contain strings or
+integers, the right/left columns to join on.</dd>
+</dl>
+</dd>
+<dt>Example:</dt>
+<dd><p class="first">a &gt;&gt; semi_join(b, by=’x1’)</p>
+<blockquote>
+<div>x1  x2</div></blockquote>
+<p class="last">0  A   1
+1  B   2</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.join.anti_join">
+<code class="descclassname">dfply.join.</code><code class="descname">anti_join</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.join.anti_join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all of the rows in the left DataFrame that do not have a
+match in the right DataFrame.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (pandas.DataFrame): Left DataFrame (passed in via pipe)
+other (pandas.DataFrame): Right DataFrame</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>by (str or list): Columns to join on. If a single string, will join</dt>
+<dd>on that column. If a list of lists which contain strings or
+integers, the right/left columns to join on.</dd>
+</dl>
+</dd>
+<dt>Example:</dt>
+<dd><p class="first">a &gt;&gt; anti_join(b, by=’x1’)</p>
+<blockquote>
+<div>x1  x2</div></blockquote>
+<p class="last">2  C   3</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.join.bind_rows">
+<code class="descclassname">dfply.join.</code><code class="descname">bind_rows</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>join='outer'</em>, <em>ignore_index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.join.bind_rows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binds DataFrames “vertically”, stacking them together. This is equivalent
+to <cite>pd.concat</cite> with <cite>axis=0</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (pandas.DataFrame): Top DataFrame (passed in via pipe).
+other (pandas.DataFrame): Bottom DataFrame.</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>join (str): One of <cite>“outer”</cite> or <cite>“inner”</cite>. Outer join will preserve</dt>
+<dd>columns not present in both DataFrames, whereas inner joining will
+drop them.</dd>
+<dt>ignore_index (bool): Indicates whether to consider pandas indices as</dt>
+<dd>part of the concatenation (defaults to <cite>False</cite>).</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.join.bind_cols">
+<code class="descclassname">dfply.join.</code><code class="descname">bind_cols</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>join='outer'</em>, <em>ignore_index=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.join.bind_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binds DataFrames “horizontally”. This is equivalent to <cite>pd.concat</cite> with
+<cite>axis=1</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (pandas.DataFrame): Left DataFrame (passed in via pipe).
+other (pandas.DataFrame): Right DataFrame.</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>join (str): One of <cite>“outer”</cite> or <cite>“inner”</cite>. Outer join will preserve</dt>
+<dd>rows not present in both DataFrames, whereas inner joining will
+drop them.</dd>
+<dt>ignore_index (bool): Indicates whether to consider pandas indices as</dt>
+<dd>part of the concatenation (defaults to <cite>False</cite>).</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">dfply</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Sphinx AutoAPI Index</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Kiefer Katovich.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../../../_sources/autoapi/dfply/join/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

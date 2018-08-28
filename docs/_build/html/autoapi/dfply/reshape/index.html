@@ -1,0 +1,278 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>dfply.reshape &#8212; dfply 0.3 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/autoapi.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dfply.reshape">
+<span id="dfply-reshape"></span><h1><a class="reference internal" href="#module-dfply.reshape" title="dfply.reshape"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dfply.reshape</span></code></a><a class="headerlink" href="#module-dfply.reshape" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dfply.reshape.arrange">
+<code class="descclassname">dfply.reshape.</code><code class="descname">arrange</code><span class="sig-paren">(</span><em>df</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.reshape.arrange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls <cite>pandas.DataFrame.sort_values</cite> to sort a DataFrame according to
+criteria.</p>
+<p>See:
+<a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_values.html">http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_values.html</a></p>
+<p>For a list of specific keyword arguments for sort_values (which will be
+the same in arrange).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt><a href="#id1"><span class="problematic" id="id2">*</span></a>args: Symbolic, string, integer or lists of those types indicating</dt>
+<dd>columns to sort the DataFrame by.</dd>
+</dl>
+</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: Any keyword arguments will be passed through to the pandas</dt>
+<dd><cite>DataFrame.sort_values</cite> function.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.reshape.rename">
+<code class="descclassname">dfply.reshape.</code><code class="descname">rename</code><span class="sig-paren">(</span><em>df</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.reshape.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renames columns, where keyword argument values are the current names
+of columns and keys are the new names.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (<code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>): DataFrame passed in via <cite>&gt;&gt;</cite> pipe.</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt><a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs: key:value pairs where keys are new names for columns and</dt>
+<dd>values are current names of columns.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.reshape.gather">
+<code class="descclassname">dfply.reshape.</code><code class="descname">gather</code><span class="sig-paren">(</span><em>df</em>, <em>key</em>, <em>values</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.reshape.gather" title="Permalink to this definition">¶</a></dt>
+<dd><p>Melts the specified columns in your DataFrame into two key:value columns.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">key (str): Name of identifier column.
+values (str): Name of column that will contain values for the key.
+<a href="#id7"><span class="problematic" id="id8">*</span></a>args (str, int, symbolic): Columns to “melt” into the new key and</p>
+<blockquote class="last">
+<div>value columns. If no args are specified, all columns are melted
+into they key and value columns.</div></blockquote>
+</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>add_id (bool): Boolean value indicating whether to add a <cite>“_ID”</cite></dt>
+<dd>column that will preserve information about the original rows
+(useful for being able to re-widen the data later).</dd>
+</dl>
+</dd>
+<dt>Example:</dt>
+<dd><p class="first">diamonds &gt;&gt; gather(‘variable’, ‘value’, [‘price’, ‘depth’,’x’,’y’,’z’]) &gt;&gt; head(5)</p>
+<blockquote>
+<div>carat      cut color clarity  table variable  value</div></blockquote>
+<p class="last">0   0.23    Ideal     E     SI2   55.0    price  326.0
+1   0.21  Premium     E     SI1   61.0    price  326.0
+2   0.23     Good     E     VS1   65.0    price  327.0
+3   0.29  Premium     I     VS2   58.0    price  334.0
+4   0.31     Good     J     SI2   58.0    price  335.0</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.reshape.convert_type">
+<code class="descclassname">dfply.reshape.</code><code class="descname">convert_type</code><span class="sig-paren">(</span><em>df</em>, <em>columns</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/reshape.html#convert_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.reshape.convert_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function that attempts to convert columns into their appropriate
+data type.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.reshape.spread">
+<code class="descclassname">dfply.reshape.</code><code class="descname">spread</code><span class="sig-paren">(</span><em>df</em>, <em>key</em>, <em>values</em>, <em>convert=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.reshape.spread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms a “long” DataFrame into a “wide” format using a key and value
+column.</p>
+<p>If you have a mixed datatype column in your long-format DataFrame then the
+default behavior is for the spread columns to be of type <cite>object</cite>, or
+string. If you want to try to convert dtypes when spreading, you can set
+the convert keyword argument in spread to True.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>key (str, int, or symbolic): Label for the key column.
+values (str, int, or symbolic): Label for the values column.</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>convert (bool): Boolean indicating whether or not to try and convert</dt>
+<dd>the spread columns to more appropriate data types.</dd>
+</dl>
+</dd>
+<dt>Example:</dt>
+<dd><p class="first">widened = elongated &gt;&gt; spread(X.variable, X.value)
+widened &gt;&gt; head(5)</p>
+<blockquote>
+<div>_ID carat clarity color        cut depth price table     x     y     z</div></blockquote>
+<p class="last">0     0  0.23     SI2     E      Ideal  61.5   326    55  3.95  3.98  2.43
+1     1  0.21     SI1     E    Premium  59.8   326    61  3.89  3.84  2.31
+2    10   0.3     SI1     J       Good    64   339    55  4.25  4.28  2.73
+3   100  0.75     SI1     D  Very Good  63.2  2760    56   5.8  5.75  3.65
+4  1000  0.75     SI1     D      Ideal  62.3  2898    55  5.83   5.8  3.62</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.reshape.separate">
+<code class="descclassname">dfply.reshape.</code><code class="descname">separate</code><span class="sig-paren">(</span><em>df</em>, <em>column</em>, <em>into</em>, <em>sep='[\W_]+'</em>, <em>remove=True</em>, <em>convert=False</em>, <em>extra='drop'</em>, <em>fill='right'</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.reshape.separate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits columns into multiple columns.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (pandas.DataFrame): DataFrame passed in through the pipe.
+column (str, symbolic): Label of column to split.
+into (list): List of string names for new columns.</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first docutils">
+<dt>sep (str or list): If a string, the regex string used to split the</dt>
+<dd>column. If a list, a list of integer positions to split strings
+on.</dd>
+</dl>
+<p>remove (bool): Boolean indicating whether to remove the original column.
+convert (bool): Boolean indicating whether the new columns should be</p>
+<blockquote>
+<div>converted to the appropriate type.</div></blockquote>
+<dl class="last docutils">
+<dt>extra (str): either <cite>‘drop’</cite>, where split pieces beyond the specified</dt>
+<dd>new columns are dropped, or <cite>‘merge’</cite>, where the final split piece
+contains the remainder of the original column.</dd>
+<dt>fill (str): either <cite>‘right’</cite>, where <cite>np.nan</cite> values are filled in the</dt>
+<dd>right-most columns for missing pieces, or <cite>‘left’</cite> where <cite>np.nan</cite>
+values are filled in the left-most columns.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.reshape.unite">
+<code class="descclassname">dfply.reshape.</code><code class="descname">unite</code><span class="sig-paren">(</span><em>df</em>, <em>colname</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.reshape.unite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does the inverse of <cite>separate</cite>, joining columns together by a specified
+separator.</p>
+<p>Any columns that are not strings will be converted to strings.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">df (pandas.DataFrame): DataFrame passed in through the pipe.
+colname (str): the name of the new joined column.
+<a href="#id9"><span class="problematic" id="id10">*</span></a>args: list of columns to be joined, which can be strings, symbolic, or</p>
+<blockquote class="last">
+<div>integer positions.</div></blockquote>
+</dd>
+<dt>Kwargs:</dt>
+<dd><p class="first">sep (str): the string separator to join the columns with.
+remove (bool): Boolean indicating whether or not to remove the</p>
+<blockquote>
+<div>original columns.</div></blockquote>
+<dl class="last docutils">
+<dt>na_action (str): can be one of <cite>‘maintain’</cite> (the default),</dt>
+<dd>‘<cite>ignore’</cite>, or <cite>‘as_string’</cite>. The default will make the new column
+row a <cite>NaN</cite> value if any of the original column cells at that
+row contained <cite>NaN</cite>. ‘<cite>ignore’</cite> will treat any <cite>NaN</cite> value as an
+empty string during joining. <cite>‘as_string’</cite> will convert any <cite>NaN</cite>
+value to the string <cite>‘nan’</cite> prior to joining.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">dfply</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Sphinx AutoAPI Index</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Kiefer Katovich.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../../../_sources/autoapi/dfply/reshape/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,119 @@
+
+
+:mod:`dfply.subset`
+===================
+
+.. py:module:: dfply.subset
+
+
+
+
+
+
+
+Module Contents
+---------------
+
+
+
+
+
+
+.. function:: head(df, n=5)
+
+   
+
+
+
+
+
+
+
+
+.. function:: tail(df, n=5)
+
+   
+
+
+
+
+
+
+
+
+.. function:: sample(df, *args, **kwargs)
+
+   
+
+
+
+
+
+
+
+
+.. function:: distinct(df, *args, **kwargs)
+
+   
+
+
+
+
+
+
+
+
+.. function:: row_slice(df, indices)
+
+   
+
+
+
+
+
+
+
+
+.. function:: mask(df, *args)
+
+   
+
+
+
+
+
+
+
+
+.. data:: filter_by
+   
+
+   
+
+
+
+
+
+
+
+
+.. function:: top_n(df, n=None, ascending=True, col=None)
+
+   
+
+
+
+
+
+
+
+
+.. function:: pull(df, column=-1)
+
+   
+
+
+
+
+
+

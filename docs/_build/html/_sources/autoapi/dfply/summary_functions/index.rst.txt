@@ -1,0 +1,226 @@
+
+
+:mod:`dfply.summary_functions`
+==============================
+
+.. py:module:: dfply.summary_functions
+
+
+
+
+
+
+
+Module Contents
+---------------
+
+
+
+
+
+
+.. function:: mean(series)
+
+   
+   Returns the mean of a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+
+
+
+
+
+
+
+
+.. function:: first(series, order_by=None)
+
+   
+   Returns the first value of a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+   Kwargs:
+       order_by: a pandas.Series or list of series (can be symbolic) to order
+           the input series by before summarization.
+   
+
+
+
+
+
+
+
+
+.. function:: last(series, order_by=None)
+
+   
+   Returns the last value of a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+   Kwargs:
+       order_by: a pandas.Series or list of series (can be symbolic) to order
+           the input series by before summarization.
+   
+
+
+
+
+
+
+
+
+.. function:: nth(series, n, order_by=None)
+
+   
+   Returns the nth value of a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+       n (integer): position of desired value. Returns `NaN` if out of range.
+   
+   Kwargs:
+       order_by: a pandas.Series or list of series (can be symbolic) to order
+           the input series by before summarization.
+   
+
+
+
+
+
+
+
+
+.. function:: n(series)
+
+   
+   Returns the length of a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+
+
+
+
+
+
+
+
+.. function:: n_distinct(series)
+
+   
+   Returns the number of distinct values in a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+
+
+
+
+
+
+
+
+.. function:: IQR(series)
+
+   
+   Returns the inter-quartile range (IQR) of a series.
+   
+   The IRQ is defined as the 75th quantile minus the 25th quantile values.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+
+
+
+
+
+
+
+
+.. function:: colmin(series)
+
+   
+   Returns the minimum value of a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+
+
+
+
+
+
+
+
+.. function:: colmax(series)
+
+   
+   Returns the maximum value of a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+
+
+
+
+
+
+
+
+.. function:: median(series)
+
+   
+   Returns the median value of a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+
+
+
+
+
+
+
+
+.. function:: var(series)
+
+   
+   Returns the variance of values in a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+
+
+
+
+
+
+
+
+.. function:: sd(series)
+
+   
+   Returns the standard deviation of values in a series.
+   
+   Args:
+       series (pandas.Series): column to summarize.
+   
+
+
+
+
+
+

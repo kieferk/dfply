@@ -1,0 +1,41 @@
+
+
+:mod:`dfply.summarize`
+======================
+
+.. py:module:: dfply.summarize
+
+
+
+
+
+
+
+Module Contents
+---------------
+
+
+
+
+
+
+.. function:: summarize(df, **kwargs)
+
+   
+
+
+
+
+
+
+
+
+.. function:: summarize_each(df, functions, *args)
+
+   
+
+
+
+
+
+

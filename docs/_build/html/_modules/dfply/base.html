@@ -1,0 +1,440 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>dfply.base &#8212; dfply 0.3 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/autoapi.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for dfply.base</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span><span class="p">,</span> <span class="n">wraps</span>
+
+
+<div class="viewcode-block" id="_recursive_apply"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base._recursive_apply">[docs]</a><span class="k">def</span> <span class="nf">_recursive_apply</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">_recursive_apply</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">l_</span><span class="p">)</span> <span class="k">for</span> <span class="n">l_</span> <span class="ow">in</span> <span class="n">l</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">l</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="contextualize"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.contextualize">[docs]</a><span class="k">def</span> <span class="nf">contextualize</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Intention</span><span class="p">):</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">arg</span></div>
+
+
+<div class="viewcode-block" id="flatten"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.flatten">[docs]</a><span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="k">yield from</span> <span class="n">flatten</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">el</span></div>
+
+
+<div class="viewcode-block" id="_check_delayed_eval"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base._check_delayed_eval">[docs]</a><span class="k">def</span> <span class="nf">_check_delayed_eval</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">check</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Intention</span><span class="p">)</span>
+    <span class="n">delay</span> <span class="o">=</span> <span class="nb">any</span><span class="p">([</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">_recursive_apply</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="n">args</span><span class="p">))])</span>
+    <span class="n">delay</span> <span class="o">=</span> <span class="n">delay</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">_recursive_apply</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">())))])</span>
+    <span class="k">return</span> <span class="n">delay</span></div>
+
+
+<div class="viewcode-block" id="_context_args"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base._context_args">[docs]</a><span class="k">def</span> <span class="nf">_context_args</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">_recursive_apply</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">contextualize</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">x</span><span class="p">),</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_context_kwargs"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base._context_kwargs">[docs]</a><span class="k">def</span> <span class="nf">_context_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">values_</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">_recursive_apply</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">contextualize</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">x</span><span class="p">),</span>
+                                         <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">values_</span><span class="p">(</span><span class="n">x</span><span class="p">))}</span></div>
+
+
+<div class="viewcode-block" id="_delayed_function"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base._delayed_function">[docs]</a><span class="k">def</span> <span class="nf">_delayed_function</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">_context_args</span><span class="p">(</span><span class="n">args</span><span class="p">)(</span><span class="n">x</span><span class="p">),</span>
+                              <span class="o">**</span><span class="n">_context_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)(</span><span class="n">x</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="make_symbolic"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.make_symbolic">[docs]</a><span class="k">def</span> <span class="nf">make_symbolic</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">delay</span> <span class="o">=</span> <span class="n">_check_delayed_eval</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">delay</span><span class="p">:</span>
+            <span class="n">delayed</span> <span class="o">=</span> <span class="n">_delayed_function</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Intention</span><span class="p">(</span><span class="n">delayed</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+<div class="viewcode-block" id="Intention"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.Intention">[docs]</a><span class="k">class</span> <span class="nc">Intention</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span> <span class="o">=</span> <span class="n">invert</span>
+
+<div class="viewcode-block" id="Intention.evaluate"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.Intention.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">context</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Intention.__getattr__"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.Intention.__getattr__">[docs]</a>    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Intention</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">attribute</span><span class="p">),</span>
+                         <span class="n">invert</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Intention.__invert__"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.Intention.__invert__">[docs]</a>    <span class="k">def</span> <span class="nf">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Intention</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Intention.__call__"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.Intention.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Intention</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">x</span><span class="p">)(</span><span class="o">*</span><span class="n">_context_args</span><span class="p">(</span><span class="n">args</span><span class="p">)(</span><span class="n">x</span><span class="p">),</span>
+                                                    <span class="o">**</span><span class="n">_context_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)(</span><span class="n">x</span><span class="p">)),</span>
+                         <span class="n">invert</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="p">)</span></div></div>
+
+
+<span class="n">_magic_method_names</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;__abs__&#39;</span><span class="p">,</span> <span class="s1">&#39;__add__&#39;</span><span class="p">,</span> <span class="s1">&#39;__and__&#39;</span><span class="p">,</span> <span class="s1">&#39;__cmp__&#39;</span><span class="p">,</span> <span class="s1">&#39;__complex__&#39;</span><span class="p">,</span> <span class="s1">&#39;__contains__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__delattr__&#39;</span><span class="p">,</span> <span class="s1">&#39;__delete__&#39;</span><span class="p">,</span> <span class="s1">&#39;__delitem__&#39;</span><span class="p">,</span> <span class="s1">&#39;__delslice__&#39;</span><span class="p">,</span> <span class="s1">&#39;__div__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__divmod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__enter__&#39;</span><span class="p">,</span> <span class="s1">&#39;__eq__&#39;</span><span class="p">,</span> <span class="s1">&#39;__exit__&#39;</span><span class="p">,</span> <span class="s1">&#39;__float__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__floordiv__&#39;</span><span class="p">,</span> <span class="s1">&#39;__ge__&#39;</span><span class="p">,</span> <span class="s1">&#39;__get__&#39;</span><span class="p">,</span> <span class="s1">&#39;__getitem__&#39;</span><span class="p">,</span> <span class="s1">&#39;__getslice__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__gt__&#39;</span><span class="p">,</span> <span class="s1">&#39;__hash__&#39;</span><span class="p">,</span> <span class="s1">&#39;__hex__&#39;</span><span class="p">,</span> <span class="s1">&#39;__iadd__&#39;</span><span class="p">,</span> <span class="s1">&#39;__iand__&#39;</span><span class="p">,</span> <span class="s1">&#39;__idiv__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__ifloordiv__&#39;</span><span class="p">,</span> <span class="s1">&#39;__ilshift__&#39;</span><span class="p">,</span> <span class="s1">&#39;__imod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__imul__&#39;</span><span class="p">,</span> <span class="s1">&#39;__index__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__int__&#39;</span><span class="p">,</span> <span class="s1">&#39;__ior__&#39;</span><span class="p">,</span> <span class="s1">&#39;__ipow__&#39;</span><span class="p">,</span> <span class="s1">&#39;__irshift__&#39;</span><span class="p">,</span> <span class="s1">&#39;__isub__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__iter__&#39;</span><span class="p">,</span> <span class="s1">&#39;__itruediv__&#39;</span><span class="p">,</span> <span class="s1">&#39;__ixor__&#39;</span><span class="p">,</span> <span class="s1">&#39;__le__&#39;</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">,</span> <span class="s1">&#39;__long__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__lshift__&#39;</span><span class="p">,</span> <span class="s1">&#39;__lt__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mul__&#39;</span><span class="p">,</span> <span class="s1">&#39;__ne__&#39;</span><span class="p">,</span> <span class="s1">&#39;__neg__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__nonzero__&#39;</span><span class="p">,</span> <span class="s1">&#39;__oct__&#39;</span><span class="p">,</span> <span class="s1">&#39;__or__&#39;</span><span class="p">,</span> <span class="s1">&#39;__pos__&#39;</span><span class="p">,</span> <span class="s1">&#39;__pow__&#39;</span><span class="p">,</span> <span class="s1">&#39;__radd__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__rand__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rcmp__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rdiv__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rdivmod__&#39;</span><span class="p">,</span>  <span class="c1"># &#39;__repr__&#39;,</span>
+    <span class="s1">&#39;__reversed__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rfloordiv__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rlshift__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmul__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__ror__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rpow__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rrshift__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rshift__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rsub__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__rtruediv__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rxor__&#39;</span><span class="p">,</span> <span class="s1">&#39;__set__&#39;</span><span class="p">,</span> <span class="s1">&#39;__setitem__&#39;</span><span class="p">,</span> <span class="s1">&#39;__setslice__&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;__sub__&#39;</span><span class="p">,</span> <span class="s1">&#39;__truediv__&#39;</span><span class="p">,</span> <span class="s1">&#39;__unicode__&#39;</span><span class="p">,</span> <span class="s1">&#39;__xor__&#39;</span><span class="p">,</span> <span class="s1">&#39;__str__&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="_set_magic_method"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base._set_magic_method">[docs]</a><span class="k">def</span> <span class="nf">_set_magic_method</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">magic_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Intention</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">name</span><span class="p">)(</span><span class="o">*</span><span class="n">_context_args</span><span class="p">(</span><span class="n">args</span><span class="p">)(</span><span class="n">x</span><span class="p">),</span>
+                                                                   <span class="o">**</span><span class="n">_context_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)(</span><span class="n">x</span><span class="p">)),</span>
+                         <span class="n">invert</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">magic_method</span></div>
+
+
+<span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_magic_method_names</span><span class="p">:</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">Intention</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">_set_magic_method</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+<span class="c1"># Initialize the global X symbol</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">Intention</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="pipe"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.pipe">[docs]</a><span class="k">class</span> <span class="nc">pipe</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;pipe&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">function</span><span class="o">.</span><span class="vm">__doc__</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">chained_pipes</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="pipe.__rshift__"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.pipe.__rshift__">[docs]</a>    <span class="k">def</span> <span class="nf">__rshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">pipe</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chained_pipes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="pipe.__rrshift__"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.pipe.__rrshift__">[docs]</a>    <span class="k">def</span> <span class="nf">__rrshift__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">other_copy</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+            <span class="n">other_copy</span><span class="o">.</span><span class="n">_grouped_by</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;_grouped_by&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">other_copy</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chained_pipes</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="fm">__rrshift__</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="pipe.__call__"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.pipe.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pipe</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="IntentionEvaluator"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator">[docs]</a><span class="k">class</span> <span class="nc">IntentionEvaluator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parent class for symbolic argument decorators.</span>
+<span class="sd">    Default behavior is to recursively turn the arguments and keyword</span>
+<span class="sd">    arguments of a decorated function into `symbolic.Call` objects that</span>
+<span class="sd">    can be evaluated against a pandas DataFrame as it comes down a pipe.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;IntentionEvaluator&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">eval_symbols</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eval_as_label</span><span class="o">=</span><span class="p">[],</span>
+                 <span class="n">eval_as_selector</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">IntentionEvaluator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">function</span><span class="o">.</span><span class="vm">__doc__</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_symbols</span> <span class="o">=</span> <span class="n">eval_symbols</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_as_label</span> <span class="o">=</span> <span class="n">eval_as_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_as_selector</span> <span class="o">=</span> <span class="n">eval_as_selector</span>
+
+<div class="viewcode-block" id="IntentionEvaluator._evaluate"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Intention</span><span class="p">):</span>
+            <span class="n">negate</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">inverted</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">negate</span><span class="p">:</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="o">~</span><span class="n">arg</span>
+        <span class="k">return</span> <span class="n">arg</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator._evaluate_label"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._evaluate_label">[docs]</a>    <span class="k">def</span> <span class="nf">_evaluate_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+
+        <span class="n">cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">arg</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator._evaluate_selector"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._evaluate_selector">[docs]</a>    <span class="k">def</span> <span class="nf">_evaluate_selector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="n">negate</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Intention</span><span class="p">):</span>
+            <span class="n">negate</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">inverted</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="n">cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">arg</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="p">[</span><span class="n">arg</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">arg</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">]</span>
+
+        <span class="n">selection_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">col_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">negate</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">col_idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">selection_vector</span><span class="p">[</span><span class="n">col_idx</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">col_idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">selection_vector</span><span class="p">[</span><span class="n">col_idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">selection_vector</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator._evaluator_loop"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._evaluator_loop">[docs]</a>    <span class="k">def</span> <span class="nf">_evaluator_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">eval_func</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_loop</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">a_</span><span class="p">,</span> <span class="n">eval_func</span><span class="p">)</span> <span class="k">for</span> <span class="n">a_</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">eval_func</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator._symbolic_eval"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._symbolic_eval">[docs]</a>    <span class="k">def</span> <span class="nf">_symbolic_eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_loop</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator._symbolic_to_label"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._symbolic_to_label">[docs]</a>    <span class="k">def</span> <span class="nf">_symbolic_to_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_loop</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_label</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator._symbolic_to_selector"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._symbolic_to_selector">[docs]</a>    <span class="k">def</span> <span class="nf">_symbolic_to_selector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluator_loop</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_selector</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator._recursive_arg_eval"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._recursive_arg_eval">[docs]</a>    <span class="k">def</span> <span class="nf">_recursive_arg_eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="n">eval_symbols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_eval_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_symbols</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+        <span class="n">eval_as_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_eval_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_as_label</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+        <span class="n">eval_as_selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_eval_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_as_selector</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_symbolic_to_label</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">eval_as_label</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbolic_to_selector</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">eval_as_selector</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbolic_eval</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">eval_symbols</span>
+            <span class="k">else</span> <span class="n">a</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator._recursive_kwarg_eval"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._recursive_kwarg_eval">[docs]</a>    <span class="k">def</span> <span class="nf">_recursive_kwarg_eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">eval_symbols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_eval_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_symbols</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">eval_as_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_eval_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_as_label</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">eval_as_selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_eval_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_as_selector</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_symbolic_to_label</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">eval_as_label</span>
+                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbolic_to_selector</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">eval_as_selector</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbolic_eval</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">eval_symbols</span>
+            <span class="k">else</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator._find_eval_args"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._find_eval_args">[docs]</a>    <span class="k">def</span> <span class="nf">_find_eval_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">request</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">))]</span>
+        <span class="k">elif</span> <span class="n">request</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">request</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator._find_eval_kwargs"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator._find_eval_kwargs">[docs]</a>    <span class="k">def</span> <span class="nf">_find_eval_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">request</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;**&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="k">elif</span> <span class="n">request</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">request</span></div>
+
+<div class="viewcode-block" id="IntentionEvaluator.__call__"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.IntentionEvaluator.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recursive_arg_eval</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recursive_kwarg_eval</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="symbolic_evaluation"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.symbolic_evaluation">[docs]</a><span class="k">def</span> <span class="nf">symbolic_evaluation</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eval_symbols</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eval_as_label</span><span class="o">=</span><span class="p">[],</span>
+                        <span class="n">eval_as_selector</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="k">if</span> <span class="n">function</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IntentionEvaluator</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">IntentionEvaluator</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">eval_symbols</span><span class="o">=</span><span class="n">eval_symbols</span><span class="p">,</span>
+                                      <span class="n">eval_as_label</span><span class="o">=</span><span class="n">eval_as_label</span><span class="p">,</span>
+                                      <span class="n">eval_as_selector</span><span class="o">=</span><span class="n">eval_as_selector</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+<div class="viewcode-block" id="group_delegation"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.group_delegation">[docs]</a><span class="k">class</span> <span class="nc">group_delegation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;group_delegation&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">function</span><span class="o">.</span><span class="vm">__doc__</span>
+
+<div class="viewcode-block" id="group_delegation._apply"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.group_delegation._apply">[docs]</a>    <span class="k">def</span> <span class="nf">_apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">grouped</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">_grouped_by</span><span class="p">)</span>
+
+        <span class="n">dff</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Save all the metadata attributes back into the new data frame</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">_metadata</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">dff</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">dff</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="group_delegation.__call__"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.group_delegation.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">grouped_by</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;_grouped_by&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">grouped_by</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">g</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">grouped_by</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">applied</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+                <span class="n">applied</span><span class="o">.</span><span class="n">_grouped_by</span> <span class="o">=</span> <span class="n">grouped_by</span>
+            
+            <span class="k">return</span> <span class="n">applied</span></div></div>
+
+
+<div class="viewcode-block" id="dfpipe"><a class="viewcode-back" href="../../autoapi/dfply/base/index.html#dfply.base.dfpipe">[docs]</a><span class="k">def</span> <span class="nf">dfpipe</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pipe</span><span class="p">(</span>
+        <span class="n">group_delegation</span><span class="p">(</span>
+            <span class="n">symbolic_evaluation</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">dfply</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">Sphinx AutoAPI Index</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Kiefer Katovich.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,214 @@
+
+
+:mod:`dfply.select`
+===================
+
+.. py:module:: dfply.select
+
+
+
+
+
+
+
+Module Contents
+---------------
+
+
+
+
+
+
+.. function:: selection_context(arg, context)
+
+   
+
+
+
+
+
+
+
+
+.. function:: selection_filter(f)
+
+   
+
+
+
+
+
+
+
+
+.. function:: resolve_selection(df, *args, drop=False)
+
+   
+
+
+
+
+
+
+
+
+.. function:: select(df, *args)
+
+   
+
+
+
+
+
+
+
+
+.. function:: drop(df, *args)
+
+   
+
+
+
+
+
+
+
+
+.. function:: select_if(df, fun)
+
+   
+   Selects columns where fun(ction) is true
+   Args:
+       fun: a function that will be applied to columns
+   
+
+
+
+
+
+
+
+
+.. function:: drop_if(df, fun)
+
+   
+   Drops columns where fun(ction) is true
+   Args:
+       fun: a function that will be applied to columns
+   
+
+
+
+
+
+
+
+
+.. function:: starts_with(columns, prefix)
+
+   
+
+
+
+
+
+
+
+
+.. function:: ends_with(columns, suffix)
+
+   
+
+
+
+
+
+
+
+
+.. function:: contains(columns, substr)
+
+   
+
+
+
+
+
+
+
+
+.. function:: matches(columns, pattern)
+
+   
+
+
+
+
+
+
+
+
+.. function:: everything(columns)
+
+   
+
+
+
+
+
+
+
+
+.. function:: num_range(columns, prefix, range)
+
+   
+
+
+
+
+
+
+
+
+.. function:: one_of(columns, specified)
+
+   
+
+
+
+
+
+
+
+
+.. function:: columns_between(columns, start_col, end_col, inclusive=True)
+
+   
+
+
+
+
+
+
+
+
+.. function:: columns_from(columns, start_col)
+
+   
+
+
+
+
+
+
+
+
+.. function:: columns_to(columns, end_col, inclusive=False)
+
+   
+
+
+
+
+
+

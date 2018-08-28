@@ -1,0 +1,279 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>dfply.window_functions &#8212; dfply 0.3 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/autoapi.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dfply.window_functions">
+<span id="dfply-window-functions"></span><h1><a class="reference internal" href="#module-dfply.window_functions" title="dfply.window_functions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dfply.window_functions</span></code></a><a class="headerlink" href="#module-dfply.window_functions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dfply.window_functions.lead">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">lead</code><span class="sig-paren">(</span><em>series</em>, <em>i=1</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.lead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a series shifted forward by a value. <cite>NaN</cite> values will be filled
+in the end.</p>
+<p>Same as a call to <cite>series.shift(i)</cite></p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to shift forward.
+i (int): number of positions to shift forward.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.lag">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">lag</code><span class="sig-paren">(</span><em>series</em>, <em>i=1</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.lag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a series shifted backwards by a value. <cite>NaN</cite> values will be filled
+in the beginning.</p>
+<p>Same as a call to <cite>series.shift(-i)</cite></p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to shift backward.
+i (int): number of positions to shift backward.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.between">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">between</code><span class="sig-paren">(</span><em>series</em>, <em>a</em>, <em>b</em>, <em>inclusive=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.between" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean series specifying whether rows of the input series
+are between values <cite>a</cite> and <cite>b</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">series: column to compare, typically symbolic.
+a: value series must be greater than (or equal to if <cite>inclusive=True</cite>)</p>
+<blockquote>
+<div>for the output series to be <cite>True</cite> at that position.</div></blockquote>
+<dl class="last docutils">
+<dt>b: value series must be less than (or equal to if <cite>inclusive=True</cite>) for</dt>
+<dd>the output series to be <cite>True</cite> at that position.</dd>
+</dl>
+</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>inclusive (bool): If <cite>True</cite>, comparison is done with <cite>&gt;=</cite> and <cite>&lt;=</cite>.</dt>
+<dd>If <cite>False</cite> (the default), comparison uses <cite>&gt;</cite> and <cite>&lt;</cite>.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.dense_rank">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">dense_rank</code><span class="sig-paren">(</span><em>series</em>, <em>ascending=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.dense_rank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equivalent to <cite>series.rank(method=’dense’, ascending=ascending)</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to rank.</dd>
+<dt>Kwargs:</dt>
+<dd>ascending (bool): whether to rank in ascending order (default is <cite>True</cite>).</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.min_rank">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">min_rank</code><span class="sig-paren">(</span><em>series</em>, <em>ascending=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.min_rank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equivalent to <cite>series.rank(method=’min’, ascending=ascending)</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to rank.</dd>
+<dt>Kwargs:</dt>
+<dd>ascending (bool): whether to rank in ascending order (default is <cite>True</cite>).</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.cumsum">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">cumsum</code><span class="sig-paren">(</span><em>series</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.cumsum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates cumulative sum of values. Equivalent to <cite>series.cumsum()</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to compute cumulative sum for.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.cummean">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">cummean</code><span class="sig-paren">(</span><em>series</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.cummean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates cumulative mean of values. Equivalent to
+<cite>series.expanding().mean()</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to compute cumulative mean for.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.cummax">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">cummax</code><span class="sig-paren">(</span><em>series</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.cummax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates cumulative maximum of values. Equivalent to
+<cite>series.expanding().max()</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to compute cumulative maximum for.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.cummin">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">cummin</code><span class="sig-paren">(</span><em>series</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.cummin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates cumulative minimum of values. Equivalent to
+<cite>series.expanding().min()</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to compute cumulative minimum for.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.cumprod">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">cumprod</code><span class="sig-paren">(</span><em>series</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.cumprod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates cumulative product of values. Equivalent to
+<cite>series.cumprod()</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to compute cumulative product for.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.cumany">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">cumany</code><span class="sig-paren">(</span><em>series</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.cumany" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates cumulative any of values. Equivalent to
+<cite>series.expanding().apply(np.any).astype(bool)</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to compute cumulative any for.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.cumall">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">cumall</code><span class="sig-paren">(</span><em>series</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.cumall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates cumulative all of values. Equivalent to
+<cite>series.expanding().apply(np.all).astype(bool)</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to compute cumulative all for.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.percent_rank">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">percent_rank</code><span class="sig-paren">(</span><em>series</em>, <em>ascending=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.percent_rank" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="dfply.window_functions.row_number">
+<code class="descclassname">dfply.window_functions.</code><code class="descname">row_number</code><span class="sig-paren">(</span><em>series</em>, <em>ascending=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.window_functions.row_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns row number based on column rank
+Equivalent to <cite>series.rank(method=’first’, ascending=ascending)</cite>.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>series: column to rank.</dd>
+<dt>Kwargs:</dt>
+<dd>ascending (bool): whether to rank in ascending order (default is <cite>True</cite>).</dd>
+</dl>
+<p>Usage:
+diamonds &gt;&gt; head() &gt;&gt; mutate(rn=row_number(X.x))</p>
+<blockquote>
+<div>carat      cut color clarity  depth  table  price     x     y     z   rn</div></blockquote>
+<p>0   0.23    Ideal     E     SI2   61.5   55.0    326  3.95  3.98  2.43  2.0
+1   0.21  Premium     E     SI1   59.8   61.0    326  3.89  3.84  2.31  1.0
+2   0.23     Good     E     VS1   56.9   65.0    327  4.05  4.07  2.31  3.0
+3   0.29  Premium     I     VS2   62.4   58.0    334  4.20  4.23  2.63  4.0
+4   0.31     Good     J     SI2   63.3   58.0    335  4.34  4.35  2.75  5.0</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">dfply</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Sphinx AutoAPI Index</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Kiefer Katovich.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../../../_sources/autoapi/dfply/window_functions/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

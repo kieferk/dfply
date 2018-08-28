@@ -1,0 +1,41 @@
+
+
+:mod:`dfply.group`
+==================
+
+.. py:module:: dfply.group
+
+
+
+
+
+
+
+Module Contents
+---------------
+
+
+
+
+
+
+.. function:: group_by(df, *args)
+
+   
+
+
+
+
+
+
+
+
+.. function:: ungroup(df)
+
+   
+
+
+
+
+
+

@@ -1,0 +1,106 @@
+
+
+:mod:`dfply.set_ops`
+====================
+
+.. py:module:: dfply.set_ops
+
+
+
+
+
+
+
+Module Contents
+---------------
+
+
+
+
+
+
+.. function:: validate_set_ops(df, other)
+
+   
+   Helper function to ensure that DataFrames are valid for set operations.
+   Columns must be the same name in the same order, and indices must be of the
+   same dimension with the same names.
+   
+
+
+
+
+
+
+
+
+.. function:: union(df, other, index=False, keep='first')
+
+   
+   Returns rows that appear in either DataFrame.
+   
+   Args:
+       df (pandas.DataFrame): data passed in through the pipe.
+       other (pandas.DataFrame): other DataFrame to use for set operation with
+           the first.
+   
+   Kwargs:
+       index (bool): Boolean indicating whether to consider the pandas index
+           as part of the set operation (default `False`).
+       keep (str): Indicates which duplicate should be kept. Options are `'first'`
+           and `'last'`.
+   
+
+
+
+
+
+
+
+
+.. function:: intersect(df, other, index=False, keep='first')
+
+   
+   Returns rows that appear in both DataFrames.
+   
+   Args:
+       df (pandas.DataFrame): data passed in through the pipe.
+       other (pandas.DataFrame): other DataFrame to use for set operation with
+           the first.
+   
+   Kwargs:
+       index (bool): Boolean indicating whether to consider the pandas index
+           as part of the set operation (default `False`).
+       keep (str): Indicates which duplicate should be kept. Options are `'first'`
+           and `'last'`.
+   
+
+
+
+
+
+
+
+
+.. function:: set_diff(df, other, index=False, keep='first')
+
+   
+   Returns rows that appear in the first DataFrame but not the second.
+   
+   Args:
+       df (pandas.DataFrame): data passed in through the pipe.
+       other (pandas.DataFrame): other DataFrame to use for set operation with
+           the first.
+   
+   Kwargs:
+       index (bool): Boolean indicating whether to consider the pandas index
+           as part of the set operation (default `False`).
+       keep (str): Indicates which duplicate should be kept. Options are `'first'`
+           and `'last'`.
+   
+
+
+
+
+
+

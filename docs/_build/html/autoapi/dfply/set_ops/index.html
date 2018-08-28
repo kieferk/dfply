@@ -1,0 +1,175 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>dfply.set_ops &#8212; dfply 0.3 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/autoapi.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dfply.set_ops">
+<span id="dfply-set-ops"></span><h1><a class="reference internal" href="#module-dfply.set_ops" title="dfply.set_ops"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dfply.set_ops</span></code></a><a class="headerlink" href="#module-dfply.set_ops" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dfply.set_ops.validate_set_ops">
+<code class="descclassname">dfply.set_ops.</code><code class="descname">validate_set_ops</code><span class="sig-paren">(</span><em>df</em>, <em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dfply/set_ops.html#validate_set_ops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dfply.set_ops.validate_set_ops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to ensure that DataFrames are valid for set operations.
+Columns must be the same name in the same order, and indices must be of the
+same dimension with the same names.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.set_ops.union">
+<code class="descclassname">dfply.set_ops.</code><code class="descname">union</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>index=False</em>, <em>keep='first'</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.set_ops.union" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns rows that appear in either DataFrame.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">df (pandas.DataFrame): data passed in through the pipe.
+other (pandas.DataFrame): other DataFrame to use for set operation with</p>
+<blockquote class="last">
+<div>the first.</div></blockquote>
+</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>index (bool): Boolean indicating whether to consider the pandas index</dt>
+<dd>as part of the set operation (default <cite>False</cite>).</dd>
+<dt>keep (str): Indicates which duplicate should be kept. Options are <cite>‘first’</cite></dt>
+<dd>and <cite>‘last’</cite>.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.set_ops.intersect">
+<code class="descclassname">dfply.set_ops.</code><code class="descname">intersect</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>index=False</em>, <em>keep='first'</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.set_ops.intersect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns rows that appear in both DataFrames.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">df (pandas.DataFrame): data passed in through the pipe.
+other (pandas.DataFrame): other DataFrame to use for set operation with</p>
+<blockquote class="last">
+<div>the first.</div></blockquote>
+</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>index (bool): Boolean indicating whether to consider the pandas index</dt>
+<dd>as part of the set operation (default <cite>False</cite>).</dd>
+<dt>keep (str): Indicates which duplicate should be kept. Options are <cite>‘first’</cite></dt>
+<dd>and <cite>‘last’</cite>.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="dfply.set_ops.set_diff">
+<code class="descclassname">dfply.set_ops.</code><code class="descname">set_diff</code><span class="sig-paren">(</span><em>df</em>, <em>other</em>, <em>index=False</em>, <em>keep='first'</em><span class="sig-paren">)</span><a class="headerlink" href="#dfply.set_ops.set_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns rows that appear in the first DataFrame but not the second.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">df (pandas.DataFrame): data passed in through the pipe.
+other (pandas.DataFrame): other DataFrame to use for set operation with</p>
+<blockquote class="last">
+<div>the first.</div></blockquote>
+</dd>
+<dt>Kwargs:</dt>
+<dd><dl class="first last docutils">
+<dt>index (bool): Boolean indicating whether to consider the pandas index</dt>
+<dd>as part of the set operation (default <cite>False</cite>).</dd>
+<dt>keep (str): Indicates which duplicate should be kept. Options are <cite>‘first’</cite></dt>
+<dd>and <cite>‘last’</cite>.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">dfply</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Sphinx AutoAPI Index</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Kiefer Katovich.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../../../_sources/autoapi/dfply/set_ops/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
