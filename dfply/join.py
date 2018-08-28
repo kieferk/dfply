@@ -19,8 +19,8 @@ def get_join_parameters(join_kwargs):
         if isinstance(by, str):
             left_on, right_on = by, by
         else:
-            left_on = [col if isinstance(col, str) else col[0] for col in by]
-            right_on = [col if isinstance(col, str) else col[1] for col in by]
+            left_on = by[0]
+            right_on = by[1]
     return left_on, right_on, suffixes
 
 
@@ -49,6 +49,9 @@ def inner_join(df, other, **kwargs):
     """
 
     left_on, right_on, suffixes = get_join_parameters(kwargs)
+    print(df.columns)
+    print(other.columns)
+    print(left_on, right_on)
     joined = df.merge(other, how='inner', left_on=left_on,
                       right_on=right_on, suffixes=suffixes)
     return joined
