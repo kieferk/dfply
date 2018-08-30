@@ -19,8 +19,11 @@ def get_join_parameters(join_kwargs):
         if isinstance(by, str):
             left_on, right_on = by, by
         else:
-            left_on = by[0]
-            right_on = by[1]
+            if not isinstance(by[0], str):
+                left_on = by[0]
+                right_in = by[1]
+            else:
+                left_on, right_on = by, by
     return left_on, right_on, suffixes
 
 
