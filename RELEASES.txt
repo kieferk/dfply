@@ -1,5 +1,10 @@
+v0.3.3
+- Hotfix for parsing left_on and right_on
+
+TODO: Need to figure out fix to the inversion of symbol issue. Somewhat complicated.
+
 v0.3.2
-Various PRs added fixing bugs, etc. 
+Various PRs added fixing bugs, etc.
 
 v0.3.1
 This update is almost solely the pull requests by @bleearmstrong that were sitting
