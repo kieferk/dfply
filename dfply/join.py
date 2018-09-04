@@ -15,15 +15,13 @@ def get_join_parameters(join_kwargs):
     suffixes = join_kwargs.get('suffixes', ('_x', '_y'))
     if by is None:
         left_on, right_on = None, None
+    elif isinstance(by, str):
+        left_on, right_on = by, by
+    elif isinstance(by[0], str):
+        left_on = by[0]
+        right_on = by[1]
     else:
-        if isinstance(by, str):
-            left_on, right_on = by, by
-        else:
-            if not isinstance(by[0], str):
-                left_on = by[0]
-                right_on = by[1]
-            else:
-                left_on, right_on = by, by
+        left_on, right_on = by, by
     return left_on, right_on, suffixes
 
 
