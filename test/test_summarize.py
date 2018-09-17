@@ -24,6 +24,28 @@ def test_summarize():
                        summarize(price_mean=X.price.mean(), price_std=X.price.std()))
 
 
+def test_summarize_positional_args():
+    with_args = diamonds >> summarize(
+        X.price.mean(),
+        price_std=X.price.std()
+    ) >> rename(
+        price_mean=X.unnamed_arg_0
+    )
+
+    with_kwargs = diamonds >> summarize(
+        price_std=X.price.std(),
+        price_mean=X.price.mean()
+    )
+
+    # Use `sort_index()` to account for
+    # Python versions < 3.6 which do not
+    # reliably conserve dictionary insertion order.
+    pd.testing.assert_frame_equal(
+        with_kwargs.sort_index(axis=1),
+        with_args.sort_index(axis=1)
+    )
+
+
 def test_summarize_each():
     to_match = pd.DataFrame({
         'price_mean':[np.mean(diamonds.price)],
