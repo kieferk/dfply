@@ -2,7 +2,17 @@ from .base import *
 
 
 @dfpipe
-def summarize(df, **kwargs):
+def summarize(df, *args, **kwargs):
+    for e, v in enumerate(args):
+        column_name = "unnamed_arg_{}".format(e)
+        if column_name not in kwargs:
+            kwargs[column_name] = v
+        else:
+            raise KeyError(
+                "Positional argument {} was assigned "
+                "name '{}', which was also supplied as "
+                "a keyword argument.".format(e, column_name)
+            )
     return pd.DataFrame({k: [v] for k, v in kwargs.items()})
 
 
