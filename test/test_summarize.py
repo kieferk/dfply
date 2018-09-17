@@ -24,7 +24,7 @@ def test_summarize():
                        summarize(price_mean=X.price.mean(), price_std=X.price.std()))
 
 
-def test_summarize_positional_args():
+def test_summarize_with_positional_args():
     with_args = diamonds >> summarize(
         X.price.mean(),
         price_std=X.price.std()
