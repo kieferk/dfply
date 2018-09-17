@@ -1,3 +1,5 @@
+import re
+
 from .base import *
 
 
@@ -120,6 +122,11 @@ def ends_with(columns, suffix):
 @selection_filter
 def contains(columns, substr):
     return [c for c in columns if substr in c]
+
+
+@selection_filter
+def matches(columns, pattern):
+    return [c for c in columns if re.search(pattern, c)]
 
 
 @selection_filter

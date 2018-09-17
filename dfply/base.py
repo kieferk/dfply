@@ -134,7 +134,10 @@ class pipe(object):
 
     def __rrshift__(self, other):
         other_copy = other.copy()
-        other_copy._grouped_by = getattr(other, '_grouped_by', None)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            other_copy._grouped_by = getattr(other, '_grouped_by', None)
 
         result = self.function(other_copy)
 
@@ -303,7 +306,11 @@ class group_delegation(object):
     def _apply(self, df, *args, **kwargs):
         grouped = df.groupby(df._grouped_by)
 
-        df = grouped.apply(self.function, *args, **kwargs)
+        dff = grouped.apply(self.function, *args, **kwargs)
+        # Save all the metadata attributes back into the new data frame
+        for field in df._metadata:
+            setattr(dff, field, getattr(df, field))
+        df = dff
 
         for name in df.index.names[:-1]:
             if name in df:
@@ -322,7 +329,11 @@ class group_delegation(object):
             return self.function(*args, **kwargs)
         else:
             applied = self._apply(args[0], *args[1:], **kwargs)
-            applied._grouped_by = grouped_by
+
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                applied._grouped_by = grouped_by
+            
             return applied
 
 

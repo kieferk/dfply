@@ -1,6 +1,6 @@
 # dfply
 
-### Version: 0.3.1
+### Version: 0.3.2
 
 > Note: Version 0.3.0 is the first big update in awhile, and changes a lot of
 the "base" code. The `pandas-ply` package is no longer being imported. I have coded
@@ -445,6 +445,28 @@ diamonds >> filter_by(X.cut == 'Ideal', X.color == 'E', X.table < 55, X.price < 
 50623   0.30  Ideal     E     SI2   62.1   54.0    401  4.32  4.35  2.69
 50625   0.30  Ideal     E     SI2   62.0   54.0    401  4.33  4.35  2.69
 ```
+
+#### `pull()`
+
+`pull` simply retrieves a column and returns it as a pandas series, in case you only care about one particular column at the end of your pipeline. Columns can be specified either by their name (string) or an integer.
+
+The default returns the last column (on the assumption that's the column you've created most recently).
+
+Example:
+
+```python
+(diamonds
+ >> filter_by(X.cut == 'Ideal', X.color == 'E', X.table < 55, X.price < 500)
+ >> pull('carat'))
+
+ 26683    0.33
+ 32297    0.34
+ 40928    0.30
+ 50623    0.30
+ 50625    0.30
+ Name: carat, dtype: float64
+```
+
 
 ### DataFrame transformation
 

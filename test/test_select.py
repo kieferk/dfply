@@ -54,6 +54,16 @@ def test_drop_containing():
     assert df.equals(diamonds >> drop(contains('c')))
 
 
+def test_select_matches():
+    df = diamonds[['carat','cut','color','clarity','price']]
+    assert df.equals(diamonds >> select(matches('^c[auol]|pri')))
+
+
+def test_drop_matches():
+    df = diamonds[['depth','table','x','y','z']]
+    assert df.equals(diamonds >> drop(matches('^c[auol]|p.i')))
+
+
 def test_select_startswith():
     df = diamonds[['carat','cut','color','clarity']]
     assert df.equals(diamonds >> select(starts_with('c')))

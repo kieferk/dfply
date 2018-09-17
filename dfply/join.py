@@ -13,14 +13,13 @@ def get_join_parameters(join_kwargs):
 
     by = join_kwargs.get('by', None)
     suffixes = join_kwargs.get('suffixes', ('_x', '_y'))
-    if by is None:
-        left_on, right_on = None, None
+    if isinstance(by, tuple):
+        left_on, right_on = by
+    elif isinstance(by, list):
+        by = [x if isinstance(x, tuple) else (x, x) for x in by]
+        left_on, right_on = (list(x) for x in zip(*by))
     else:
-        if isinstance(by, str):
-            left_on, right_on = by, by
-        else:
-            left_on = [col if isinstance(col, str) else col[0] for col in by]
-            right_on = [col if isinstance(col, str) else col[1] for col in by]
+        left_on, right_on = by, by
     return left_on, right_on, suffixes
 
 
