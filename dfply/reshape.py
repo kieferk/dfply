@@ -312,7 +312,7 @@ def unite(df, colname, *args, **kwargs):
     # as_string: becomes string 'nan'
     na_action = kwargs.get('na_action', 'maintain')
 
-    print(to_unite, sep, remove, na_action)
+    # print(to_unite, sep, remove, na_action)
 
     if na_action == 'maintain':
         df[colname] = df[to_unite].apply(lambda x: np.nan if any(x.isnull())
