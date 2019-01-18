@@ -333,7 +333,7 @@ class group_delegation(object):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 applied._grouped_by = grouped_by
-            
+
             return applied
 
 
