@@ -4,6 +4,7 @@ from .base import *
 @pipe
 @symbolic_evaluation(eval_as_label=True)
 def group_by(df, *args):
+    assert_known_cols(df, args)
     df._grouped_by = list(args)
     return df
 

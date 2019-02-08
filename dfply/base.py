@@ -325,7 +325,7 @@ class group_delegation(object):
 
     def __call__(self, *args, **kwargs):
         grouped_by = getattr(args[0], '_grouped_by', None)
-        if (grouped_by is None) or not all([g in args[0].columns for g in grouped_by]):
+        if grouped_by is None:
             return self.function(*args, **kwargs)
         else:
             applied = self._apply(args[0], *args[1:], **kwargs)
@@ -343,3 +343,11 @@ def dfpipe(f):
             symbolic_evaluation(f)
         )
     )
+
+
+def assert_known_cols(df, cols):
+    bad_cols = [g for g in cols if g not in df.columns]
+    if bad_cols:
+        raise Exception(
+            'The following columns are unknown: ' + ', '.join(bad_cols)
+        )
