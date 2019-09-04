@@ -1282,7 +1282,7 @@ diamonds >> select(X.price) >> mutate(price_cumprod=cumprod(X.price)) >> head(6)
 `mean(series)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_mean=mean(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_mean=mean(X.price))
 
          cut   price_mean
 0       Fair  4358.757764
@@ -1297,7 +1297,7 @@ diamonds >> groupby(X.cut) >> summarize(price_mean=mean(X.price))
 `first(series, order_by=None)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_first=first(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_first=first(X.price))
 
          cut  price_first
 0       Fair          337
@@ -1312,7 +1312,7 @@ diamonds >> groupby(X.cut) >> summarize(price_first=first(X.price))
 `last(series, order_by=None)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_last=last(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_last=last(X.price))
 
          cut  price_last
 0       Fair        2747
@@ -1327,7 +1327,7 @@ diamonds >> groupby(X.cut) >> summarize(price_last=last(X.price))
 `nth(series, n, order_by=None)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_penultimate=nth(X.price, -2))
+diamonds >> group_by(X.cut) >> summarize(price_penultimate=nth(X.price, -2))
 
          cut  price_penultimate
 0       Fair               2745
@@ -1342,7 +1342,7 @@ diamonds >> groupby(X.cut) >> summarize(price_penultimate=nth(X.price, -2))
 `n(series)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_n=n(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_n=n(X.price))
 
          cut  price_n
 0       Fair     1610
@@ -1357,7 +1357,7 @@ diamonds >> groupby(X.cut) >> summarize(price_n=n(X.price))
 `n_distinct(series)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_ndistinct=n_distinct(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_ndistinct=n_distinct(X.price))
 
          cut  price_ndistinct
 0       Fair             1267
@@ -1372,7 +1372,7 @@ diamonds >> groupby(X.cut) >> summarize(price_ndistinct=n_distinct(X.price))
 `IQR(series)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_iqr=IQR(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_iqr=IQR(X.price))
 
          cut  price_iqr
 0       Fair    3155.25
@@ -1387,7 +1387,7 @@ diamonds >> groupby(X.cut) >> summarize(price_iqr=IQR(X.price))
 `colmin(series)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_min=colmin(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_min=colmin(X.price))
 
          cut  price_min
 0       Fair        337
@@ -1402,7 +1402,7 @@ diamonds >> groupby(X.cut) >> summarize(price_min=colmin(X.price))
 `colmax(series)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_max=colmax(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_max=colmax(X.price))
 
          cut  price_max
 0       Fair      18574
@@ -1417,7 +1417,7 @@ diamonds >> groupby(X.cut) >> summarize(price_max=colmax(X.price))
 `median(series)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_median=median(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_median=median(X.price))
 
          cut  price_median
 0       Fair        3282.0
@@ -1432,7 +1432,7 @@ diamonds >> groupby(X.cut) >> summarize(price_median=median(X.price))
 `var(series)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_var=var(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_var=var(X.price))
 
          cut     price_var
 0       Fair  1.267635e+07
@@ -1447,7 +1447,7 @@ diamonds >> groupby(X.cut) >> summarize(price_var=var(X.price))
 `sd(series)`
 
 ```python
-diamonds >> groupby(X.cut) >> summarize(price_sd=sd(X.price))
+diamonds >> group_by(X.cut) >> summarize(price_sd=sd(X.price))
 
          cut     price_sd
 0       Fair  3560.386612
