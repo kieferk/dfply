@@ -59,6 +59,7 @@ any bugs are fixed.**
     - [`mask()`](#mask)
   - [DataFrame transformation](#dataframe-transformation)
     - [`mutate()`](#mutate)
+    - [`mutate_if()`](#mutate_if)
     - [`transmute()`](#transmute)
   - [Grouping](#grouping)
     - [`group_by()` and `ungroup()`](#group_by-and-ungroup)
@@ -498,6 +499,20 @@ diamonds >> mutate(x_plus_y=X.x + X.y, y_div_z=(X.y / X.z)) >> select(columns_fr
 > Note: In Python the new variables created with mutate may not be guaranteed
 to be created in the same order that they are input into the function call, though
 this may have been changed in Python 3...
+
+#### `mutate_if()`
+
+Modifies columns in place if the specified predicate is true. `mutate_if()` function (named that way to match `dplyr`).
+
+```python
+diamonds >> mutate_if(lambda col: min(col) < 1 and mean(col) < 4, lambda row: 2 * row) >> head(3)
+           carat      cut color clarity  depth  table  price     x     y     z
+        0   0.46    Ideal     E     SI2   61.5   55.0    326  3.95  3.98  4.86
+        1   0.42  Premium     E     SI1   59.8   61.0    326  3.89  3.84  4.62
+        2   0.46     Good     E     VS1   56.9   65.0    327  4.05  4.07  4.62
+        (columns 'carat' and 'z', both having a min < 1 and mean < 4, are doubled, while the
+        other rows remain as they were)
+```
 
 
 #### `transmute()`
