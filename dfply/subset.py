@@ -84,4 +84,4 @@ def top_n(df, n=None, ascending=True, col=None):
 
 @dfpipe
 def pull(df, column=-1):
-    return df.ix[:, column]
+    return df.iloc[:, column]
